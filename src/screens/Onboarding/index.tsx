@@ -14,7 +14,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useNavigation} from '@react-navigation/native';
 import slides from './slides';
 import {Black, Gold, White} from '../../constants/Color';
-import Logo from '../../assets/logo/mainLogo.svg';
 
 const {width} = Dimensions.get('window');
 
@@ -60,7 +59,13 @@ const Onboarding = () => {
               source={item.image}
               style={styles.image}
               resizeMode="contain"
-            /> : <Logo height={100} width={300} style={{marginBottom: 10}}/>
+            /> : 
+            // <Logo height={100} width={300} style={{marginBottom: 10}}/>
+            <Image
+          source={require('../../assets/logo/mainLogo.png')}
+          height={100}
+          style={{marginTop: 15}}
+        />
             }
             <Text style={styles.title}>{item.title}</Text>
             <Text style={styles.description}>{item.description}</Text>

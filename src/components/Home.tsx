@@ -17,14 +17,13 @@ import {
   White,
 } from '../constants/Color';
 import MapView, { Marker } from 'react-native-maps';
-import { request, PERMISSIONS } from 'react-native-permissions';
-import Geolocation from 'react-native-geolocation-service';
+import { useSocket } from '../context/SocketContext';
 
 
 export default function Home() {
   const [isNormalMode, setIsNormalMode] = useState(false);
   const [isDriverMode, setIsDriverMode] = useState(false);
-  const [location, setLocation] = useState<any>(null);
+  const socket = useSocket();
   
   // Function to handle normal mode toggle
   const toggleNormalMode = () => {
@@ -46,49 +45,6 @@ export default function Home() {
     }
   };
 
-  const requestLocationPermission = async () => {
-    const result = await request(
-      Platform.OS === 'ios'
-        ? PERMISSIONS.IOS.LOCATION_WHEN_IN_USE
-        : PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION
-    );
-  
-    return result === 'granted';
-  };
-
-  
-  
-  // useEffect(() => {
-  //   const fetchLocation = async () => {
-  //     const granted = await requestLocationPermission();
-  //     if (!granted) {
-  //       Alert.alert('Permission Denied', 'Location permission is required.');
-  //       return;
-  //     }
-  
-  //     Geolocation.getCurrentPosition(
-  //       position => {
-  //         const { latitude, longitude } = position.coords;
-  //         setLocation({
-  //           latitude,
-  //           longitude,
-  //           latitudeDelta: 0.01,
-  //           longitudeDelta: 0.01,
-  //         });
-  //       },
-  //       error => {
-  //         console.error(error.code, error.message);
-  //       },
-  //       {
-  //         enableHighAccuracy: true,
-  //         timeout: 15000,
-  //         maximumAge: 10000,
-  //       }
-  //     );
-  //   };
-  
-  //   fetchLocation();
-  // }, []);
   
 
 
