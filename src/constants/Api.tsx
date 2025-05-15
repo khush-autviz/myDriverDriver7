@@ -30,6 +30,12 @@ export const vehicleDocumentsApi = async (driverId: number, data: any) => {
     return response.data
 }  
 
+// get profile
+export const getProfile = async () => {
+    const response = await axios.get(`/driverAuth/driver/details`)
+    return response.data
+}
+
 // edit profile
 export const editProfile = async (data: any) => {
     const response = await axios.put(`/driverAuth/driver/edit-profile`, data, {headers: {'Content-Type': 'multipart/form-data'}})

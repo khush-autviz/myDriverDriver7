@@ -30,7 +30,7 @@ export default function Home() {
   const socket = useSocket();
   const {location} = useLocation()
   const USER = useAuthStore(state => state.user)
-
+  
   const DriverOnlineMutation = useMutation({
     mutationFn: driverGoOnline,
     onSuccess: (response) => {
@@ -50,6 +50,12 @@ export default function Home() {
       console.log('extra driver online error', error);
     }
   })
+
+  socket?.emit('updateLocation', {
+    latitude: location?.latitude || 0,
+    longitude: location?.longitude || 0,
+  })
+  
   
   // Function to handle normal mode toggle
   const toggleNormalMode = () => {
@@ -60,6 +66,11 @@ export default function Home() {
         latitude: location?.latitude || 0,
         longitude: location?.longitude || 0,
         }
+      })
+      console.log('location', location);
+      socket?.emit('updateLocation', {
+        latitude: location?.latitude || 0,
+        longitude: location?.longitude || 0,
       })
       setIsNormalMode(true);
       setIsDriverMode(false);
@@ -85,6 +96,14 @@ export default function Home() {
     }
   };
 
+
+  useEffect(() => {
+    console.log('Socket:', socket);
+    if (socket) {
+      console.log('Connected?', socket.connected); // should log true/false, not undefined
+    }
+  }, [socket]);
+  
   
 
 
@@ -130,7 +149,7 @@ export default function Home() {
               longitudeDelta: 0.0421,
             }}
           >
-            <Marker coordinate={{ latitude: 37.78825, longitude: -122.4324 }} />
+            <Marker coordinate={{ latitude: location?.latitude, longitude: location?.longitude}} />
           </MapView>
         </View>
       </View>
