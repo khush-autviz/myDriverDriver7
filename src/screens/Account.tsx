@@ -29,10 +29,10 @@ export default function Account() {
               {/* <Text style={styles.text}>or</Text> */}
               <View style={styles.line} />
             </View>
-      <View style={{display: 'flex', flexDirection: 'row', marginTop: 30, alignItems: 'center'}}>
+      <TouchableOpacity onPress={() => navigation.navigate('Profile')} style={{display: 'flex', flexDirection: 'row', marginTop: 30, alignItems: 'center'}}>
         <Ionicons name='person-add' size={20} color={Gray}/>
         <Text style={{color: Gray, marginStart: 30, fontSize: 16, fontWeight: '700' }}>Manage account</Text>
-      </View>
+      </TouchableOpacity>
       <View style={{display: 'flex', flexDirection: 'row', marginTop: 30, alignItems: 'center'}}>
         <Ionicons name='settings' size={20} color={Gray}/>
         <Text style={{color: Gray, marginStart: 30, fontSize: 16, fontWeight: '700' }}>Settings</Text>

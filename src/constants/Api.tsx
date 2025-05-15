@@ -28,4 +28,23 @@ export const vehicleDetailsApi = async (driverId: number, data: any) => {
 export const vehicleDocumentsApi = async (driverId: number, data: any) => {
     const response = await axios.put(`/driverAuth/drivers/${driverId}/upload-documents`, data, {headers: {'Content-Type': 'multipart/form-data'}})
     return response.data
-}   
+}  
+
+// edit profile
+export const editProfile = async (data: any) => {
+    const response = await axios.put(`/driverAuth/driver/edit-profile`, data, {headers: {'Content-Type': 'multipart/form-data'}})
+    return response.data
+}
+
+// driver online
+export const driverGoOnline = async (data: any) => {
+    const response = await axios.post(`/driverAuth/go-online`, data)
+    return response.data
+}
+
+// extra driver online 
+export const extraDriverGoOnline = async (data: any) => {
+    const response = await axios.post(`/driverAuth/go-online-with-extra`, data)
+    return response.data
+}
+

@@ -18,16 +18,49 @@ import {
 } from '../constants/Color';
 import MapView, { Marker } from 'react-native-maps';
 import { useSocket } from '../context/SocketContext';
+import { useMutation } from '@tanstack/react-query';
+import { driverGoOnline, extraDriverGoOnline } from '../constants/Api';
+import { useLocation } from '../context/LocationProvider';
+import { useAuthStore } from '../store/authStore';
 
 
 export default function Home() {
   const [isNormalMode, setIsNormalMode] = useState(false);
   const [isDriverMode, setIsDriverMode] = useState(false);
   const socket = useSocket();
+  const {location} = useLocation()
+  const USER = useAuthStore(state => state.user)
+
+  const DriverOnlineMutation = useMutation({
+    mutationFn: driverGoOnline,
+    onSuccess: (response) => {
+      console.log('driver online success', response);
+    },
+    onError: (error) => {
+      console.log('driver online error', error);
+    }
+  })
+
+  const ExtraDriverOnlineMutation = useMutation({
+    mutationFn: extraDriverGoOnline,
+    onSuccess: (response) => {
+      console.log('extra driver online success', response);
+    },
+    onError: (error) => {
+      console.log('extra driver online error', error);
+    }
+  })
   
   // Function to handle normal mode toggle
   const toggleNormalMode = () => {
     if (!isNormalMode) {
+      DriverOnlineMutation.mutateAsync({
+        driverId: USER?.id,
+        location: {
+        latitude: location?.latitude || 0,
+        longitude: location?.longitude || 0,
+        }
+      })
       setIsNormalMode(true);
       setIsDriverMode(false);
     } else {
@@ -38,6 +71,13 @@ export default function Home() {
   // Function to handle driver mode toggle
   const toggleDriverMode = () => {
     if (!isDriverMode) {
+      ExtraDriverOnlineMutation.mutateAsync({
+        driverId: USER?.id,
+        location: {
+        latitude: location?.latitude || 0,
+        longitude: location?.longitude || 0,
+        }
+      })
       setIsDriverMode(true);
       setIsNormalMode(false);
     } else {
@@ -82,8 +122,10 @@ export default function Home() {
           <MapView
             style={styles.map}
             initialRegion={{
-              latitude: 37.78825,
-              longitude: -122.4324,
+              // latitude: 37.78825,
+              latitude: location?.latitude || 0,
+              // longitude: -122.4324,
+              longitude: location?.longitude || 0,
               latitudeDelta: 0.0922,
               longitudeDelta: 0.0421,
             }}

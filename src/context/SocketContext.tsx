@@ -28,7 +28,7 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
     }
 
     // Connect to socket server with access_token in headers
-    socketRef.current = io('https://t1wfswdh-3001.inc1.devtunnels.ms/', {
+    socketRef.current = io('https://t1wfswdh-3000.inc1.devtunnels.ms/', {
       auth: {
         access_token: accessToken, // Use auth object for cleaner token passing
       },
