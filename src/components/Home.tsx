@@ -35,6 +35,15 @@ export default function Home() {
     mutationFn: driverGoOnline,
     onSuccess: (response) => {
       console.log('driver online success', response);
+      setIsNormalMode(true);
+      socket?.emit('goOnDuty', {
+        latitude: location?.latitude || 0,
+        longitude: location?.longitude || 0,
+      })
+      socket?.emit('updateLocation', {
+        latitude: location?.latitude || 0,
+        longitude: location?.longitude || 0,
+      })
     },
     onError: (error) => {
       console.log('driver online error', error);
@@ -45,15 +54,11 @@ export default function Home() {
     mutationFn: extraDriverGoOnline,
     onSuccess: (response) => {
       console.log('extra driver online success', response);
+      setIsDriverMode(true);
     },
     onError: (error) => {
       console.log('extra driver online error', error);
     }
-  })
-
-  socket?.emit('updateLocation', {
-    latitude: location?.latitude || 0,
-    longitude: location?.longitude || 0,
   })
   
   
@@ -67,15 +72,9 @@ export default function Home() {
         longitude: location?.longitude || 0,
         }
       })
-      console.log('location', location);
-      socket?.emit('updateLocation', {
-        latitude: location?.latitude || 0,
-        longitude: location?.longitude || 0,
-      })
-      setIsNormalMode(true);
-      setIsDriverMode(false);
     } else {
       setIsNormalMode(false);
+      setIsDriverMode(false);
     }
   };
   
@@ -89,23 +88,10 @@ export default function Home() {
         longitude: location?.longitude || 0,
         }
       })
-      setIsDriverMode(true);
-      setIsNormalMode(false);
     } else {
       setIsDriverMode(false);
     }
   };
-
-
-  useEffect(() => {
-    console.log('Socket:', socket);
-    if (socket) {
-      console.log('Connected?', socket.connected); // should log true/false, not undefined
-    }
-  }, [socket]);
-  
-  
-
 
   return (
     <>
@@ -121,6 +107,7 @@ export default function Home() {
               ios_backgroundColor={DarkGray}
               onValueChange={toggleNormalMode}
               value={isNormalMode}
+              disabled={DriverOnlineMutation.isPending}
             />
           </View>
   
@@ -132,6 +119,7 @@ export default function Home() {
               ios_backgroundColor={DarkGray}
               onValueChange={toggleDriverMode}
               value={isDriverMode}
+              disabled={!isNormalMode || ExtraDriverOnlineMutation.isPending} 
             />
           </View>
         </View>

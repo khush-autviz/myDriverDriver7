@@ -325,11 +325,11 @@ useEffect(() => {
 
   return (
     <SafeAreaView style={{paddingHorizontal: 20, flex: 1, backgroundColor: Black}}>
-      <View style={{display: 'flex', flexDirection: 'row', alignItems: 'center', marginTop: 30}}>
+      <View style={{display: 'flex', flexDirection: 'row', alignItems: 'center', marginTop: 20}}>
         <TouchableOpacity onPress={() => navigation.goBack()} >
           <Ionicons name="chevron-back" size={20} color={Gold} />
         </TouchableOpacity>
-      <Text style={{color: Gold, fontSize: 18, fontWeight: '500'}}>Profile</Text>
+      <Text style={{color: Gold, fontSize: 20, fontWeight: '500'}}>Profile</Text>
       </View>
       <View style={{display: 'flex', alignItems: 'center', marginTop: 40}}>
         <TouchableOpacity onPress={handleImageUpload}>
