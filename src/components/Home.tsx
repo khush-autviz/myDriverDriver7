@@ -19,7 +19,7 @@ import {
 import MapView, { Marker } from 'react-native-maps';
 import { useSocket } from '../context/SocketContext';
 import { useMutation } from '@tanstack/react-query';
-import { driverGoOnline, extraDriverGoOnline } from '../constants/Api';
+import { driverGoOffline, driverGoOnline, extraDriverGoOnline } from '../constants/Api';
 import { useLocation } from '../context/LocationProvider';
 import { useAuthStore } from '../store/authStore';
 
@@ -28,9 +28,9 @@ export default function Home() {
   const [isNormalMode, setIsNormalMode] = useState(false);
   const [isDriverMode, setIsDriverMode] = useState(false);
   const socket = useSocket();
-  const {location} = useLocation()
+  const {location, startTracking, stopTracking} = useLocation()
   const USER = useAuthStore(state => state.user)
-  
+
   const DriverOnlineMutation = useMutation({
     mutationFn: driverGoOnline,
     onSuccess: (response) => {
@@ -58,6 +58,19 @@ export default function Home() {
     },
     onError: (error) => {
       console.log('extra driver online error', error);
+    }
+  })
+
+  const DriverOfflineMutation = useMutation({
+    mutationFn: driverGoOffline,
+    onSuccess: (response) => {
+      console.log('driver offline success', response);
+      socket?.emit('goOffDuty')
+      setIsNormalMode(false);
+      setIsDriverMode(false);
+    },
+    onError: (error) => {
+      console.log('driver offline error', error);
     }
   })
   
@@ -93,9 +106,18 @@ export default function Home() {
     }
   };
 
+  useEffect(() => {
+    startTracking()
+  
+    return () => {
+      stopTracking()
+    }
+  }, [])
+  
+
   return (
     <>
-      <StatusBar backgroundColor={Black} barStyle="light-content" />
+      {/* <StatusBar backgroundColor={Black} barStyle="light-content" /> */}
       <View style={styles.container}>
         {/* Mode Toggle Section */}
         <View style={styles.toggleContainer}>
@@ -151,7 +173,7 @@ const styles = StyleSheet.create({
   toggleContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: 10,
+    // marginTop: 10,
     marginBottom: 10,
   },
   toggleCard: {

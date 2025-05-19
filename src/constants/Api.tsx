@@ -54,3 +54,45 @@ export const extraDriverGoOnline = async (data: any) => {
     return response.data
 }
 
+// driver offline
+export const driverGoOffline = async (data: any) => {
+    const response = await axios.post(`/driverAuth/go-offline`, data)
+    return response.data
+}
+
+
+// driver arrived
+export const driverArrived = async (rideId: any) => {
+    const response = await axios.put(`/ride-status/driver/arrived/${rideId}`)
+    return response.data
+}
+
+// driver waiting
+export const driverWaiting = async (rideId: any) => {
+    const response = await axios.put(`/ride-status/driver/waiting/${rideId}`)
+    return response.data
+}
+
+// verify ride otp
+export const verifyRideOtp = async (rideId: any, data: number) => {
+    const response = await axios.put(`/ride-status/driver/verify-otp/${rideId}`, data)
+    return response.data
+}
+
+// start ride
+export const startRide = async (rideId: any) => {
+    const response = await axios.put(`/ride-status/driver/start/${rideId}`)
+    return response.data
+}
+
+// complete ride
+export const completeRide = async (rideId: any) => {
+    const response = await axios.put(`/ride-status/driver/complete/${rideId}`)
+    return response.data
+}
+
+// cancel ride
+export const cancelRide = async (rideId: any, data: any) => {
+    const response = await axios.put(`/ride-status/driver/cancel/${rideId}`, data)
+    return response.data
+}

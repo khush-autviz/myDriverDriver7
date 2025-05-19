@@ -203,9 +203,6 @@ export default function Profile() {
     profilePhoto: user?.profilePhoto ?? null,
   })
 
-  console.log(token?.access_token);
-  
-
   // fetches driver info
   const {data: DriverDetails, } = useQuery({
     queryKey: ['driver-details'],
@@ -293,22 +290,7 @@ export default function Profile() {
   }
 
 
-// const logAsyncStorage = async () => {
-//   try {
-//     const keys = await AsyncStorage.getAllKeys();
-//     const items = await AsyncStorage.multiGet(keys);
-//     console.log('AsyncStorage contents:');
-//     items.forEach(([key, value]) => {
-//       console.log(`${key}: ${value}`);
-//     });
-//   } catch (error) {
-//     console.error('Error reading AsyncStorage:', error);
-//   }
-// };
-
 useEffect(() => {
-  // logAsyncStorage();
-
   if (DriverDetails) {
     console.log(DriverDetails);
     

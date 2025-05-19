@@ -18,7 +18,7 @@ export default function Account() {
   }
 
   return (
-    <SafeAreaView style={{backgroundColor: Black, flex: 1, padding: 20}}>
+    <SafeAreaView style={{backgroundColor: Black, flex: 1, paddingHorizontal: 20}}>
       <Text style={{color: LightGold, fontSize: 32, fontWeight: '800'}}>{USER?.firstName + " " + USER?.lastName}</Text>
       <View style={{backgroundColor: '#fce5fc', marginTop: 20, height: 110, borderRadius: 8, padding: 10}}>
         <Text style={{color: Black, fontSize: 18, fontWeight: '700'}}>Invite friends!</Text>
