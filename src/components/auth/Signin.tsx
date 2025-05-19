@@ -56,6 +56,7 @@ export default function Signin() {
         paddingTop: 70,
         paddingHorizontal: 20,
       }}>
+
       <Image
           source={require('../../assets/logo/mainLogo.png')}
           height={100}
@@ -113,7 +114,13 @@ export default function Signin() {
             height: 50,
             // backgroundColor: 'red'
           }}
-          
+          countryPickerProps={{
+            withFilter: true,
+            theme: {
+              backgroundColor: '#1a1a1a', 
+              onBackgroundTextColor: '#ffffff', 
+            },
+          }}
         />
 
       {/* <TextInput

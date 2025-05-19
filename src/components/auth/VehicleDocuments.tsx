@@ -642,7 +642,7 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: Black,
     flex: 1,
-    paddingTop: 30,
+    // paddingTop: 30,
     paddingHorizontal: 20,
   },
   backRow: {

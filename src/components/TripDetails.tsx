@@ -17,7 +17,8 @@ export default function TripDetails() {
     const navigation: any = useNavigation()
     const [mode, setmode] = useState('first')
     const [modalVisible, setmodalVisible] = useState(false)
-    const [rideId, setrideId] = useState('')
+    const [otp, setotp] = useState('')
+    const [rideId, setrideId] = useState<number>()
     const bottomSheetRef = useRef<BottomSheet>(null);
     const { location } = useLocation()
 
@@ -29,7 +30,7 @@ export default function TripDetails() {
         'Vehicle issue or breakdown',
         'Personal emergency',
         'Rider asked to cancel the trip',
-      ];
+    ];
 
     const handleSheetChanges = useCallback((index: number) => {
         console.log('handleSheetChanges', index);
@@ -59,9 +60,10 @@ export default function TripDetails() {
 
     // ride otp verfication mutation
     const verifyRideOtpMutation = useMutation({
-        mutationFn: ({ id, payload }: { id: number, payload: number }) => verifyRideOtp(id, payload),
+        mutationFn: ({ id, payload }: { id: any, payload: any }) => verifyRideOtp(id, payload),
         onSuccess: (response) => {
             console.log('ride otp verification success', response);
+            startRideMutation.mutateAsync(rideId);
         },
         onError: (error) => {
             console.log('ride otp verification error', error);
@@ -92,7 +94,7 @@ export default function TripDetails() {
 
     // cancel ride mutation
     const cancelRideMutation = useMutation({
-        mutationFn: ({ id, payload }: { id: number, payload: any }) => cancelRide(id, payload),
+        mutationFn: ({ id, payload }: { id: any, payload: any }) => cancelRide(id, payload),
         onSuccess: (response) => {
             console.log('cancel ride success', response);
         },
@@ -103,29 +105,29 @@ export default function TripDetails() {
 
     // arrived button 
     const handleArrivedButton = () => {
-        driverArrivedMutation.mutateAsync(rideId); 
+        driverArrivedMutation.mutateAsync(rideId);
         setmode('second')
     }
 
 
 
-const logLocalStorage = async () => {
-    try {
-      const keys = await AsyncStorage.getAllKeys();
-      const result = await AsyncStorage.multiGet(keys);
-  
-      console.log('📦 AsyncStorage contents:');
-      result.forEach(([key, value]) => {
-        console.log(`${key}: ${value}`);
-      });
-    } catch (error) {
-      console.error('Failed to load AsyncStorage:', error);
-    }
-  };
+    const logLocalStorage = async () => {
+        try {
+            const keys = await AsyncStorage.getAllKeys();
+            const result = await AsyncStorage.multiGet(keys);
 
-  useEffect(() => {
-    logLocalStorage()
-  }, [])
+            console.log('📦 AsyncStorage contents:');
+            result.forEach(([key, value]) => {
+                console.log(`${key}: ${value}`);
+            });
+        } catch (error) {
+            console.error('Failed to load AsyncStorage:', error);
+        }
+    };
+
+    useEffect(() => {
+        logLocalStorage()
+    }, [])
 
     return (
         <GestureHandlerRootView style={styles.container}>
@@ -175,7 +177,7 @@ const logLocalStorage = async () => {
                                     activeOpacity={0.7}
                                     onPress={() => {
                                         cancelRideMutation.mutate({
-                                            id: 123, // Replace with actual ride ID
+                                            id: rideId, // Replace with actual ride ID
                                             payload: { reason: item }
                                         });
                                         setmodalVisible(false);
@@ -288,6 +290,7 @@ const logLocalStorage = async () => {
                             </TouchableOpacity>
                         </>
                     )}
+
                     {mode === 'second' && (
                         <>
                             {/* OTP Verification Section */}
@@ -298,11 +301,16 @@ const logLocalStorage = async () => {
                                     placeholderTextColor={Gray}
                                     keyboardType="number-pad"
                                     maxLength={4}
+                                    value={otp}
+                                    onChangeText={text => setotp(text)}
                                 />
                                 <TouchableOpacity
                                     style={styles.verifyButton}
                                     activeOpacity={0.8}
-                                    onPress={() => setmode('third')}
+                                    onPress={() => verifyRideOtpMutation.mutateAsync({
+                                        id: rideId,
+                                        payload: { otp: Number(otp) }
+                                    })}
                                 >
                                     <Text style={styles.verifyButtonText}>Verify</Text>
                                 </TouchableOpacity>
@@ -343,135 +351,53 @@ const logLocalStorage = async () => {
                             </TouchableOpacity>
                         </>
                     )}
-                    {/* {mode === 'third' && (
+
+                    {mode === 'third' && (
                         <>
-                            <View
-                                style={{
-                                    borderColor: Gold,
-                                    borderWidth: 2,
-                                    padding: 10,
-                                    marginTop: 10,
-                                    borderRadius: 10,
-                                    gap: 10,
-                                }}>
-                                <View
-                                    style={{
-                                        display: 'flex',
-                                        flexDirection: 'row',
-                                        gap: 15,
-                                        alignItems: 'center',
-                                    }}>
-                                    <View style={{ gap: 10 }}>
+                            {/* Trip Details Card */}
+                            <View style={styles.tripDetailsCard}>
+                                {/* Pickup Location */}
+                                <View style={styles.locationRow}>
+                                    <View style={styles.iconContainer}>
                                         <Ionicons name="location" size={20} color="green" />
                                     </View>
                                     <View>
-                                        <View>
-                                            <Text
-                                                style={{ color: Gold, fontSize: 14, fontWeight: 700 }}>
-                                                FZ5
-                                            </Text>
-                                            <Text style={{ color: Gray, fontSize: 12 }}>
-                                                Chandigarh, India
-                                            </Text>
-                                        </View>
+                                        <Text style={styles.locationTitle}>FZ5</Text>
+                                        <Text style={styles.locationSubtitle}>Chandigarh, India</Text>
                                     </View>
                                 </View>
-                                <View
-                                    style={{
-                                        display: 'flex',
-                                        flexDirection: 'row',
-                                        gap: 15,
-                                        alignItems: 'center',
-                                    }}>
-                                    <View style={{ gap: 10 }}>
+
+                                {/* Destination Location */}
+                                <View style={styles.locationRow}>
+                                    <View style={styles.iconContainer}>
                                         <Ionicons name="location" size={20} color="red" />
                                     </View>
                                     <View>
-                                        <View>
-                                            <Text
-                                                style={{ color: Gold, fontSize: 14, fontWeight: 700 }}>
-                                                FZ5
-                                            </Text>
-                                            <Text style={{ color: Gray, fontSize: 12 }}>
-                                                Chandigarh, India
-                                            </Text>
-                                        </View>
+                                        <Text style={styles.locationTitle}>FZ5</Text>
+                                        <Text style={styles.locationSubtitle}>Chandigarh, India</Text>
                                     </View>
                                 </View>
                             </View>
+
+                            {/* Trip Status Information */}
+                            <View style={styles.tripStatusContainer}>
+                                <View style={styles.statusItem}>
+                                    <Ionicons name="time-outline" size={20} color={Gold} />
+                                    <Text style={styles.statusText}>Trip in progress</Text>
+                                </View>
+                            </View>
+
+                            {/* Complete Trip Button */}
                             <TouchableOpacity
-                                style={{
-                                    backgroundColor: Gold,
-                                    borderRadius: 8,
-                                    padding: 10,
-                                    // width: '30%',
-                                    marginTop: 10,
-                                    // alignSelf: 'flex-end'
-                                }}
-                                onPress={() => {
-                                    setmode('fourth')
-                                }}
+                                style={styles.completeButton}
+                                activeOpacity={0.8}
+                                onPress={() => setmode('fourth')}
                             >
-                                <Text
-                                    style={{
-                                        color: White,
-                                        fontSize: 14,
-                                        fontWeight: '700',
-                                        textAlign: 'center',
-                                        padding: 4,
-                                    }}>
-                                    Complete
-                                </Text>
+                                <Ionicons name="checkmark-circle" size={20} color={White} style={styles.buttonIcon} />
+                                <Text style={styles.buttonText}>Complete Trip</Text>
                             </TouchableOpacity>
                         </>
-                    )} */}
-
-{mode === 'third' && (
-  <>
-    {/* Trip Details Card */}
-    <View style={styles.tripDetailsCard}>
-      {/* Pickup Location */}
-      <View style={styles.locationRow}>
-        <View style={styles.iconContainer}>
-          <Ionicons name="location" size={20} color="green" />
-        </View>
-        <View>
-          <Text style={styles.locationTitle}>FZ5</Text>
-          <Text style={styles.locationSubtitle}>Chandigarh, India</Text>
-        </View>
-      </View>
-      
-      {/* Destination Location */}
-      <View style={styles.locationRow}>
-        <View style={styles.iconContainer}>
-          <Ionicons name="location" size={20} color="red" />
-        </View>
-        <View>
-          <Text style={styles.locationTitle}>FZ5</Text>
-          <Text style={styles.locationSubtitle}>Chandigarh, India</Text>
-        </View>
-      </View>
-    </View>
-    
-    {/* Trip Status Information */}
-    <View style={styles.tripStatusContainer}>
-      <View style={styles.statusItem}>
-        <Ionicons name="time-outline" size={20} color={Gold} />
-        <Text style={styles.statusText}>Trip in progress</Text>
-      </View>
-    </View>
-    
-    {/* Complete Trip Button */}
-    <TouchableOpacity
-      style={styles.completeButton}
-      activeOpacity={0.8}
-      onPress={() => setmode('fourth')}
-    >
-      <Ionicons name="checkmark-circle" size={20} color={White} style={styles.buttonIcon} />
-      <Text style={styles.buttonText}>Complete Trip</Text>
-    </TouchableOpacity>
-  </>
-)}
+                    )}
 
                 </BottomSheetView>
             </BottomSheet>
@@ -708,43 +634,43 @@ const styles = StyleSheet.create({
         textAlign: 'center',
     },
 
-    
+
     // Trip Status Styles
     tripStatusContainer: {
-      marginTop: 20,
-      marginBottom: 10,
+        marginTop: 20,
+        marginBottom: 10,
     },
     statusItem: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      backgroundColor: 'rgba(255, 255, 255, 0.08)',
-      borderRadius: 10,
-      padding: 12,
-      marginBottom: 8,
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: 'rgba(255, 255, 255, 0.08)',
+        borderRadius: 10,
+        padding: 12,
+        marginBottom: 8,
     },
     statusText: {
-      color: White,
-      fontSize: 14,
-      marginLeft: 10,
-      fontWeight: '500',
+        color: White,
+        fontSize: 14,
+        marginLeft: 10,
+        fontWeight: '500',
     },
-    
+
     // Complete Button Style
     completeButton: {
-      backgroundColor: Gold,
-      borderRadius: 10,
-      padding: 15,
-      marginTop: 10,
-      flexDirection: 'row',
-      justifyContent: 'center',
-      alignItems: 'center',
-      elevation: 3,
-      shadowColor: Gold,
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.3,
-      shadowRadius: 3,
+        backgroundColor: Gold,
+        borderRadius: 10,
+        padding: 15,
+        marginTop: 10,
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        elevation: 3,
+        shadowColor: Gold,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.3,
+        shadowRadius: 3,
     },
     buttonIcon: {
-      marginRight: 8,
+        marginRight: 8,
     },
-  });
+});
