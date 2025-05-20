@@ -1,4 +1,88 @@
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+// import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+// import React from 'react'
+// import { SafeAreaView } from 'react-native-safe-area-context'
+// import { Black, DarkGray, Gold, Gray, LightGold, White } from '../constants/Color'
+// import Ionicons from 'react-native-vector-icons/Ionicons'
+// import { useAuthStore } from '../store/authStore'
+// import { useNavigation } from '@react-navigation/native'
+
+// export default function Account() {
+
+//   const USER = useAuthStore(state => state.user)
+//   const LOGOUT = useAuthStore(state => state.logout)
+//   const navigation: any = useNavigation()
+
+//   const handleLogout = () => {
+//     navigation.navigate('Signin')
+//     LOGOUT()
+//   }
+
+//   return (
+//     <SafeAreaView style={{backgroundColor: Black, flex: 1, paddingHorizontal: 20}}>
+//       <Text style={{color: LightGold, fontSize: 32, fontWeight: '800'}}>{USER?.firstName + " " + USER?.lastName}</Text>
+//       <View style={{backgroundColor: '#fce5fc', marginTop: 20, height: 110, borderRadius: 8, padding: 10}}>
+//         <Text style={{color: Black, fontSize: 18, fontWeight: '700'}}>Invite friends!</Text>
+//         <Text style={{color: DarkGray, fontWeight: '500', width: 250, marginTop: 10}}>Invite your friends to earn free points for later use</Text>
+//       </View>
+//       <View style={styles.lineContainer}>
+//               <View style={styles.line} />
+//               {/* <Text style={styles.text}>or</Text> */}
+//               <View style={styles.line} />
+//             </View>
+//       <TouchableOpacity onPress={() => navigation.navigate('Profile')} style={{display: 'flex', flexDirection: 'row', marginTop: 30, alignItems: 'center'}}>
+//         <Ionicons name='person-add' size={20} color={Gray}/>
+//         <Text style={{color: Gray, marginStart: 30, fontSize: 16, fontWeight: '700' }}>Manage account</Text>
+//       </TouchableOpacity>
+//       <View style={{display: 'flex', flexDirection: 'row', marginTop: 30, alignItems: 'center'}}>
+//         <Ionicons name='settings' size={20} color={Gray}/>
+//         <Text style={{color: Gray, marginStart: 30, fontSize: 16, fontWeight: '700' }}>Settings</Text>
+//       </View>
+//       <View style={{display: 'flex', flexDirection: 'row', marginTop: 30, alignItems: 'center'}}>
+//         <Ionicons name='chatbubbles' size={20} color={Gray}/>
+//         <Text style={{color: Gray, marginStart: 30, fontSize: 16, fontWeight: '700' }}>Messages</Text>
+//       </View>
+//       <View style={{display: 'flex', flexDirection: 'row', marginTop: 30, alignItems: 'center'}}>
+//         <Ionicons name='flame' size={20} color={Gray}/>
+//         <Text style={{color: Gray, marginStart: 30, fontSize: 16, fontWeight: '700' }}>Points</Text>
+//       </View>
+//       <View style={{display: 'flex', flexDirection: 'row', marginTop: 30, alignItems: 'center'}}>
+//         <Ionicons name='server' size={20} color={Gray}/>
+//         <Text style={{color: Gray, marginStart: 30, fontSize: 16, fontWeight: '700' }}>Saved groups</Text>
+//       </View>
+//       <View style={{display: 'flex', flexDirection: 'row', marginTop: 30, alignItems: 'center'}}>
+//         <Ionicons name='extension-puzzle' size={20} color={Gray}/>
+//         <Text style={{color: Gray, marginStart: 30, fontSize: 16, fontWeight: '700' }}>Set up your business profile</Text>
+//       </View>
+//       <View style={{display: 'flex', flexDirection: 'row', marginTop: 30, alignItems: 'center'}}>
+//         <Ionicons name='leaf' size={20} color={Gray}/>
+//         <Text style={{color: Gray, marginStart: 30, fontSize: 16, fontWeight: '700' }}>Send a gift</Text>
+//       </View>
+//       <TouchableOpacity onPress={handleLogout} style={{display: 'flex', flexDirection: 'row', marginTop: 30, alignItems: 'center'}}>
+//         <Ionicons name='log-out' size={20} color={Gray}/>
+//         <Text style={{color: Gray, marginStart: 30, fontSize: 16, fontWeight: '700' }}>Logout</Text>
+//       </TouchableOpacity>
+//     </SafeAreaView>
+//   )
+// }
+
+// const styles = StyleSheet.create({
+//     lineContainer: {
+//         flexDirection: 'row',
+//         alignItems: 'center',
+//         marginTop: 20,
+//       },
+//       line: {
+//         flex: 1,
+//         height: 1,
+//         backgroundColor: '#ccc',
+//       },
+// })
+
+
+
+
+
+import { StyleSheet, Text, TouchableOpacity, View, Image, ScrollView } from 'react-native'
 import React from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { Black, DarkGray, Gold, Gray, LightGold, White } from '../constants/Color'
@@ -7,7 +91,6 @@ import { useAuthStore } from '../store/authStore'
 import { useNavigation } from '@react-navigation/native'
 
 export default function Account() {
-
   const USER = useAuthStore(state => state.user)
   const LOGOUT = useAuthStore(state => state.logout)
   const navigation: any = useNavigation()
@@ -17,63 +100,294 @@ export default function Account() {
     LOGOUT()
   }
 
+  // Menu items with icons, labels, and navigation targets
+  const menuItems = [
+    {
+      icon: 'person',
+      label: 'Manage Profile',
+      onPress: () => navigation.navigate('Profile'),
+      important: true
+    },
+    {
+      icon: 'settings',
+      label: 'Settings',
+      onPress: () => {},
+      important: true
+    },
+    {
+      icon: 'chatbubbles',
+      label: 'Messages',
+      onPress: () => {},
+      important: true
+    },
+    {
+      icon: 'flame',
+      label: 'Points & Rewards',
+      onPress: () => {},
+      important: true
+    },
+    {
+      icon: 'log-out',
+      label: 'Logout',
+      onPress: handleLogout,
+      important: true,
+      danger: true
+    }
+  ]
+
   return (
-    <SafeAreaView style={{backgroundColor: Black, flex: 1, paddingHorizontal: 20}}>
-      <Text style={{color: LightGold, fontSize: 32, fontWeight: '800'}}>{USER?.firstName + " " + USER?.lastName}</Text>
-      <View style={{backgroundColor: '#fce5fc', marginTop: 20, height: 110, borderRadius: 8, padding: 10}}>
-        <Text style={{color: Black, fontSize: 18, fontWeight: '700'}}>Invite friends!</Text>
-        <Text style={{color: DarkGray, fontWeight: '500', width: 250, marginTop: 10}}>Invite your friends to earn free points for later use</Text>
-      </View>
-      <View style={styles.lineContainer}>
-              <View style={styles.line} />
-              {/* <Text style={styles.text}>or</Text> */}
-              <View style={styles.line} />
+    <SafeAreaView style={styles.container}>
+      <ScrollView showsVerticalScrollIndicator={false}>
+        {/* Header Section */}
+        <View style={styles.header}>
+          <Text style={styles.headerTitle}>Account</Text>
+        </View>
+
+        {/* Profile Card */}
+        <View style={styles.profileCard}>
+          <View style={styles.profileImageContainer}>
+            {USER?.profilePhoto ? (
+              <Image 
+                source={{ uri: `https://t1wfswdh-3000.inc1.devtunnels.ms/${USER.profilePhoto}` }} 
+                style={styles.profileImage} 
+              />
+            ) : (
+              <View style={styles.profileImagePlaceholder}>
+                <Text style={styles.profileInitials}>
+                  {USER?.firstName?.charAt(0) || ''}{USER?.lastName?.charAt(0) || ''}
+                </Text>
+              </View>
+            )}
+          </View>
+          <View style={styles.profileInfo}>
+            <Text style={styles.profileName}>{USER?.firstName} {USER?.lastName}</Text>
+            <Text style={styles.profileEmail}>{USER?.email || 'No email provided'}</Text>
+            {/* <TouchableOpacity 
+              style={styles.editProfileButton}
+              onPress={() => navigation.navigate('Profile')}
+            >
+              <Text style={styles.editProfileText}>Edit Profile</Text>
+            </TouchableOpacity> */}
+          </View>
+        </View>
+
+        {/* Invite Card */}
+        <View style={styles.inviteCard}>
+          <View style={styles.inviteContent}>
+            <Ionicons name="gift-outline" size={28} color={Black} style={styles.inviteIcon} />
+            <View>
+              <Text style={styles.inviteTitle}>Invite friends!</Text>
+              <Text style={styles.inviteSubtitle}>Invite your friends to earn free points for later use</Text>
             </View>
-      <TouchableOpacity onPress={() => navigation.navigate('Profile')} style={{display: 'flex', flexDirection: 'row', marginTop: 30, alignItems: 'center'}}>
-        <Ionicons name='person-add' size={20} color={Gray}/>
-        <Text style={{color: Gray, marginStart: 30, fontSize: 16, fontWeight: '700' }}>Manage account</Text>
-      </TouchableOpacity>
-      <View style={{display: 'flex', flexDirection: 'row', marginTop: 30, alignItems: 'center'}}>
-        <Ionicons name='settings' size={20} color={Gray}/>
-        <Text style={{color: Gray, marginStart: 30, fontSize: 16, fontWeight: '700' }}>Settings</Text>
-      </View>
-      <View style={{display: 'flex', flexDirection: 'row', marginTop: 30, alignItems: 'center'}}>
-        <Ionicons name='chatbubbles' size={20} color={Gray}/>
-        <Text style={{color: Gray, marginStart: 30, fontSize: 16, fontWeight: '700' }}>Messages</Text>
-      </View>
-      <View style={{display: 'flex', flexDirection: 'row', marginTop: 30, alignItems: 'center'}}>
-        <Ionicons name='flame' size={20} color={Gray}/>
-        <Text style={{color: Gray, marginStart: 30, fontSize: 16, fontWeight: '700' }}>Points</Text>
-      </View>
-      <View style={{display: 'flex', flexDirection: 'row', marginTop: 30, alignItems: 'center'}}>
-        <Ionicons name='server' size={20} color={Gray}/>
-        <Text style={{color: Gray, marginStart: 30, fontSize: 16, fontWeight: '700' }}>Saved groups</Text>
-      </View>
-      <View style={{display: 'flex', flexDirection: 'row', marginTop: 30, alignItems: 'center'}}>
-        <Ionicons name='extension-puzzle' size={20} color={Gray}/>
-        <Text style={{color: Gray, marginStart: 30, fontSize: 16, fontWeight: '700' }}>Set up your business profile</Text>
-      </View>
-      <View style={{display: 'flex', flexDirection: 'row', marginTop: 30, alignItems: 'center'}}>
-        <Ionicons name='leaf' size={20} color={Gray}/>
-        <Text style={{color: Gray, marginStart: 30, fontSize: 16, fontWeight: '700' }}>Send a gift</Text>
-      </View>
-      <TouchableOpacity onPress={handleLogout} style={{display: 'flex', flexDirection: 'row', marginTop: 30, alignItems: 'center'}}>
-        <Ionicons name='log-out' size={20} color={Gray}/>
-        <Text style={{color: Gray, marginStart: 30, fontSize: 16, fontWeight: '700' }}>Logout</Text>
-      </TouchableOpacity>
+          </View>
+          <TouchableOpacity style={styles.inviteButton}>
+            <Text style={styles.inviteButtonText}>Share</Text>
+            <Ionicons name="share-social-outline" size={16} color={White} />
+          </TouchableOpacity>
+        </View>
+
+        {/* Menu Items */}
+        <View style={styles.menuContainer}>
+          {menuItems.filter(item => item.important).map((item, index) => (
+            <TouchableOpacity 
+              key={index} 
+              style={[
+                styles.menuItem, 
+                item.danger && styles.dangerMenuItem
+              ]}
+              onPress={item.onPress}
+            >
+              <View style={styles.menuIconContainer}>
+                <Ionicons 
+                  name={item.icon} 
+                  size={20} 
+                  color={item.danger ? '#FF6B6B' : Gold} 
+                />
+              </View>
+              <Text style={[
+                styles.menuLabel, 
+                item.danger && styles.dangerMenuLabel
+              ]}>
+                {item.label}
+              </Text>
+              {!item.danger && (
+                <Ionicons name="chevron-forward" size={18} color={Gray} />
+              )}
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        {/* App Version */}
+        <Text style={styles.versionText}>Version 1.0.0</Text>
+      </ScrollView>
     </SafeAreaView>
   )
 }
 
 const styles = StyleSheet.create({
-    lineContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginTop: 20,
-      },
-      line: {
-        flex: 1,
-        height: 1,
-        backgroundColor: '#ccc',
-      },
+  container: {
+    flex: 1,
+    backgroundColor: Black,
+    paddingHorizontal: 20,
+  },
+  header: {
+    marginBottom: 20,
+    paddingTop: 10,
+  },
+  headerTitle: {
+    color: LightGold,
+    fontSize: 28,
+    fontWeight: '800',
+  },
+  profileCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  profileImageContainer: {
+    marginRight: 16,
+  },
+  profileImage: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    borderWidth: 2,
+    borderColor: Gold,
+  },
+  profileImagePlaceholder: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: 'rgba(212, 175, 55, 0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: Gold,
+  },
+  profileInitials: {
+    color: Gold,
+    fontSize: 28,
+    fontWeight: '700',
+  },
+  profileInfo: {
+    flex: 1,
+  },
+  profileName: {
+    color: White,
+    fontSize: 22,
+    fontWeight: '700',
+    marginBottom: 4,
+  },
+  profileEmail: {
+    color: Gray,
+    fontSize: 14,
+    marginBottom: 10,
+  },
+  editProfileButton: {
+    backgroundColor: 'transparent',
+    paddingVertical: 6,
+    paddingHorizontal: 0,
+    borderRadius: 4,
+  },
+  editProfileText: {
+    color: Gold,
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  inviteCard: {
+    backgroundColor: '#fce5fc',
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  inviteContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  inviteIcon: {
+    marginRight: 12,
+  },
+  inviteTitle: {
+    color: Black,
+    fontSize: 18,
+    fontWeight: '700',
+    marginBottom: 4,
+  },
+  inviteSubtitle: {
+    color: DarkGray,
+    fontSize: 14,
+    width: '90%',
+  },
+  inviteButton: {
+    backgroundColor: Gold,
+    borderRadius: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    alignSelf: 'flex-end',
+  },
+  inviteButtonText: {
+    color: White,
+    fontWeight: '600',
+    marginRight: 6,
+  },
+  menuContainer: {
+    marginBottom: 24,
+  },
+  menuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  dangerMenuItem: {
+    marginTop: 16,
+    borderBottomWidth: 0,
+    backgroundColor: 'rgba(255, 107, 107, 0.1)',
+    borderRadius: 12,
+    paddingHorizontal: 12,
+  },
+  menuIconContainer: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 16,
+  },
+  menuLabel: {
+    color: White,
+    fontSize: 16,
+    fontWeight: '600',
+    flex: 1,
+  },
+  dangerMenuLabel: {
+    color: '#FF6B6B',
+  },
+  versionText: {
+    color: Gray,
+    fontSize: 12,
+    textAlign: 'center',
+    marginBottom: 24,
+  },
+  lineContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 24,
+  },
+  line: {
+    flex: 1,
+    height: 1,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+  },
 })

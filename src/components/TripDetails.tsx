@@ -26,7 +26,7 @@ export default function TripDetails() {
 
     const cancelReasons = [
         'Rider not at pickup location',
-        'Rider not responding to calls/messages',
+        'Rider not responding',
         'Vehicle issue or breakdown',
         'Personal emergency',
         'Rider asked to cancel the trip',

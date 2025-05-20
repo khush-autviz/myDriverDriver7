@@ -44,6 +44,9 @@ export default function Home() {
         latitude: location?.latitude || 0,
         longitude: location?.longitude || 0,
       })
+      socket?.on('rideRequest', (data) => {
+        console.log('ride request', data);
+      })
     },
     onError: (error) => {
       console.log('driver online error', error);
