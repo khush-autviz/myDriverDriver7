@@ -116,7 +116,7 @@ export default function TripDetails() {
             const keys = await AsyncStorage.getAllKeys();
             const result = await AsyncStorage.multiGet(keys);
 
-            console.log('📦 AsyncStorage contents:');
+            console.log('AsyncStorage contents:');
             result.forEach(([key, value]) => {
                 console.log(`${key}: ${value}`);
             });
