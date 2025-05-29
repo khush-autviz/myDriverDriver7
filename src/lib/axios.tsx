@@ -20,6 +20,8 @@ instance.interceptors.request.use((config) => {
     config.headers.Authorization = `Bearer ${token}`;
   }
 
+  console.log(token, "token interce[pter");
+
   return config;
 });
 

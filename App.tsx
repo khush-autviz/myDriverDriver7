@@ -21,6 +21,7 @@ import { Black, Gold } from './src/constants/Color';
 import { SocketProvider } from './src/context/SocketContext';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { LocationProvider } from './src/context/LocationProvider';
+import { RideProvider } from './src/context/RideContext';
 import TripDetails from './src/components/TripDetails';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -68,34 +69,37 @@ export default function App() {
   return (
     <LocationProvider>
       <GestureHandlerRootView style={{ flex: 1 }}>
-    <QueryClientProvider client={queryClient}>
-      <SocketProvider>
-        <SafeAreaView style={{flex: 1, backgroundColor: Black, paddingTop: 10}}>
-      <NavigationContainer>
-        <Stack.Navigator screenOptions={{ headerShown: false }}>
-          {/* Splash Screen as initial screen */}
-          <Stack.Screen name="Splash" component={Splash} />
-          
-          {/* Onboarding Screen */}
-          <Stack.Screen name="Onboarding" component={Onboarding} />
-          
-          {/* Auth Screens */}
-          <Stack.Screen name="Signin" component={Signin} />
-          <Stack.Screen name="Signup" component={Signup} />
-          <Stack.Screen name="OtpScreen" component={OtpScreen} />
-          <Stack.Screen name="Profile" component={Profile} />
-          <Stack.Screen name="vehicle-details" component={VehicleDetails} />
-          <Stack.Screen name="vehicle-documents" component={VehicleDocuments} />
-          <Stack.Screen name="approval-screen" component={ApprovalScreen} />
-          
-          {/* Main Tabs */}
-          <Stack.Screen name="Main" component={MainTabs} />
-        </Stack.Navigator>
-      </NavigationContainer>
-      </SafeAreaView>
-      </SocketProvider>
-    </QueryClientProvider>
-    </GestureHandlerRootView>
+        <QueryClientProvider client={queryClient}>
+          <RideProvider>
+            <SocketProvider>
+              <SafeAreaView style={{ flex: 1, backgroundColor: Black, paddingTop: 10 }}>
+                <NavigationContainer>
+                  <Stack.Navigator screenOptions={{ headerShown: false }}>
+                    {/* Splash Screen as initial screen */}
+                    <Stack.Screen name="Splash" component={Splash} />
+
+                    {/* Onboarding Screen */}
+                    <Stack.Screen name="Onboarding" component={Onboarding} />
+
+                    {/* Auth Screens */}
+                    <Stack.Screen name="Signin" component={Signin} />
+                    <Stack.Screen name="Signup" component={Signup} />
+                    <Stack.Screen name="OtpScreen" component={OtpScreen} />
+                    <Stack.Screen name="Profile" component={Profile} />
+                    <Stack.Screen name="vehicle-details" component={VehicleDetails} />
+                    <Stack.Screen name="vehicle-documents" component={VehicleDocuments} />
+                    <Stack.Screen name="approval-screen" component={ApprovalScreen} />
+                    <Stack.Screen name='trip-details' component={TripDetails} />
+
+                    {/* Main Tabs */}
+                    <Stack.Screen name="Main" component={MainTabs} />
+                  </Stack.Navigator>
+                </NavigationContainer>
+              </SafeAreaView>
+            </SocketProvider>
+          </RideProvider>
+        </QueryClientProvider>
+      </GestureHandlerRootView>
     </LocationProvider>
   );
 }

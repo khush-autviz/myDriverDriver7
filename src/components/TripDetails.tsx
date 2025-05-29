@@ -12,15 +12,19 @@ import { useSocket } from '../context/SocketContext';
 import { useLocation } from '../context/LocationProvider';
 import Modal from 'react-native-modal'
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useRide } from '../context/RideContext';
+import { useAuthStore } from '../store/authStore';
 
 export default function TripDetails() {
     const navigation: any = useNavigation()
     const [mode, setmode] = useState('first')
     const [modalVisible, setmodalVisible] = useState(false)
     const [otp, setotp] = useState('')
-    const [rideId, setrideId] = useState<number>()
+    // const [rideId, setrideId] = useState<number>()
     const bottomSheetRef = useRef<BottomSheet>(null);
     const { location } = useLocation()
+    const {currentRide} = useRide()
+    const {user:USER,rideId} = useAuthStore()
 
     const snapPoints = useMemo(() => ['25%', '50%'], []);
 
@@ -97,6 +101,7 @@ export default function TripDetails() {
         mutationFn: ({ id, payload }: { id: any, payload: any }) => cancelRide(id, payload),
         onSuccess: (response) => {
             console.log('cancel ride success', response);
+            navigation.navigate('Main')
         },
         onError: (error) => {
             console.log('cancel ride error', error);
@@ -125,9 +130,16 @@ export default function TripDetails() {
         }
     };
 
-    useEffect(() => {
-        logLocalStorage()
-    }, [])
+    console.log("CRide", currentRide);
+    
+    console.log(rideId, 'trip details rideid');
+    
+    
+
+useEffect(() => {
+    logLocalStorage()
+}, [])
+
 
     return (
         <GestureHandlerRootView style={styles.container}>
@@ -180,7 +192,8 @@ export default function TripDetails() {
                                             id: rideId, // Replace with actual ride ID
                                             payload: { reason: item }
                                         });
-                                        setmodalVisible(false);
+                                        // setmodalVisible(false);
+                                        // navigation.navigate('Home')
                                     }}
                                 >
                                     <Text style={styles.reasonText}>{item}</Text>
@@ -247,8 +260,8 @@ export default function TripDetails() {
                                         <Ionicons name="location" size={20} color="green" />
                                     </View>
                                     <View>
-                                        <Text style={styles.locationTitle}>FZ5</Text>
-                                        <Text style={styles.locationSubtitle}>Chandigarh, India</Text>
+                                        {/* <Text style={styles.locationTitle}>{currentRide?.destination?.address}</Text> */}
+                                        <Text style={styles.locationSubtitle}>{currentRide?.pickupLocation.address}</Text>
                                     </View>
                                 </View>
 
@@ -258,8 +271,8 @@ export default function TripDetails() {
                                         <Ionicons name="location" size={20} color="red" />
                                     </View>
                                     <View>
-                                        <Text style={styles.locationTitle}>FZ5</Text>
-                                        <Text style={styles.locationSubtitle}>Chandigarh, India</Text>
+                                        {/* <Text style={styles.locationTitle}>FZ5</Text> */}
+                                        <Text style={styles.locationSubtitle}>{currentRide?.destination.address}</Text>
                                     </View>
                                 </View>
                             </View>
@@ -267,7 +280,7 @@ export default function TripDetails() {
                             {/* Fare Details */}
                             <View style={styles.fareContainer}>
                                 <Text style={styles.fareLabel}>Total</Text>
-                                <Text style={styles.fareAmount}>$40</Text>
+                                <Text style={styles.fareAmount}>${currentRide?.fare}</Text>
                             </View>
 
                             {/* <View style={styles.divider} /> */}
@@ -564,7 +577,7 @@ const styles = StyleSheet.create({
         marginBottom: 4,
     },
     locationSubtitle: {
-        color: Gray,
+        color: LightGold,
         fontSize: 14,
     },
 
@@ -595,6 +608,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginTop: 20,
         paddingHorizontal: 5,
+        marginBottom: 10
     },
     fareLabel: {
         color: Gold,

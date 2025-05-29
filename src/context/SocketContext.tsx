@@ -123,6 +123,7 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
   const [socket, setSocket] = useState<SocketContextType>(null);
   const token = useAuthStore((state) => state.token);
   const accessToken = token?.access_token;
+  const Driver = useAuthStore((state) => state.user)
 
   useEffect(() => {
     if (!accessToken) {
@@ -142,6 +143,11 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
     newSocket.on('connect', () => {
       console.log('Socket connected with ID:', newSocket.id);
     });
+
+
+    newSocket.on(`driver_${Driver?.id}`, (error) => {
+      console.error('Driver Id error', error.message);
+    })
 
     newSocket.on('connect_error', (error) => {
       console.error('Socket connection error:', error.message);

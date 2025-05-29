@@ -22,12 +22,14 @@ interface Token {
 interface AuthStateData {
   user: User | null;
   token: Token | null;
+  rideId: string | null
 }
 
 // Define the full state interface including methods
 interface AuthState extends AuthStateData {
   setUser: (user: User) => void;
   setToken: (token: Token) => void;
+  setRideId: (rideId: string) => void;
   logout: () => void;
 }
 
@@ -50,6 +52,7 @@ const persistConfig: AuthStorePersist = {
   partialize: (state) => ({
     user: state.user,
     token: state.token,
+    rideId: state.rideId
   }),
 };
 
@@ -58,6 +61,8 @@ export const useAuthStore = create<AuthState>()(
     (set) => ({
       user: null,
       token: '',
+      rideId: '',
+      setRideId: (rideId) => set({rideId}),
       setUser: (user) => set({ user }),
       setToken: (token) => set({ token }),
       logout: () => set({ user: null, token: null }),

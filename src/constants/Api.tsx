@@ -60,6 +60,11 @@ export const driverGoOffline = async (data: any) => {
     return response.data
 }
 
+// ride accepted
+export const rideAccepted = async (rideId: any) => {
+    const response = await axios.put(`/ride-status/driver/accept/${rideId}`)
+    return response.data
+}
 
 // driver arrived
 export const driverArrived = async (rideId: any) => {
@@ -94,5 +99,11 @@ export const completeRide = async (rideId: any) => {
 // cancel ride
 export const cancelRide = async (rideId: any, data: any) => {
     const response = await axios.put(`/ride-status/driver/cancel/${rideId}`, data)
+    return response.data
+}
+
+// ride details
+export const rideDetails = async (rideId: any) => {
+    const response = await axios.get(`/ride/${rideId}`)
     return response.data
 }
