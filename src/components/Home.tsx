@@ -28,6 +28,7 @@ import { useAuthStore } from '../store/authStore';
 import Modal from 'react-native-modal';
 import { useNavigation } from '@react-navigation/native';
 import { useRide } from '../context/RideContext';
+import { ShowToast } from '../lib/Toast';
 
 
 export default function Home() {
@@ -152,12 +153,17 @@ export default function Home() {
     }
   }, [])
 
+  // live location socket
+  useEffect(() => {
+    ShowToast('Operation successful!', { type: 'success' });
+  }, [])
+
+// ShowToast('Operation successful!', { type: 'success' });
 
   return (
     <>
       {/* <StatusBar backgroundColor={Black} barStyle="light-content" /> */}
       <View style={styles.container}>
-
         <View style={styles.header}>
           <View>
             <Text style={styles.headerTitle}>Driver Dashboard</Text>
@@ -175,12 +181,10 @@ export default function Home() {
           <MapView
             style={styles.map}
             initialRegion={{
-              // latitude: 37.78825,
               latitude: location?.latitude || 0,
-              // longitude: -122.4324,
               longitude: location?.longitude || 0,
-              latitudeDelta: 0.0922,
-              longitudeDelta: 0.0421,
+              latitudeDelta: 0.01,
+              longitudeDelta: 0.01,
             }}
           >
             <Marker coordinate={{ latitude: location?.latitude || 0, longitude: location?.longitude || 0 }} />
@@ -382,6 +386,7 @@ export default function Home() {
                 }}
                 onPress={onAccept}
                 activeOpacity={0.7}
+                disabled={rideAcceptedMutation.isPending}
               >
                 <Text style={{
                   color: Black,

@@ -14,6 +14,8 @@ import Modal from 'react-native-modal'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRide } from '../context/RideContext';
 import { useAuthStore } from '../store/authStore';
+import { Socket } from 'socket.io-client';
+import MapViewDirections from 'react-native-maps-directions';
 
 export default function TripDetails() {
     const navigation: any = useNavigation()
@@ -22,9 +24,10 @@ export default function TripDetails() {
     const [otp, setotp] = useState('')
     // const [rideId, setrideId] = useState<number>()
     const bottomSheetRef = useRef<BottomSheet>(null);
-    const { location } = useLocation()
-    const {currentRide} = useRide()
-    const {user:USER,rideId} = useAuthStore()
+    const { location, startTracking, stopTracking } = useLocation()
+    const { currentRide} = useRide()
+    const { user: USER, rideId } = useAuthStore()
+    const socket  = useSocket()
 
     const snapPoints = useMemo(() => ['25%', '50%'], []);
 
@@ -131,14 +134,19 @@ export default function TripDetails() {
     };
 
     console.log("CRide", currentRide);
-    
-    console.log(rideId, 'trip details rideid');
-    
-    
 
-useEffect(() => {
-    logLocalStorage()
-}, [])
+    console.log(rideId, 'trip details rideid');
+
+
+
+    useEffect(() => {
+        logLocalStorage()
+    }, [])
+
+    // live location socket
+    // socket?.emit('subscribeToDriverLocation', USER?.id)
+
+    
 
 
     return (
@@ -232,12 +240,12 @@ useEffect(() => {
                 <Marker coordinate={{ latitude: location?.latitude, longitude: location?.longitude }} />
 
                 {/* <MapViewDirections
-          origin={pickupCoord}
-          destination={destinationCoord}
-          apikey='AIzaSyBcKgyA7urR7gHyen79h40UlkvTJJoKc9I'
-          strokeColor="#fff"
-          strokeWidth={4}
-        /> */}
+                    origin={pickupCoord}
+                    destination={destinationCoord}
+                    apikey='AIzaSyBcKgyA7urR7gHyen79h40UlkvTJJoKc9I'
+                    strokeColor="#fff"
+                    strokeWidth={4}
+                /> */}
 
             </MapView>
 

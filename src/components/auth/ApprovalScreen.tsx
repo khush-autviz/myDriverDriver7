@@ -46,7 +46,7 @@ export default function ApprovalScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerText}>Document Verification</Text>
+        <Text style={styles.headerText}>Approval in Progress</Text>
       </View>
       
       <View style={styles.content}>

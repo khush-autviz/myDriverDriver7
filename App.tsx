@@ -24,6 +24,7 @@ import { LocationProvider } from './src/context/LocationProvider';
 import { RideProvider } from './src/context/RideContext';
 import TripDetails from './src/components/TripDetails';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Toast } from './src/lib/Toast';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -94,6 +95,7 @@ export default function App() {
                     {/* Main Tabs */}
                     <Stack.Screen name="Main" component={MainTabs} />
                   </Stack.Navigator>
+                  <Toast/>
                 </NavigationContainer>
               </SafeAreaView>
             </SocketProvider>

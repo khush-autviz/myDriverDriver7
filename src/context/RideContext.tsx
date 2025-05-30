@@ -72,6 +72,8 @@ export const RideProvider: React.FC<RideProviderProps> = ({ children }) => {
             }
           });
       
+          console.log("ride details token", token?.access_token);
+          
           console.log('Ride details success:', response.data.data.ride);
       setCurrentRide(response.data.data.ride)
           return response.data;

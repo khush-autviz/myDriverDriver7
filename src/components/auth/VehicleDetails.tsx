@@ -488,6 +488,7 @@ const requestStoragePermission = async () => {
         <TouchableOpacity
           style={styles.submitButton}
           onPress={handleSubmit}
+          disabled={VehicleDetailsMutation.isPending}
           activeOpacity={0.7}
         >
           <Text style={styles.submitButtonText}>Submit</Text>
