@@ -1,33 +1,31 @@
 import { View, Text, TouchableOpacity, StyleSheet, FlatList, Platform } from 'react-native'
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
-import { useMutation } from '@tanstack/react-query'
-import { cancelRide, completeRide, driverArrived, driverWaiting, startRide, verifyRideOtp } from '../constants/Api';
+import { QueryClient, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { cancelRide, completeRide, driverArrived, driverWaiting, rideDetails, startRide, verifyRideOtp } from '../constants/Api';
 import { GestureHandlerRootView, TextInput } from 'react-native-gesture-handler';
 import { useNavigation } from '@react-navigation/native';
 import Ionicons from 'react-native-vector-icons/Ionicons'
 import { Black, DarkGray, Gold, Gray, LightGold, maroon, White } from '../constants/Color';
 import MapView, { Marker } from 'react-native-maps';
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet';
-import { useSocket } from '../context/SocketContext';
 import { useLocation } from '../context/LocationProvider';
 import Modal from 'react-native-modal'
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useRide } from '../context/RideContext';
 import { useAuthStore } from '../store/authStore';
-import { Socket } from 'socket.io-client';
 import MapViewDirections from 'react-native-maps-directions';
+import { ShowToast } from '../lib/Toast';
+import { Loader } from '../lib/Loader';
 
 export default function TripDetails() {
     const navigation: any = useNavigation()
-    const [mode, setmode] = useState('first')
+    const [mode, setmode] = useState('')
     const [modalVisible, setmodalVisible] = useState(false)
     const [otp, setotp] = useState('')
-    // const [rideId, setrideId] = useState<number>()
+//    const [rideInfo, setRideInfo] = useState<any>(null)
     const bottomSheetRef = useRef<BottomSheet>(null);
     const { location, startTracking, stopTracking } = useLocation()
-    const { currentRide} = useRide()
+    // const { currentRide, fetchRideDetails} = useRide()
     const { user: USER, rideId } = useAuthStore()
-    const socket  = useSocket()
+    const queryClient = useQueryClient()
 
     const snapPoints = useMemo(() => ['25%', '50%'], []);
 
@@ -43,26 +41,24 @@ export default function TripDetails() {
         console.log('handleSheetChanges', index);
     }, []);
 
+    const {data: rideInfo} = useQuery({
+        queryKey: ['ride-details', rideId],
+        queryFn: () => rideDetails(rideId),
+        enabled: !!rideId,
+    })
+
+    console.log(rideInfo, 'ride info');
+
     // driver arrived mutation
     const driverArrivedMutation = useMutation({
         mutationFn: driverArrived,
         onSuccess: (response) => {
             console.log('driver arrived success', response);
-            setmode('second')
+            setmode('arrived')
         },
         onError: (error) => {
             console.log('driver arrived error', error);
-        }
-    })
-
-    // driver waiting mutation
-    const driverWaitingMutation = useMutation({
-        mutationFn: driverWaiting,
-        onSuccess: (response) => {
-            console.log('driver waiting success', response);
-        },
-        onError: (error) => {
-            console.log('driver waiting error', error);
+            ShowToast(error?.message, {type: 'error'})
         }
     })
 
@@ -71,24 +67,14 @@ export default function TripDetails() {
         mutationFn: ({ id, payload }: { id: any, payload: any }) => verifyRideOtp(id, payload),
         onSuccess: (response) => {
             console.log('ride otp verification success', response);
-            // startRideMutation.mutateAsync(rideId);
-            setmode('third')
+            setmode('otp_verified')
         },
         onError: (error) => {
             console.log('ride otp verification error', error);
+            ShowToast(error?.message, {type: 'error'})
         }
     })
 
-    // start ride mutation
-    const startRideMutation = useMutation({
-        mutationFn: startRide,
-        onSuccess: (response) => {
-            console.log('start ride success', response);
-        },
-        onError: (error) => {
-            console.log('start ride error', error);
-        }
-    })
 
     // complete ride mutation
     const completeRideMutation = useMutation({
@@ -99,6 +85,7 @@ export default function TripDetails() {
         },
         onError: (error) => {
             console.log('complete ride error', error);
+            ShowToast(error?.message, {type: 'error'})
         }
     })
 
@@ -115,42 +102,16 @@ export default function TripDetails() {
     })
 
 
-
-    const logLocalStorage = async () => {
-        try {
-            const keys = await AsyncStorage.getAllKeys();
-            const result = await AsyncStorage.multiGet(keys);
-
-            console.log('AsyncStorage contents:');
-            result.forEach(([key, value]) => {
-                console.log(`${key}: ${value}`);
-            });
-        } catch (error) {
-            console.error('Failed to load AsyncStorage:', error);
-        }
-    };
-
-    console.log("CRide", currentRide);
-
-    console.log(rideId, 'trip details rideid');
-
     useEffect(() => {
-        logLocalStorage()
-    }, [])
+        if (rideInfo) {
+            setmode(rideInfo?.data?.ride?.status)
+        }
+    }, [rideInfo])
 
     return (
         <GestureHandlerRootView style={styles.container}>
-            <TouchableOpacity
-                style={{
-                    position: 'absolute',
-                    top: 20,
-                    left: 10,
-                    zIndex: 100,
-                }}
-                onPress={() => navigation.navigate('Main')}>
-                <Ionicons name="chevron-back-circle" size={32} color={Gold} />
-            </TouchableOpacity>
 
+        {(cancelRideMutation.isPending || driverArrivedMutation.isPending || verifyRideOtpMutation.isPending || completeRideMutation.isPending) &&  <Loader />}
 
             {/* Cancel Ride Modal */}
             <Modal
@@ -245,7 +206,7 @@ export default function TripDetails() {
                 handleIndicatorStyle={{ backgroundColor: Gold }}
                 backgroundStyle={{ backgroundColor: Black }}>
                 <BottomSheetView style={styles.contentContainer}>
-                    {mode === 'first' && (
+                    {mode === 'accepted' && (
                         <>
                             {/* Trip Details Card */}
                             <View style={styles.tripDetailsCard}>
@@ -255,8 +216,7 @@ export default function TripDetails() {
                                         <Ionicons name="location" size={20} color="green" />
                                     </View>
                                     <View>
-                                        {/* <Text style={styles.locationTitle}>{currentRide?.destination?.address}</Text> */}
-                                        <Text style={styles.locationSubtitle}>{currentRide?.pickupLocation.address}</Text>
+                                        <Text style={styles.locationSubtitle}>{rideInfo?.data?.ride?.pickupLocation?.address}</Text>
                                     </View>
                                 </View>
 
@@ -267,7 +227,7 @@ export default function TripDetails() {
                                     </View>
                                     <View>
                                         {/* <Text style={styles.locationTitle}>FZ5</Text> */}
-                                        <Text style={styles.locationSubtitle}>{currentRide?.destination.address}</Text>
+                                        <Text style={styles.locationSubtitle}>{rideInfo?.data?.ride?.destination?.address}</Text>
                                     </View>
                                 </View>
                             </View>
@@ -275,7 +235,7 @@ export default function TripDetails() {
                             {/* Fare Details */}
                             <View style={styles.fareContainer}>
                                 <Text style={styles.fareLabel}>Total</Text>
-                                <Text style={styles.fareAmount}>${currentRide?.fare}</Text>
+                                <Text style={styles.fareAmount}>${rideInfo?.data?.ride?.fare}</Text>
                             </View>
 
                             {/* <View style={styles.divider} /> */}
@@ -299,7 +259,7 @@ export default function TripDetails() {
                         </>
                     )}
 
-                    {mode === 'second' && (
+                    {mode === 'arrived' && (
                         <>
                             {/* OTP Verification Section */}
                             <View style={styles.otpContainer}>
@@ -332,8 +292,8 @@ export default function TripDetails() {
                                         <Ionicons name="location" size={20} color="green" />
                                     </View>
                                     <View>
-                                        <Text style={styles.locationTitle}>FZ5</Text>
-                                        <Text style={styles.locationSubtitle}>Chandigarh, India</Text>
+                                        {/* <Text style={styles.locationTitle}>FZ5</Text> */}
+                                        <Text style={styles.locationSubtitle}>{rideInfo?.data?.ride?.pickupLocation?.address}</Text>
                                     </View>
                                 </View>
 
@@ -343,8 +303,8 @@ export default function TripDetails() {
                                         <Ionicons name="location" size={20} color="red" />
                                     </View>
                                     <View>
-                                        <Text style={styles.locationTitle}>FZ5</Text>
-                                        <Text style={styles.locationSubtitle}>Chandigarh, India</Text>
+                                        {/* <Text style={styles.locationTitle}>FZ5</Text> */}
+                                        <Text style={styles.locationSubtitle}>{rideInfo?.data?.ride?.destination?.address}</Text>
                                     </View>
                                 </View>
                             </View>
@@ -360,7 +320,7 @@ export default function TripDetails() {
                         </>
                     )}
 
-                    {mode === 'third' && (
+                    {mode === 'otp_verified' && (
                         <>
                             {/* Trip Details Card */}
                             <View style={styles.tripDetailsCard}>
@@ -370,8 +330,8 @@ export default function TripDetails() {
                                         <Ionicons name="location" size={20} color="green" />
                                     </View>
                                     <View>
-                                        <Text style={styles.locationTitle}>FZ5</Text>
-                                        <Text style={styles.locationSubtitle}>Chandigarh, India</Text>
+                                        {/* <Text style={styles.locationTitle}>FZ5</Text> */}
+                                        <Text style={styles.locationSubtitle}>{rideInfo?.data?.ride?.pickupLocation?.address}</Text>
                                     </View>
                                 </View>
 
@@ -381,8 +341,8 @@ export default function TripDetails() {
                                         <Ionicons name="location" size={20} color="red" />
                                     </View>
                                     <View>
-                                        <Text style={styles.locationTitle}>FZ5</Text>
-                                        <Text style={styles.locationSubtitle}>Chandigarh, India</Text>
+                                        {/* <Text style={styles.locationTitle}>FZ5</Text> */}
+                                        <Text style={styles.locationSubtitle}>{rideInfo?.data?.ride?.destination?.address}</Text>
                                     </View>
                                 </View>
                             </View>
@@ -574,6 +534,9 @@ const styles = StyleSheet.create({
     locationSubtitle: {
         color: LightGold,
         fontSize: 14,
+        flexWrap: 'wrap',
+        width: '60%',
+        // marginRight: 10,
     },
 
     // Cancel Button Styles

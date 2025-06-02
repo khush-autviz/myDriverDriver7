@@ -191,6 +191,7 @@ import { editProfile, getProfile } from '../constants/Api'
 import { launchImageLibrary, ImageLibraryOptions } from 'react-native-image-picker'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { useNavigation } from '@react-navigation/native'
+import { ShowToast } from '../lib/Toast'
 
 export default function Profile() {
   const [buttonDisabled, setbuttonDisabled] = useState(true)
@@ -257,6 +258,7 @@ export default function Profile() {
     },
     onError: (error) => {
       console.log('profile update error', error);
+      ShowToast(error?.message || 'Failed to update profile', { type: 'error' });
     }
   })
 

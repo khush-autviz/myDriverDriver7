@@ -116,7 +116,7 @@ export default function Home() {
         console.log('ride accept success', response);
         // SETUSER({...USER, rideId: currentRide?._id})
         setRideId(rideDetails.rideId)
-        fetchRideDetails(rideDetails.rideId)
+        // fetchRideDetails(rideDetails.rideId)
         navigation.navigate('trip-details')
     },
     onError: (error) => {

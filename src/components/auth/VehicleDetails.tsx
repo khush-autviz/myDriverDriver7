@@ -27,6 +27,7 @@ import { useAuthStore } from '../../store/authStore'
 import { useMutation } from '@tanstack/react-query'
 import { vehicleDetailsApi } from '../../constants/Api'
 import { ShowToast } from '../../lib/Toast'
+import { Loader } from '../../lib/Loader'
 
 // Define TypeScript interface for vehicle data
 interface VehicleDataType {
@@ -371,6 +372,7 @@ const requestStoragePermission = async () => {
 
   return (
     <SafeAreaView style={styles.container}>
+      {VehicleDetailsMutation.isPending && <Loader />}
       <TouchableOpacity onPress={() => navigation.goBack()}>
         <View style={styles.backRow}>
           <Ionicons name="chevron-back" size={20} color={Gold} />

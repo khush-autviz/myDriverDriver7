@@ -104,6 +104,7 @@ export const cancelRide = async (rideId: any, data: any) => {
 
 // ride details
 export const rideDetails = async (rideId: any) => {
-    const response = await axios.get(`/ride/${rideId}`)
+    console.log(rideId, 'ride details ride id');
+    const response = await axios.get(`/ride/driver/${rideId}`)
     return response.data
 }

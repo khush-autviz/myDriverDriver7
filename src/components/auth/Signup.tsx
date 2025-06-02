@@ -427,7 +427,7 @@ export default function Signup() {
             <TouchableOpacity
               style={[
                 styles.signupButton,
-                registerMutation.isPending && styles.signupButtonDisabled
+                // registerMutation.isPending && styles.signupButtonDisabled
               ]}
               onPress={handleSignup}
               disabled={registerMutation.isPending}>

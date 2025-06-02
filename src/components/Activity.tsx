@@ -5,19 +5,83 @@ import { Black, Gray, Gold, LightGold, White, DarkGray } from '../constants/Colo
 import Ionicons from 'react-native-vector-icons/Ionicons'
 
 // Sample data for demonstration
-const sampleActivities : any= [
-  // Empty for now - will show empty state
-]
+const sampleActivities = [
+  {
+    id: '1',
+    type: 'ride',
+    title: 'Trip to Downtown',
+    date: '2024-03-20 14:30',
+    amount: '$25.50',
+    status: 'completed',
+    distance: '12.5 km',
+    duration: '28 min'
+  },
+  {
+    id: '2',
+    type: 'earning',
+    title: 'Daily Earnings',
+    date: '2024-03-20 22:00',
+    amount: '$158.75',
+    rides: 8
+  },
+  {
+    id: '3',
+    type: 'ride',
+    title: 'Airport Transfer',
+    date: '2024-03-19 09:15',
+    amount: '$45.00',
+    status: 'completed',
+    distance: '28.3 km',
+    duration: '45 min'
+  },
+  {
+    id: '4',
+    type: 'earning',
+    title: 'Bonus Reward',
+    date: '2024-03-19 23:59',
+    amount: '$25.00',
+    description: 'Peak hours bonus'
+  },
+  {
+    id: '5',
+    type: 'ride',
+    title: 'Shopping Mall Trip',
+    date: '2024-03-19 16:45',
+    amount: '$18.25',
+    status: 'completed',
+    distance: '8.7 km',
+    duration: '22 min'
+  }
+];
 
 // Activity item component
-const ActivityItem = ({ item}: {item: any} ) => (
+const ActivityItem = ({ item }: {item: any} ) => (
   <View style={styles.activityItem}>
     <View style={styles.activityIconContainer}>
-      <Ionicons name={item.type === 'ride' ? 'car' : 'cash'} size={20} color={Gold} />
+      <Ionicons 
+        name={item.type === 'ride' ? 'car' : 'wallet'} 
+        size={20} 
+        color={Gold} 
+      />
     </View>
     <View style={styles.activityContent}>
       <Text style={styles.activityTitle}>{item.title}</Text>
       <Text style={styles.activityDate}>{item.date}</Text>
+      {item.type === 'ride' && (
+        <Text style={styles.activityDetails}>
+          {item.distance} • {item.duration}
+        </Text>
+      )}
+      {item.type === 'earning' && item.description && (
+        <Text style={styles.activityDetails}>
+          {item.description}
+        </Text>
+      )}
+      {item.type === 'earning' && item.rides && (
+        <Text style={styles.activityDetails}>
+          {item.rides} rides completed
+        </Text>
+      )}
     </View>
     <View style={styles.activityAmount}>
       <Text style={[styles.amountText, item.type === 'earning' && styles.earningText]}>
@@ -31,7 +95,13 @@ export default function Activity() {
   const [isLoading, setIsLoading] = useState(false)
   const [isFilterVisible, setIsFilterVisible] = useState(false)
 
-
+  // Calculate totals
+  const totals = {
+    rides: sampleActivities.filter(item => item.type === 'ride').length,
+    earnings: sampleActivities
+      .filter(item => item.type === 'earning')
+      .reduce((sum, item) => sum + parseFloat(item.amount.replace('$', '')), 0)
+  };
 
   // Empty state component
   const EmptyState = () => (
@@ -57,12 +127,12 @@ export default function Activity() {
       <View style={styles.summaryCard}>
         <View style={styles.summaryItem}>
           <Text style={styles.summaryLabel}>Total Rides</Text>
-          <Text style={styles.summaryValue}>0</Text>
+          <Text style={styles.summaryValue}>{totals.rides}</Text>
         </View>
         <View style={styles.summaryDivider} />
         <View style={styles.summaryItem}>
           <Text style={styles.summaryLabel}>Total Earnings</Text>
-          <Text style={styles.summaryValue}>$0.00</Text>
+          <Text style={styles.summaryValue}>${totals.earnings.toFixed(2)}</Text>
         </View>
       </View>
 
@@ -286,5 +356,10 @@ const styles = StyleSheet.create({
     color: Gray,
     marginTop: 12,
     fontSize: 16,
+  },
+  activityDetails: {
+    color: Gray,
+    fontSize: 12,
+    marginTop: 2,
   },
 })
