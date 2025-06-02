@@ -3,6 +3,8 @@ import { View, Image, StyleSheet, StatusBar } from 'react-native';
 import { Black } from '../constants/Color';
 import { useAuthStore } from '../store/authStore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getProfile } from '../constants/Api';
+import { useQuery } from '@tanstack/react-query';
 
 const Splash = ({ navigation }: { navigation: any }) => {
   const token = useAuthStore((state) => state.token);
@@ -10,7 +12,13 @@ const Splash = ({ navigation }: { navigation: any }) => {
   const mobileNumber = USER?.phone;
   const [isLoading, setIsLoading] = useState(true); // Add loading state
 
+  const {data: driverDetails} = useQuery({
+    queryKey: ['user'],
+    queryFn: getProfile,
+  });
+
   useEffect(() => {
+    console.log("driverDetails splash", driverDetails);
     const checkAuthAndOnboarding = async () => {
       try {
         // Check if user has seen onboarding
@@ -53,7 +61,7 @@ const Splash = ({ navigation }: { navigation: any }) => {
     };
 
     checkAuthAndOnboarding();
-  }, [navigation, token, USER]); // Include USER in dependencies
+  }, [navigation, token, USER, driverDetails]); // Include USER in dependencies
 
   // Optionally, show a loading indicator or nothing while loading
   if (isLoading) {

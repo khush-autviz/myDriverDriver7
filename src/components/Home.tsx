@@ -154,9 +154,6 @@ export default function Home() {
   }, [])
 
   // live location socket
-  useEffect(() => {
-    ShowToast('Operation successful!', { type: 'success' });
-  }, [])
 
 // ShowToast('Operation successful!', { type: 'success' });
 

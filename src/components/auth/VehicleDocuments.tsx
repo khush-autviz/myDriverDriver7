@@ -23,6 +23,8 @@ import {
 import { useAuthStore } from '../../store/authStore'
 import { useMutation } from '@tanstack/react-query'
 import { vehicleDocumentsApi } from '../../constants/Api'
+import { ShowToast } from '../../lib/Toast'
+import { Loader } from '../../lib/Loader'
 
 // Define TypeScript interface for document data
 interface DocumentDataType {
@@ -54,7 +56,8 @@ export default function VehicleDocuments() {
     },
     onError: (error) => {
       console.log('document upload error', error);
-      Alert.alert('Error', 'Failed to upload documents. Please try again.');
+      ShowToast(error.message, { type: 'error' });
+      // Alert.alert('Error', 'Failed to upload documents. Please try again.');
     }
   });
 
@@ -84,7 +87,8 @@ export default function VehicleDocuments() {
       }
     } catch (error) {
       console.error('Error in image picker:', error);
-      Alert.alert('Error', 'Something went wrong when trying to pick an image');
+      // Alert.alert('Error', 'Something went wrong when trying to pick an image');
+      ShowToast('Something went wrong when trying to pick an image', {type: 'error'})
     }
   };
 
@@ -104,7 +108,8 @@ export default function VehicleDocuments() {
         }
       });
       
-      Alert.alert('Missing Documents', `Please upload all required documents: ${fieldNames.join(', ')}`);
+      // Alert.alert('Missing Documents', `Please upload all required documents: ${fieldNames.join(', ')}`);
+      ShowToast(`Please upload all required documents: ${fieldNames.join(', ')}`, {type: 'warning'})
       return;
     }
     
@@ -172,6 +177,7 @@ export default function VehicleDocuments() {
 
   return (
     <SafeAreaView style={styles.container}>
+      {DocumentUploadMutation.isPending && <Loader />}
       <TouchableOpacity onPress={() => navigation.goBack()}>
         <View style={styles.backRow}>
           <Ionicons name="chevron-back" size={20} color={Gold} />

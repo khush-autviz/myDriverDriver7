@@ -17,6 +17,7 @@ import {useMutation} from '@tanstack/react-query';
 import {authSignin} from '../../constants/Api';
 import PhoneInput from 'react-native-phone-number-input';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { ShowToast } from '../../lib/Toast';
 
 const {width} = Dimensions.get('window');
 
@@ -36,6 +37,7 @@ export default function Signin() {
       navigation.navigate('OtpScreen', {mobileNumber});
     },
     onError: (error: any) => {
+      ShowToast(error.message ?? 'Something went wrong', { type: 'error' });
       console.log('signin error', error);
       setIsValid(false);
     },

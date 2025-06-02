@@ -26,6 +26,7 @@ import {
 import { useAuthStore } from '../../store/authStore'
 import { useMutation } from '@tanstack/react-query'
 import { vehicleDetailsApi } from '../../constants/Api'
+import { ShowToast } from '../../lib/Toast'
 
 // Define TypeScript interface for vehicle data
 interface VehicleDataType {
@@ -65,6 +66,7 @@ export default function VehicleDetails() {
     },
     onError: (error) => {
       console.log('vehicle details mutation error', error);
+      ShowToast(error.message, { type: 'error' });
       // Alert.alert('Error', 'Failed to save vehicle details. Please try again.');
     }
   });
@@ -292,7 +294,8 @@ const requestStoragePermission = async () => {
       }
     } catch (error) {
       console.error('Error in image picker:', error);
-      Alert.alert('Error', 'Something went wrong when trying to pick an image');
+      // Alert.alert('Error', 'Something went wrong when trying to pick an image');
+      ShowToast('something went wrong', {type: 'error'})
     }
   };
   const handleSubmit = () => {
@@ -301,7 +304,8 @@ const requestStoragePermission = async () => {
     const missingFields = requiredFields.filter(field => !vehicleData[field as keyof VehicleDataType])
     
     if (missingFields.length > 0) {
-      Alert.alert('Missing Information', `Please fill in all required fields: ${missingFields.join(', ')}`)
+      // Alert.alert('Missing Information', `Please fill in all required fields: ${missingFields.join(', ')}`)
+      ShowToast('Fill all fields', {type: 'warning'})
       return
     }
     
