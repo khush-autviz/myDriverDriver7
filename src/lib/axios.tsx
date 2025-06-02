@@ -9,8 +9,8 @@ const instance = axios.create({
 
 // Middleware-style import for Zustand (not reactive)
 let token = null;
-const authStore = useAuthStore.getState();
-token = authStore.token?.access_token;
+const authStore = useAuthStore.getState().token
+token = authStore?.access_token;
 
 instance.interceptors.request.use((config) => {
   config.baseURL = 'https://t1wfswdh-3000.inc1.devtunnels.ms'; // change this to your IP address

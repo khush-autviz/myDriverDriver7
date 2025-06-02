@@ -12,13 +12,16 @@ const Splash = ({ navigation }: { navigation: any }) => {
   const mobileNumber = USER?.phone;
   const [isLoading, setIsLoading] = useState(true); // Add loading state
 
-  const {data: driverDetails} = useQuery({
-    queryKey: ['user'],
+  // fetches driver info
+  const {data: DriverDetails, } = useQuery({
+    queryKey: ['driver-details'],
     queryFn: getProfile,
-  });
+    // staleTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnWindowFocus: true,
+  })
 
   useEffect(() => {
-    console.log("driverDetails splash", driverDetails);
+    console.log("driverDetails splash", DriverDetails);
     const checkAuthAndOnboarding = async () => {
       try {
         // Check if user has seen onboarding
@@ -61,7 +64,7 @@ const Splash = ({ navigation }: { navigation: any }) => {
     };
 
     checkAuthAndOnboarding();
-  }, [navigation, token, USER, driverDetails]); // Include USER in dependencies
+  }, [navigation, token, USER, DriverDetails]); // Include USER in dependencies
 
   // Optionally, show a loading indicator or nothing while loading
   if (isLoading) {

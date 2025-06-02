@@ -48,6 +48,7 @@ export default function TripDetails() {
         mutationFn: driverArrived,
         onSuccess: (response) => {
             console.log('driver arrived success', response);
+            setmode('second')
         },
         onError: (error) => {
             console.log('driver arrived error', error);
@@ -70,7 +71,8 @@ export default function TripDetails() {
         mutationFn: ({ id, payload }: { id: any, payload: any }) => verifyRideOtp(id, payload),
         onSuccess: (response) => {
             console.log('ride otp verification success', response);
-            startRideMutation.mutateAsync(rideId);
+            // startRideMutation.mutateAsync(rideId);
+            setmode('third')
         },
         onError: (error) => {
             console.log('ride otp verification error', error);
@@ -93,6 +95,7 @@ export default function TripDetails() {
         mutationFn: completeRide,
         onSuccess: (response) => {
             console.log('complete ride success', response);
+            navigation.navigate('Main')
         },
         onError: (error) => {
             console.log('complete ride error', error);
@@ -110,12 +113,6 @@ export default function TripDetails() {
             console.log('cancel ride error', error);
         }
     })
-
-    // arrived button 
-    const handleArrivedButton = () => {
-        driverArrivedMutation.mutateAsync(rideId);
-        setmode('second')
-    }
 
 
 
@@ -137,17 +134,9 @@ export default function TripDetails() {
 
     console.log(rideId, 'trip details rideid');
 
-
-
     useEffect(() => {
         logLocalStorage()
     }, [])
-
-    // live location socket
-    // socket?.emit('subscribeToDriverLocation', USER?.id)
-
-    
-
 
     return (
         <GestureHandlerRootView style={styles.container}>
@@ -197,11 +186,9 @@ export default function TripDetails() {
                                     activeOpacity={0.7}
                                     onPress={() => {
                                         cancelRideMutation.mutate({
-                                            id: rideId, // Replace with actual ride ID
+                                            id: rideId,
                                             payload: { reason: item }
                                         });
-                                        // setmodalVisible(false);
-                                        // navigation.navigate('Home')
                                     }}
                                 >
                                     <Text style={styles.reasonText}>{item}</Text>
@@ -297,7 +284,7 @@ export default function TripDetails() {
                             <TouchableOpacity
                                 style={styles.primaryButton}
                                 activeOpacity={0.8}
-                                onPress={handleArrivedButton}
+                                onPress={() => driverArrivedMutation.mutateAsync(rideId)}
                             >
                                 <Text style={styles.buttonText}>Arrived</Text>
                             </TouchableOpacity>
@@ -330,7 +317,7 @@ export default function TripDetails() {
                                     activeOpacity={0.8}
                                     onPress={() => verifyRideOtpMutation.mutateAsync({
                                         id: rideId,
-                                        payload: { otp: Number(otp) }
+                                        payload: { otp }
                                     })}
                                 >
                                     <Text style={styles.verifyButtonText}>Verify</Text>
@@ -412,7 +399,7 @@ export default function TripDetails() {
                             <TouchableOpacity
                                 style={styles.completeButton}
                                 activeOpacity={0.8}
-                                onPress={() => setmode('fourth')}
+                                onPress={() => completeRideMutation.mutateAsync(rideId)}
                             >
                                 <Ionicons name="checkmark-circle" size={20} color={White} style={styles.buttonIcon} />
                                 <Text style={styles.buttonText}>Complete Trip</Text>
