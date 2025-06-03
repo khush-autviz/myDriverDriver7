@@ -68,11 +68,13 @@ function MainTabs() {
 
 export default function App() {
   return (
-    <LocationProvider>
+    // <LocationProvider>
+    <SocketProvider>
       <GestureHandlerRootView style={{ flex: 1 }}>
         <QueryClientProvider client={queryClient}>
           <RideProvider>
-            <SocketProvider>
+            {/* <SocketProvider> */}
+              <LocationProvider>
               <SafeAreaView style={{ flex: 1, backgroundColor: Black, paddingTop: 10 }}>
                 <NavigationContainer>
                   <Stack.Navigator screenOptions={{ headerShown: false }}>
@@ -98,10 +100,11 @@ export default function App() {
                   <Toast/>
                 </NavigationContainer>
               </SafeAreaView>
-            </SocketProvider>
+              </LocationProvider>
+            {/* </SocketProvider> */}
           </RideProvider>
         </QueryClientProvider>
       </GestureHandlerRootView>
-    </LocationProvider>
+    </SocketProvider>
   );
 }

@@ -37,7 +37,7 @@ export default function Home() {
   const [modalVisible, setmodalVisible] = useState(false)
   const [rideDetails, setrideDetails] = useState<any>()
   const socket = useSocket();
-  const { location, startTracking, stopTracking } = useLocation()
+  const { location, startTracking, stopTracking, startBackgroundTracking, stopBackgroundTracking, isBackgroundTracking } = useLocation()
   const {user: USER, setUser: SETUSER, setRideId} = useAuthStore()
   const navigation = useNavigation()
   const {fetchRideDetails} = useRide()
@@ -46,9 +46,18 @@ export default function Home() {
 
   const DriverOnlineMutation = useMutation({
     mutationFn: driverGoOnline,
-    onSuccess: (response) => {
-      console.log('driver online success', response);
+    onSuccess: async (response) => {
+      console.log('🚀 Driver online success', response);
       setIsNormalMode(true);
+
+      // Start background location tracking when driver goes online
+      try {
+        await startBackgroundTracking();
+        // console.log('✅ Background location tracking started for online driver');
+      } catch (error) {
+        console.error('❌ Failed to start background tracking:', error);
+      }
+
       socket?.emit('goOnDuty', {
         latitude: location?.latitude || 0,
         longitude: location?.longitude || 0,
@@ -64,7 +73,7 @@ export default function Home() {
       })
     },
     onError: (error) => {
-      console.log('driver online error', error);
+      console.log('❌ Driver online error', error);
     }
   })
 
@@ -82,13 +91,21 @@ export default function Home() {
   const DriverOfflineMutation = useMutation({
     mutationFn: driverGoOffline,
     onSuccess: (response) => {
-      console.log('driver offline success', response);
+      console.log('🛑 Driver offline success', response);
       socket?.emit('goOffDuty')
       setIsNormalMode(false);
       setIsDriverMode(false);
+
+      // Stop background location tracking when driver goes offline
+      try {
+        stopBackgroundTracking();
+        console.log('✅ Background location tracking stopped for offline driver');
+      } catch (error) {
+        console.error('❌ Failed to stop background tracking:', error);
+      }
     },
     onError: (error) => {
-      console.log('driver offline error', error);
+      console.log('❌ Driver offline error', error);
     }
   })
 
@@ -104,8 +121,10 @@ export default function Home() {
         }
       })
     } else {
-      setIsNormalMode(false);
-      setIsDriverMode(false);
+      // Use the offline mutation to properly stop background tracking
+      DriverOfflineMutation.mutateAsync({
+        driverId: USER?.id
+      })
     }
   };
 
@@ -150,8 +169,17 @@ export default function Home() {
 
     return () => {
       stopTracking()
+      // Also stop background tracking on component unmount
+      if (isBackgroundTracking) {
+        stopBackgroundTracking()
+      }
     }
   }, [])
+
+  // Log background tracking status changes
+  useEffect(() => {
+    console.log(`📍 Background tracking status changed: ${isBackgroundTracking ? 'ACTIVE' : 'INACTIVE'}`);
+  }, [isBackgroundTracking])
 
   // live location socket
 
@@ -166,9 +194,17 @@ export default function Home() {
             <Text style={styles.headerTitle}>Driver Dashboard</Text>
             <Text style={styles.headerSubtitle}>Welcome back, {USER?.name || 'Driver'}</Text>
           </View>
-          <View style={[styles.statusIndicator, isNormalMode ? styles.statusIndicatorOnline : styles.statusIndicatorOffline]}>
-            <View style={[styles.statusDot, isNormalMode ? styles.statusOnline : styles.statusOffline]} />
-            <Text style={styles.statusText}>{isNormalMode ? 'Online' : 'Offline'}</Text>
+          <View style={styles.statusContainer}>
+            <View style={[styles.statusIndicator, isNormalMode ? styles.statusIndicatorOnline : styles.statusIndicatorOffline]}>
+              <View style={[styles.statusDot, isNormalMode ? styles.statusOnline : styles.statusOffline]} />
+              <Text style={styles.statusText}>{isNormalMode ? 'Online' : 'Offline'}</Text>
+            </View>
+            {isBackgroundTracking && (
+              <View style={styles.trackingIndicator}>
+                <View style={styles.trackingDot} />
+                <Text style={styles.trackingText}>Tracking</Text>
+              </View>
+            )}
           </View>
         </View>
         {/* </View> */}
@@ -452,6 +488,9 @@ const styles = StyleSheet.create({
     marginBottom: 20
     // paddingTop: 10,
   },
+  statusContainer: {
+    alignItems: 'flex-end',
+  },
   headerTitle: {
     color: White,
     fontSize: 20,
@@ -492,6 +531,29 @@ const styles = StyleSheet.create({
   statusText: {
     color: White,
     fontSize: 12,
+    fontWeight: '600',
+  },
+  trackingIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    backgroundColor: 'rgba(76, 175, 80, 0.2)',
+    borderWidth: 1,
+    borderColor: 'rgba(76, 175, 80, 0.5)',
+    marginTop: 4,
+  },
+  trackingDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#4CAF50',
+    marginRight: 4,
+  },
+  trackingText: {
+    color: '#4CAF50',
+    fontSize: 10,
     fontWeight: '600',
   },
   modal: {

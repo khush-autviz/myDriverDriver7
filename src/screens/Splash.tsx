@@ -24,10 +24,9 @@ const Splash = ({ navigation }: { navigation: any }) => {
     refetchOnWindowFocus: true,
   })
 
+  console.log(DriverDetails, 'DriverDetails in splash');
+
   useEffect(() => {
-    if (DriverDetails) {
-      const mobileNumber = DriverDetails?.data?.phone;
-      console.log("driverDetails splash", DriverDetails);
       const checkAuthAndOnboarding = async () => {
         try {
           // Check if user has seen onboarding
@@ -36,12 +35,13 @@ const Splash = ({ navigation }: { navigation: any }) => {
           // Wait for 2 seconds to show splash screen
           setTimeout(() => {
             // If token is still not loaded, keep loading
-            if (token === undefined || token === null) {
-              setIsLoading(false);
-              return;
-            }
+            // if (token === undefined || token === null) {
+            //   setIsLoading(false);
+            //   return;
+            // }
 
             if (token) {
+      const mobileNumber = DriverDetails?.data?.phone;
               // If token exists, navigate based on account status
               if (DriverDetails?.data?.accountStatus === 'VehiclePending') {
                 navigation.navigate('vehicle-details', { mobileNumber });
@@ -50,8 +50,10 @@ const Splash = ({ navigation }: { navigation: any }) => {
               } else if (DriverDetails?.data?.accountStatus === 'ApprovalPending') {
                 navigation.navigate('approval-screen', { mobileNumber });
               } else if (DriverDetails?.data?.accountStatus === 'active') {
+                console.log("current ride splash", DriverDetails.data.currentRide);
+
                 if (DriverDetails.data.currentRide) {
-                  console.log("current ride splash", DriverDetails.data.currentRide);
+                  // console.log("current ride splash", DriverDetails.data.currentRide);
                   SETRIDEID(DriverDetails.data.currentRide)
                   navigation.navigate('trip-details');
                 }
@@ -77,7 +79,7 @@ const Splash = ({ navigation }: { navigation: any }) => {
       };
 
       checkAuthAndOnboarding();
-    }
+    
   }, [navigation, token, DriverDetails]);
 
 
