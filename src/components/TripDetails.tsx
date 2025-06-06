@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, StyleSheet, FlatList, Platform } from 'react-native'
+import { View, Text, TouchableOpacity, StyleSheet, FlatList, Platform, Image } from 'react-native'
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { QueryClient, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { cancelRide, completeRide, driverArrived, driverWaiting, rideDetails, startRide, verifyRideOtp } from '../constants/Api';
@@ -14,6 +14,7 @@ import { useAuthStore } from '../store/authStore';
 import MapViewDirections from 'react-native-maps-directions';
 import { ShowToast } from '../lib/Toast';
 import { Loader } from '../lib/Loader';
+import { useSocket } from '../context/SocketContext';
 
 export default function TripDetails() {
     const navigation: any = useNavigation()
@@ -24,8 +25,9 @@ export default function TripDetails() {
     const bottomSheetRef = useRef<BottomSheet>(null);
     const { location, startTracking, stopTracking } = useLocation()
     // const { currentRide, fetchRideDetails} = useRide()
-    const { user: USER, rideId } = useAuthStore()
-    const queryClient = useQueryClient()
+    const { user: USER, rideId, setRideId } = useAuthStore()
+    // const queryClient = useQueryClient()
+    const socket = useSocket()
 
     const snapPoints = useMemo(() => ['25%', '50%'], []);
 
@@ -108,6 +110,17 @@ export default function TripDetails() {
         }
     }, [rideInfo])
 
+    //ride cancel socket
+    socket?.on('rideCancelled', (data: any) => {
+        console.log('ride cancel socket', data);
+        setRideId(null)     
+        navigation.navigate('Main')
+        ShowToast('Ride cancelled by user', {type: 'error'})   
+    })
+
+    console.log(location, 'location');
+    
+
     return (
         <GestureHandlerRootView style={styles.container}>
 
@@ -185,15 +198,37 @@ export default function TripDetails() {
                     longitudeDelta: 0.01,
                 }}
             >
-                <Marker coordinate={{ latitude: location?.latitude, longitude: location?.longitude }} />
+                {mode === 'accepted' && (
+                    <>
+                <Marker coordinate={{ latitude: location?.latitude, longitude: location?.longitude }} ></Marker>
+                <Marker coordinate={{ latitude: rideInfo?.data?.ride?.pickupLocation?.coordinates[0], longitude: rideInfo?.data?.ride?.pickupLocation?.coordinates[1] }} >
+                    <Image source={require('../assets/logo/push-pin.png')} style={{ width: 40, height: 40}} />
+                </Marker>
 
-                {/* <MapViewDirections
-                    origin={pickupCoord}
-                    destination={destinationCoord}
+                <MapViewDirections
+                    origin={{latitude: location?.latitude, longitude: location?.longitude}}
+                    destination={{latitude: rideInfo?.data?.ride?.pickupLocation?.coordinates[0], longitude: rideInfo?.data?.ride?.pickupLocation?.coordinates[1]}}
                     apikey='AIzaSyBcKgyA7urR7gHyen79h40UlkvTJJoKc9I'
-                    strokeColor="#fff"
+                    strokeColor={Gold}
                     strokeWidth={4}
-                /> */}
+                />
+                </>
+                )}
+                {mode !== 'accepted' && (
+                    <>
+                    <Marker coordinate={{ latitude: rideInfo?.data?.ride?.pickupLocation?.coordinates[0], longitude: rideInfo?.data?.ride?.pickupLocation?.coordinates[1] }} />
+                    <Marker coordinate={{ latitude: rideInfo?.data?.ride?.destination?.coordinates[0], longitude: rideInfo?.data?.ride?.destination?.coordinates[1] }} >
+                        <Image source={require('../assets/logo/push-pin.png')} style={{ width: 40, height: 40}} />
+                    </Marker>
+                    <MapViewDirections
+                    origin={{latitude: rideInfo?.data?.ride?.pickupLocation?.coordinates[0], longitude: rideInfo?.data?.ride?.pickupLocation?.coordinates[1]}}
+                    destination={{latitude: rideInfo?.data?.ride?.destination?.coordinates[0], longitude: rideInfo?.data?.ride?.destination?.coordinates[1]}}
+                    apikey='AIzaSyBcKgyA7urR7gHyen79h40UlkvTJJoKc9I'
+                    strokeColor={Gold}
+                    strokeWidth={4}
+                />
+                    </>
+                )}
 
             </MapView>
 
@@ -507,7 +542,7 @@ const styles = StyleSheet.create({
         borderColor: Gold,
         borderWidth: 2,
         padding: 8,
-        marginTop: 20,
+        marginTop: 10,
         borderRadius: 12,
         backgroundColor: 'rgba(0, 0, 0, 0.3)',
     },
@@ -533,9 +568,9 @@ const styles = StyleSheet.create({
     },
     locationSubtitle: {
         color: LightGold,
-        fontSize: 14,
-        flexWrap: 'wrap',
-        width: '60%',
+        fontSize: 12,
+        // flexWrap: 'wrap',
+        width: '50%',
         // marginRight: 10,
     },
 

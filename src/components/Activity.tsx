@@ -1,58 +1,62 @@
-import React, { useState } from 'react'
+import React, { useCallback, useState } from 'react'
 import { StyleSheet, Text, View, TouchableOpacity, FlatList, Image, ActivityIndicator } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { Black, Gray, Gold, LightGold, White, DarkGray } from '../constants/Color'
 import Ionicons from 'react-native-vector-icons/Ionicons'
+import { rideHistory } from '../constants/Api'
+import { useQuery } from '@tanstack/react-query'
+import { useFocusEffect } from '@react-navigation/native'
 
 // Sample data for demonstration
-const sampleActivities = [
-  {
-    id: '1',
-    type: 'ride',
-    title: 'Trip to Downtown',
-    date: '2024-03-20 14:30',
-    amount: '$25.50',
-    status: 'completed',
-    distance: '12.5 km',
-    duration: '28 min'
-  },
-  {
-    id: '2',
-    type: 'earning',
-    title: 'Daily Earnings',
-    date: '2024-03-20 22:00',
-    amount: '$158.75',
-    rides: 8
-  },
-  {
-    id: '3',
-    type: 'ride',
-    title: 'Airport Transfer',
-    date: '2024-03-19 09:15',
-    amount: '$45.00',
-    status: 'completed',
-    distance: '28.3 km',
-    duration: '45 min'
-  },
-  {
-    id: '4',
-    type: 'earning',
-    title: 'Bonus Reward',
-    date: '2024-03-19 23:59',
-    amount: '$25.00',
-    description: 'Peak hours bonus'
-  },
-  {
-    id: '5',
-    type: 'ride',
-    title: 'Shopping Mall Trip',
-    date: '2024-03-19 16:45',
-    amount: '$18.25',
-    status: 'completed',
-    distance: '8.7 km',
-    duration: '22 min'
-  }
-];
+// const sampleActivities = [
+//   {
+//     id: '1',
+//     type: 'ride',
+//     title: 'Trip to Downtown',
+//     date: '2024-03-20 14:30',
+//     amount: '$25.50',
+//     status: 'completed',
+//     distance: '12.5 km',
+//     duration: '28 min'
+//   },
+//   {
+//     id: '2',
+//     type: 'earning',
+//     title: 'Daily Earnings',
+//     date: '2024-03-20 22:00',
+//     amount: '$158.75',
+//     rides: 8
+//   },
+//   {
+//     id: '3',
+//     type: 'ride',
+//     title: 'Airport Transfer',
+//     date: '2024-03-19 09:15',
+//     amount: '$45.00',
+//     status: 'completed',
+//     distance: '28.3 km',
+//     duration: '45 min'
+//   },
+//   {
+//     id: '4',
+//     type: 'earning',
+//     title: 'Bonus Reward',
+//     date: '2024-03-19 23:59',
+//     amount: '$25.00',
+//     description: 'Peak hours bonus'
+//   },
+//   {
+//     id: '5',
+//     type: 'ride',
+//     title: 'Shopping Mall Trip',
+//     date: '2024-03-19 16:45',
+//     amount: '$18.25',
+//     status: 'completed',
+//     distance: '8.7 km',
+//     duration: '22 min'
+//   }
+// ];
+
 
 // Activity item component
 const ActivityItem = ({ item }: {item: any} ) => (
@@ -92,16 +96,24 @@ const ActivityItem = ({ item }: {item: any} ) => (
 )
 
 export default function Activity() {
-  const [isLoading, setIsLoading] = useState(false)
+  // const [isLoading, setIsLoading] = useState(false)
   const [isFilterVisible, setIsFilterVisible] = useState(false)
 
-  // Calculate totals
-  const totals = {
-    rides: sampleActivities.filter(item => item.type === 'ride').length,
-    earnings: sampleActivities
-      .filter(item => item.type === 'earning')
-      .reduce((sum, item) => sum + parseFloat(item.amount.replace('$', '')), 0)
-  };
+  // ride history
+const {data: rideDetails, isLoading, refetch, error} = useQuery({
+  queryKey: ['rideHistory'],
+  queryFn: rideHistory,
+  // refetchOnWindowFocus: true,
+})
+
+useFocusEffect(
+  useCallback(() => {
+    refetch()
+  }, [])
+)
+
+  console.log(rideDetails, 'rideHistory');
+
 
   // Empty state component
   const EmptyState = () => (
@@ -124,7 +136,7 @@ export default function Activity() {
       </View>
 
       {/* Activity Summary Card */}
-      <View style={styles.summaryCard}>
+      {/* <View style={styles.summaryCard}>
         <View style={styles.summaryItem}>
           <Text style={styles.summaryLabel}>Total Rides</Text>
           <Text style={styles.summaryValue}>{totals.rides}</Text>
@@ -134,7 +146,7 @@ export default function Activity() {
           <Text style={styles.summaryLabel}>Total Earnings</Text>
           <Text style={styles.summaryValue}>${totals.earnings.toFixed(2)}</Text>
         </View>
-      </View>
+      </View> */}
 
       {/* Activity List */}
       {isLoading ? (
@@ -144,7 +156,7 @@ export default function Activity() {
         </View>
       ) : (
         <FlatList
-          data={sampleActivities}
+          data={rideDetails?.data?.rides}
           keyExtractor={(item, index) => index.toString()}
           renderItem={({ item }) => <ActivityItem item={item} />}
           ListEmptyComponent={EmptyState}

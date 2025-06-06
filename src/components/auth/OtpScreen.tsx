@@ -305,7 +305,7 @@ const styles = StyleSheet.create({
   },
   backButton: {
     marginTop: 10,
-    marginBottom: 20,
+    // marginBottom: 10,
   },
   backRow: {
     flexDirection: 'row',
@@ -318,7 +318,7 @@ const styles = StyleSheet.create({
   },
   content: {
     alignItems: 'center',
-    marginTop: 10,
+    // marginTop: 10,
   },
   logo: {
     height: 70,
@@ -327,7 +327,7 @@ const styles = StyleSheet.create({
   },
   headerContainer: {
     alignItems: 'center',
-    marginBottom: 40,
+    marginBottom: 30,
   },
   header: {
     color: LightGold,

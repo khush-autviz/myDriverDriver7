@@ -9,7 +9,7 @@ import { useRide } from '../context/RideContext';
 
 const Splash = ({ navigation }: { navigation: any }) => {
   const token = useAuthStore((state) => state.token?.access_token);
-  // const USER = useAuthStore((state) => state.user);
+  const SETUSER = useAuthStore((state) => state.setUser);
   const SETRIDEID = useAuthStore((state) => state.setRideId);
   // const mobileNumber = USER?.phone;
   const [isLoading, setIsLoading] = useState(true); // Add loading state
@@ -43,6 +43,8 @@ const Splash = ({ navigation }: { navigation: any }) => {
             if (token) {
       const mobileNumber = DriverDetails?.data?.phone;
               // If token exists, navigate based on account status
+              if (DriverDetails) {
+                SETUSER(DriverDetails.data)
               if (DriverDetails?.data?.accountStatus === 'VehiclePending') {
                 navigation.navigate('vehicle-details', { mobileNumber });
               } else if (DriverDetails?.data?.accountStatus === 'DocumentsPending') {
@@ -61,6 +63,7 @@ const Splash = ({ navigation }: { navigation: any }) => {
                   navigation.navigate('Main');
                 }
               }
+            }
             } else if (hasSeenOnboarding === 'true') {
               // If user has seen onboarding but no token, go to Signin
               navigation.replace('Signin');

@@ -9,6 +9,7 @@ import {
   Platform,
   Alert,
   TouchableOpacity,
+  Image,
 } from 'react-native';
 import {
   Black,
@@ -133,6 +134,7 @@ export default function Home() {
     mutationFn: rideAccepted,
     onSuccess: (response) => {
         console.log('ride accept success', response);
+        setmodalVisible(false)
         // SETUSER({...USER, rideId: currentRide?._id})
         setRideId(rideDetails.rideId)
         // fetchRideDetails(rideDetails.rideId)
@@ -181,9 +183,13 @@ export default function Home() {
     console.log(`📍 Background tracking status changed: ${isBackgroundTracking ? 'ACTIVE' : 'INACTIVE'}`);
   }, [isBackgroundTracking])
 
-  // live location socket
+  useEffect(() => {
+    if (USER?.isAvailable) {
+      setIsNormalMode(true)
+    }
+  }, [USER])
 
-// ShowToast('Operation successful!', { type: 'success' });
+
 
   return (
     <>
@@ -220,7 +226,9 @@ export default function Home() {
               longitudeDelta: 0.01,
             }}
           >
-            <Marker coordinate={{ latitude: location?.latitude || 0, longitude: location?.longitude || 0 }} />
+            <Marker coordinate={{ latitude: location?.latitude || 0, longitude: location?.longitude || 0 }} >
+              <Image source={require('../assets/logo/push-pin.png')} style={{ width: 40, height: 40}} />
+            </Marker>
           </MapView>
         </View>
 
@@ -284,9 +292,10 @@ export default function Home() {
       >
         <View style={{
           backgroundColor: Black,
-          borderTopLeftRadius: 24,
-          borderTopRightRadius: 24,
-          paddingBottom: 60,
+          borderRadius: 24,
+          // borderTopLeftRadius: 24,
+          // borderTopRightRadius: 24,
+          // paddingBottom: 60,
           borderColor: LightGold,
           borderWidth:1
         }}>
@@ -564,7 +573,7 @@ const styles = StyleSheet.create({
     backgroundColor: Black,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
-    paddingBottom: Platform.OS === 'ios' ? 34 : 24, // Extra padding for iOS devices with home indicator
+    paddingBottom: Platform.OS === 'ios' ? 34 : 14, // Extra padding for iOS devices with home indicator
     overflow: 'hidden',
   },
   modalHeader: {

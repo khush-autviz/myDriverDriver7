@@ -108,3 +108,9 @@ export const rideDetails = async (rideId: any) => {
     const response = await axios.get(`/ride/driver/${rideId}`)
     return response.data
 }
+
+// ride history
+export const rideHistory = async () => {
+    const response = await axios.get('/driverAuth/driverHistory')
+    return response.data
+}

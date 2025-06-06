@@ -29,7 +29,7 @@ interface AuthStateData {
 interface AuthState extends AuthStateData {
   setUser: (user: User) => void;
   setToken: (token: Token) => void;
-  setRideId: (rideId: string) => void;
+  setRideId: (rideId: any) => void;
   logout: () => void;
 }
 
