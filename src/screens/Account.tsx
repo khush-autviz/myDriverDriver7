@@ -64,7 +64,7 @@ export default function Account() {
           <View style={styles.profileImageContainer}>
             {USER?.profilePhoto ? (
               <Image 
-                source={{ uri: `https://t1wfswdh-3000.inc1.devtunnels.ms/${USER.profilePhoto}` }} 
+                source={{ uri: `http://3.110.180.116:3000/${USER.profilePhoto}` }} 
                 style={styles.profileImage} 
               />
             ) : (

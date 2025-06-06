@@ -270,7 +270,7 @@ export default function TripDetails() {
                             {/* Fare Details */}
                             <View style={styles.fareContainer}>
                                 <Text style={styles.fareLabel}>Total</Text>
-                                <Text style={styles.fareAmount}>${rideInfo?.data?.ride?.fare}</Text>
+                                <Text style={styles.fareAmount}>${rideInfo?.data?.ride?.fare.toFixed(2)}</Text>
                             </View>
 
                             {/* <View style={styles.divider} /> */}

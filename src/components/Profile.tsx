@@ -319,7 +319,7 @@ useEffect(() => {
         <TouchableOpacity onPress={handleImageUpload}>
           {data.profilePhoto ? (
             <Image 
-              source={{ uri: `https://t1wfswdh-3000.inc1.devtunnels.ms/${data.profilePhoto}` }} 
+              source={{ uri: `http://3.110.180.116:3000/${data.profilePhoto}` }} 
               style={{width: 100, height: 100, borderRadius: 50}} 
             />
           ) : (

@@ -59,41 +59,77 @@ import { useFocusEffect } from '@react-navigation/native'
 
 
 // Activity item component
-const ActivityItem = ({ item }: {item: any} ) => (
-  <View style={styles.activityItem}>
-    <View style={styles.activityIconContainer}>
-      <Ionicons 
-        name={item.type === 'ride' ? 'car' : 'wallet'} 
-        size={20} 
-        color={Gold} 
-      />
-    </View>
-    <View style={styles.activityContent}>
-      <Text style={styles.activityTitle}>{item.title}</Text>
-      <Text style={styles.activityDate}>{item.date}</Text>
-      {item.type === 'ride' && (
-        <Text style={styles.activityDetails}>
-          {item.distance} • {item.duration}
+const ActivityItem = ({ item }: {item: any} ) => {
+  // Format the date
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  // Create title from pickup and destination
+  const getTitle = () => {
+    const pickup = item.pickupLocation?.address || 'Unknown pickup';
+    const destination = item.destination?.address || 'Unknown destination';
+    // Get the first part of the address (before first comma)
+    const pickupShort = pickup.split(',')[0];
+    const destinationShort = destination.split(',')[0];
+    return `${pickupShort} → ${destinationShort}`;
+  };
+
+  // Format fare as currency
+  const formatFare = (fare: number) => {
+    return `$${fare.toFixed(2)}`;
+  };
+
+  // Get status color
+  const getStatusColor = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'completed':
+        return '#4CAF50';
+      case 'cancelled':
+        return '#F44336';
+      case 'ongoing':
+        return '#FF9800';
+      default:
+        return Gray;
+    }
+  };
+
+  return (
+    <View style={styles.activityItem}>
+      <View style={styles.activityIconContainer}>
+        <Ionicons 
+          name="car" 
+          size={20} 
+          color={Gold} 
+        />
+      </View>
+      <View style={styles.activityContent}>
+        <Text style={styles.activityTitle}>{getTitle()}</Text>
+        <Text style={styles.activityDate}>{formatDate(item.createdAt)}</Text>
+        <View style={styles.activityDetailsRow}>
+          <Text style={styles.activityDetails}>
+            {item.distance.toFixed(1)} km • {item.vehicle?.type || 'Car'}
+          </Text>
+          <Text style={[styles.statusText, { color: getStatusColor(item.status) }]}>
+            {item.status.charAt(0).toUpperCase() + item.status.slice(1)}
+          </Text>
+        </View>
+      </View>
+      <View style={styles.activityAmount}>
+        <Text style={[styles.amountText, item.status === 'cancelled' && styles.cancelledText]}>
+          {formatFare(item.fare)}
         </Text>
-      )}
-      {item.type === 'earning' && item.description && (
-        <Text style={styles.activityDetails}>
-          {item.description}
-        </Text>
-      )}
-      {item.type === 'earning' && item.rides && (
-        <Text style={styles.activityDetails}>
-          {item.rides} rides completed
-        </Text>
-      )}
+      </View>
     </View>
-    <View style={styles.activityAmount}>
-      <Text style={[styles.amountText, item.type === 'earning' && styles.earningText]}>
-        {item.type === 'earning' ? '+' : ''}{item.amount}
-      </Text>
-    </View>
-  </View>
-)
+  );
+}
 
 export default function Activity() {
   // const [isLoading, setIsLoading] = useState(false)
@@ -373,5 +409,18 @@ const styles = StyleSheet.create({
     color: Gray,
     fontSize: 12,
     marginTop: 2,
+  },
+  activityDetailsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 4,
+  },
+  statusText: {
+    fontSize: 12,
+    fontWeight: '500',
+  },
+  cancelledText: {
+    color: '#F44336',
   },
 })

@@ -429,7 +429,7 @@ const requestStoragePermission = async () => {
           placeholderTextColor={Gray}
         />
         
-        <Text style={styles.labelText}>Vehicle Type <Text style={styles.requiredField}>*</Text></Text>
+        {/* <Text style={styles.labelText}>Vehicle Type <Text style={styles.requiredField}>*</Text></Text>
         <View style={styles.pickerContainer}>
           <TouchableOpacity 
             style={[
@@ -455,7 +455,7 @@ const requestStoragePermission = async () => {
               vehicleData.vehicleType === 'bike' && styles.selectedTypeText
             ]}>Bike</Text>
           </TouchableOpacity>
-        </View>
+        </View> */}
         
         <Text style={styles.labelText}>Vehicle Image <Text style={styles.requiredField}>*</Text></Text>
         <TouchableOpacity 

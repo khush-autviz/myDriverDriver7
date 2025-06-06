@@ -30,6 +30,7 @@ import Modal from 'react-native-modal';
 import { useNavigation } from '@react-navigation/native';
 import { useRide } from '../context/RideContext';
 import { ShowToast } from '../lib/Toast';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 export default function Home() {
@@ -39,9 +40,9 @@ export default function Home() {
   const [rideDetails, setrideDetails] = useState<any>()
   const socket = useSocket();
   const { location, startTracking, stopTracking, startBackgroundTracking, stopBackgroundTracking, isBackgroundTracking } = useLocation()
-  const {user: USER, setUser: SETUSER, setRideId} = useAuthStore()
+  const { user: USER, setUser: SETUSER, setRideId } = useAuthStore()
   const navigation = useNavigation()
-  const {fetchRideDetails} = useRide()
+  const { fetchRideDetails } = useRide()
 
 
 
@@ -115,7 +116,7 @@ export default function Home() {
   const toggleNormalMode = () => {
     if (!isNormalMode) {
       DriverOnlineMutation.mutateAsync({
-        driverId: USER?.id,
+        driverId: USER?.id ?? USER?._id,
         location: {
           latitude: location?.latitude || 0,
           longitude: location?.longitude || 0,
@@ -124,7 +125,7 @@ export default function Home() {
     } else {
       // Use the offline mutation to properly stop background tracking
       DriverOfflineMutation.mutateAsync({
-        driverId: USER?.id
+        driverId: USER?.id ?? USER?._id
       })
     }
   };
@@ -133,17 +134,17 @@ export default function Home() {
   const rideAcceptedMutation = useMutation({
     mutationFn: rideAccepted,
     onSuccess: (response) => {
-        console.log('ride accept success', response);
-        setmodalVisible(false)
-        // SETUSER({...USER, rideId: currentRide?._id})
-        setRideId(rideDetails.rideId)
-        // fetchRideDetails(rideDetails.rideId)
-        navigation.navigate('trip-details')
+      console.log('ride accept success', response);
+      setmodalVisible(false)
+      // SETUSER({...USER, rideId: currentRide?._id})
+      setRideId(rideDetails.rideId)
+      // fetchRideDetails(rideDetails.rideId)
+      navigation.navigate('trip-details')
     },
     onError: (error) => {
-        console.log('ride accept error', error);
+      console.log('ride accept error', error);
     }
-})
+  })
 
   // Function to handle driver mode toggle
   const toggleDriverMode = () => {
@@ -189,6 +190,25 @@ export default function Home() {
     }
   }, [USER])
 
+  const logAllLocalStorage = async () => {
+    try {
+      const allKeys = await AsyncStorage.getAllKeys();
+      const allItems = await AsyncStorage.multiGet(allKeys);
+  
+      console.log('📦 AsyncStorage contents:');
+      allItems.forEach(([key, value]) => {
+        console.log(`${key}:`, value);
+      });
+    } catch (error) {
+      console.error('❌ Error reading AsyncStorage:', error);
+    }
+  };
+  
+  // Call this function wherever appropriate
+  useEffect(() => {
+    logAllLocalStorage();
+  }, []);
+  
 
 
   return (
@@ -200,7 +220,7 @@ export default function Home() {
             <Text style={styles.headerTitle}>Driver Dashboard</Text>
             <Text style={styles.headerSubtitle}>Welcome back, {USER?.name || 'Driver'}</Text>
           </View>
-          <View style={styles.statusContainer}>
+          {/* <View style={styles.statusContainer}>
             <View style={[styles.statusIndicator, isNormalMode ? styles.statusIndicatorOnline : styles.statusIndicatorOffline]}>
               <View style={[styles.statusDot, isNormalMode ? styles.statusOnline : styles.statusOffline]} />
               <Text style={styles.statusText}>{isNormalMode ? 'Online' : 'Offline'}</Text>
@@ -211,7 +231,7 @@ export default function Home() {
                 <Text style={styles.trackingText}>Tracking</Text>
               </View>
             )}
-          </View>
+          </View> */}
         </View>
         {/* </View> */}
 
@@ -227,7 +247,7 @@ export default function Home() {
             }}
           >
             <Marker coordinate={{ latitude: location?.latitude || 0, longitude: location?.longitude || 0 }} >
-              <Image source={require('../assets/logo/push-pin.png')} style={{ width: 40, height: 40}} />
+              <Image source={require('../assets/logo/push-pin.png')} style={{ width: 40, height: 40 }} />
             </Marker>
           </MapView>
         </View>
@@ -235,7 +255,7 @@ export default function Home() {
 
         <View style={styles.toggleContainer}>
           <View style={styles.toggleCard}>
-            <Text style={styles.toggleLabel}>Normal Mode</Text>
+            {/* <Text style={styles.toggleLabel}>Switch</Text> */}
             <Switch
               trackColor={{ false: DarkGray, true: Gold }}
               thumbColor={isNormalMode ? White : Gray}
@@ -246,7 +266,7 @@ export default function Home() {
             />
           </View>
 
-          <View style={styles.toggleCard}>
+          {/* <View style={styles.toggleCard}>
             <Text style={styles.toggleLabel}>Driver Mode</Text>
             <Switch
               trackColor={{ false: DarkGray, true: Gold }}
@@ -256,6 +276,13 @@ export default function Home() {
               value={isDriverMode}
               disabled={!isNormalMode || ExtraDriverOnlineMutation.isPending}
             />
+          </View> */}
+
+          <View style={styles.statusContainer}>
+            <View style={[styles.statusIndicator, isNormalMode ? styles.statusIndicatorOnline : styles.statusIndicatorOffline]}>
+              <View style={[styles.statusDot, isNormalMode ? styles.statusOnline : styles.statusOffline]} />
+              <Text style={styles.statusText}>{isNormalMode ? 'Online' : 'Offline'}</Text>
+            </View>
           </View>
 
           {/* Temporary test button */}
@@ -297,7 +324,7 @@ export default function Home() {
           // borderTopRightRadius: 24,
           // paddingBottom: 60,
           borderColor: LightGold,
-          borderWidth:1
+          borderWidth: 1
         }}>
           <View style={{
             alignItems: 'center',
@@ -450,17 +477,18 @@ const styles = StyleSheet.create({
   toggleContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
     marginTop: 10,
     marginBottom: 10,
   },
   toggleCard: {
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderRadius: 12,
+    // backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    // borderRadius: 12,
     padding: 10,
     width: '48%',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
+    alignItems: 'flex-start',
+    // borderWidth: 1,
+    // borderColor: 'rgba(255, 255, 255, 0.1)',
   },
   toggleLabel: {
     color: White,
@@ -539,7 +567,7 @@ const styles = StyleSheet.create({
   },
   statusText: {
     color: White,
-    fontSize: 12,
+    fontSize: 14,
     fontWeight: '600',
   },
   trackingIndicator: {

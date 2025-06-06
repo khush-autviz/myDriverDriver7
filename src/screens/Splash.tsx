@@ -11,6 +11,7 @@ const Splash = ({ navigation }: { navigation: any }) => {
   const token = useAuthStore((state) => state.token?.access_token);
   const SETUSER = useAuthStore((state) => state.setUser);
   const SETRIDEID = useAuthStore((state) => state.setRideId);
+  // const USER = useAuthStore((state) => state.user);
   // const mobileNumber = USER?.phone;
   const [isLoading, setIsLoading] = useState(true); // Add loading state
 
@@ -83,7 +84,13 @@ const Splash = ({ navigation }: { navigation: any }) => {
 
       checkAuthAndOnboarding();
     
-  }, [navigation, token, DriverDetails]);
+  }, [DriverDetails]);
+
+  useEffect(() => {
+    if (DriverDetails) {
+      SETUSER(DriverDetails.data)
+    }
+  }, [DriverDetails])
 
 
 
