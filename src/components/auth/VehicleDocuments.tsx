@@ -65,23 +65,96 @@ export default function VehicleDocuments() {
   });
 
   const handleImageUpload = async (type: keyof DocumentDataType) => {
-    // Simple options for image picker
+    // Enhanced options for image picker with better compression
     const options: ImageLibraryOptions = {
       mediaType: 'photo',
       includeBase64: false,
       maxHeight: 2000,
       maxWidth: 2000,
       selectionLimit: 1,
+      quality: 0.8, // Reduce quality to help with file size
+    };
+
+    // Helper function for document names
+    const getDocumentName = (docType: keyof DocumentDataType) => {
+      switch(docType) {
+        case 'drivingLicenseFront': return 'Driving License (Front)';
+        case 'drivingLicenseBack': return 'Driving License (Back)';
+        case 'vehicleRegistration': return 'Vehicle Registration';
+        case 'profilePhoto': return 'Profile Photo';
+        default: return 'Document';
+      }
     };
   
     try {
       console.log('Launching image library...');
       const result = await launchImageLibrary(options);
+      console.log('Image picker result:', result);
+      
+      if (result.didCancel) {
+        console.log('User cancelled image selection');
+        return;
+      }
+      
+      if (result.errorMessage) {
+        console.log('Image picker error:', result.errorMessage);
+        ShowToast('Failed to select image', { type: 'error' });
+        return;
+      }
       
       if (result.assets && result.assets.length > 0) {
         const asset = result.assets[0];
+        
         if (asset.uri) {
-          console.log(`Selected image URI: ${asset.uri}`);
+          // ✅ VALIDATE IMAGE SIZE using multiple methods for accuracy
+          const maxSizeInBytes = 1 * 1024 * 1024; // 1MB limit
+          const documentName = getDocumentName(type);
+          
+          console.log(`Selected ${documentName} URI: ${asset.uri}`);
+          
+          // Method 1: Use fileSize from asset (if available)
+          let fileSizeInBytes = asset.fileSize || 0;
+          
+          // Method 2: Try to get more accurate file size using fetch (for better accuracy)
+          try {
+            const response = await fetch(asset.uri);
+            const blob = await response.blob();
+            fileSizeInBytes = blob.size;
+            console.log(`✅ Got accurate file size from blob: ${fileSizeInBytes} bytes`);
+          } catch (fetchError) {
+            console.log('❌ Could not fetch blob, using asset.fileSize:', asset.fileSize);
+            // Fallback to asset.fileSize if available
+            if (!asset.fileSize) {
+              console.log('⚠️ No file size available, allowing upload with warning');
+              ShowToast(`${documentName} selected (size validation not available)`, { 
+                type: 'warning' 
+              });
+              
+              setDocumentData(prev => ({
+                ...prev,
+                [type]: asset.uri
+              }));
+              return;
+            }
+          }
+          
+          const fileSizeInMB = (fileSizeInBytes / (1024 * 1024)).toFixed(2);
+          console.log(`File size: ${fileSizeInMB}MB (${fileSizeInBytes} bytes)`);
+          
+          // 🚫 REJECT IF TOO LARGE
+          if (fileSizeInBytes > maxSizeInBytes) {
+            ShowToast(`${documentName} too large! Please select an image smaller than 1MB. Current size: ${fileSizeInMB}MB`, { 
+              type: 'error' 
+            });
+            return;
+          }
+          
+          // ✅ IMAGE SIZE IS ACCEPTABLE
+          console.log(`✅ ${documentName} size valid: ${fileSizeInMB}MB`);
+          ShowToast(`${documentName} selected successfully (${fileSizeInMB}MB)`, { 
+            type: 'success' 
+          });
+          
           setDocumentData(prev => ({
             ...prev,
             [type]: asset.uri
@@ -90,8 +163,7 @@ export default function VehicleDocuments() {
       }
     } catch (error) {
       console.error('Error in image picker:', error);
-      // Alert.alert('Error', 'Something went wrong when trying to pick an image');
-      ShowToast('Something went wrong when trying to pick an image', {type: 'error'})
+      ShowToast('Something went wrong while selecting image', { type: 'error' });
     }
   };
 

@@ -328,10 +328,10 @@ export default function TripDetails() {
 
                             {/* Trip Route Card */}
                             <View style={styles.routeCard}>
-                                <View style={styles.routeHeader}>
+                                {/* <View style={styles.routeHeader}>
                                     <Ionicons name="navigate" size={20} color={Gold} />
                                     <Text style={styles.routeHeaderText}>Trip Route</Text>
-                                </View>
+                                </View> */}
                                 
                                 {/* Pickup Location */}
                                 <View style={styles.locationRow}>

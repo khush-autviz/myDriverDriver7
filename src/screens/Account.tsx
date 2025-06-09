@@ -20,6 +20,8 @@ export default function Account() {
     LOGOUT()
   }
 
+  console.log('USER', USER?.documents?.profilePhoto?.image)
+
   // Menu items with icons, labels, and navigation targets
   const menuItems = [
     {
@@ -66,9 +68,9 @@ export default function Account() {
         {/* Profile Card */}
         <View style={styles.profileCard}>
           <View style={styles.profileImageContainer}>
-            {USER?.profilePhoto ? (
+            {USER?.documents?.profilePhoto?.image ? (
               <Image 
-                source={{ uri: `http://3.110.180.116:3000/${USER.profilePhoto}` }} 
+                source={{ uri: `https://t1wfswdh-3000.inc1.devtunnels.ms/${USER?.documents?.profilePhoto?.image}` }} 
                 style={styles.profileImage} 
               />
             ) : (
