@@ -63,7 +63,10 @@ export default function VehicleDetails() {
     onSuccess: (response) => {
       console.log('vehicle details mutation success', response);
       SETUSER({...USER,accountStatus: response.data.accountStatus})
-      navigation.navigate('vehicle-documents')
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'vehicle-documents' }],
+      })
     },
     onError: (error) => {
       console.log('vehicle details mutation error', error);

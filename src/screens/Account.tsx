@@ -28,24 +28,24 @@ export default function Account() {
       onPress: () => navigation.navigate('Profile'),
       important: true
     },
-    {
-      icon: 'settings',
-      label: 'Settings',
-      onPress: () => {},
-      important: true
-    },
-    {
-      icon: 'chatbubbles',
-      label: 'Messages',
-      onPress: () => {},
-      important: true
-    },
-    {
-      icon: 'flame',
-      label: 'Points & Rewards',
-      onPress: () => {},
-      important: true
-    },
+    // {
+    //   icon: 'settings',
+    //   label: 'Settings',
+    //   onPress: () => {},
+    //   important: true
+    // },
+    // {
+    //   icon: 'chatbubbles',
+    //   label: 'Messages',
+    //   onPress: () => {},
+    //   important: true
+    // },
+    // {
+    //   icon: 'flame',
+    //   label: 'Points & Rewards',
+    //   onPress: () => {},
+    //   important: true
+    // },
     {
       icon: 'log-out',
       label: 'Logout',

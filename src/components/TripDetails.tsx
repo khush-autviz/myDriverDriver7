@@ -120,7 +120,6 @@ export default function TripDetails() {
     }, [rideInfo])
 
     //ride cancel socket
-    // socket?.on('rideCancelled', (data: any) => {
     const handleRideCancel = (data: any) => {
         console.log('ride cancel socket', data);
         setRideId(null)

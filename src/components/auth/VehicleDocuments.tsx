@@ -52,7 +52,10 @@ export default function VehicleDocuments() {
     onSuccess: (response) => {
       console.log('document upload success', response);
       SETUSER({...USER,accountStatus: response.data.accountStatus})
-      navigation.navigate('approval-screen')
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'approval-screen' }],
+      })
     },
     onError: (error) => {
       console.log('document upload error', error);
