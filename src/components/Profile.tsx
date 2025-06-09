@@ -197,19 +197,22 @@ export default function Profile() {
   const [buttonDisabled, setbuttonDisabled] = useState(true)
   const { user, setUser, token } = useAuthStore()
   const navigation: any = useNavigation()
-  const [data, setdata] = useState({
-    firstName: user?.firstName || '',
-    lastName: user?.lastName || '',
-    email: user?.email || '',
-    profilePhoto: user?.profilePhoto ?? null,
-  })
+
 
   // fetches driver info
-  const {data: DriverDetails, } = useQuery({
+  const {data: DriverDetails, refetch } = useQuery({
     queryKey: ['driver-details'],
     queryFn: getProfile,
     // staleTime: 5 * 60 * 1000, // 5 minutes
     refetchOnWindowFocus: true,
+  })
+
+
+  const [data, setdata] = useState({
+    firstName: user?.firstName || '',
+    lastName: user?.lastName || '',
+    email: user?.email || '',
+    profilePhoto: DriverDetails?.data?.documents?.profilePhoto?.image ,
   })
 
   // handle data
@@ -255,6 +258,8 @@ export default function Profile() {
       console.log('profile update success', response);
       setUser({...user, ...response?.data})
       setbuttonDisabled(true)
+      ShowToast('Profile updated successfully', { type: 'success' });
+      refetch()
     },
     onError: (error) => {
       console.log('profile update error', error);
@@ -319,7 +324,7 @@ useEffect(() => {
         <TouchableOpacity onPress={handleImageUpload}>
           {data.profilePhoto ? (
             <Image 
-              source={{ uri: `http://3.110.180.116:3000/${data.profilePhoto}` }} 
+              source={{ uri: `https://t1wfswdh-3000.inc1.devtunnels.ms/${data.profilePhoto}` }} 
               style={{width: 100, height: 100, borderRadius: 50}} 
             />
           ) : (

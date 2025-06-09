@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, StyleSheet, FlatList, Platform, Image } from 'react-native'
+import { View, Text, TouchableOpacity, StyleSheet, FlatList, Platform, Image, ScrollView } from 'react-native'
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { QueryClient, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { cancelRide, completeRide, driverArrived, driverWaiting, rideDetails, startRide, verifyRideOtp } from '../constants/Api';
@@ -317,150 +317,228 @@ export default function TripDetails() {
                 <BottomSheetView style={styles.contentContainer}>
                     {mode === 'accepted' && (
                         <>
-                            {/* Trip Details Card */}
-                            <View style={styles.tripDetailsCard}>
+                            {/* Header Section */}
+                            {/* <View style={styles.headerSection}>
+                                <View style={styles.statusBadge}>
+                                    <Ionicons name="checkmark-circle" size={16} color={Black} />
+                                    <Text style={styles.statusBadgeText}>RIDE ACCEPTED</Text>
+                                </View>
+                                <Text style={styles.rideIdText}>Ride ID: {rideId?.slice(-8)}</Text>
+                            </View> */}
+
+                            {/* Trip Route Card */}
+                            <View style={styles.routeCard}>
+                                <View style={styles.routeHeader}>
+                                    <Ionicons name="navigate" size={20} color={Gold} />
+                                    <Text style={styles.routeHeaderText}>Trip Route</Text>
+                                </View>
+                                
                                 {/* Pickup Location */}
                                 <View style={styles.locationRow}>
-                                    <View style={styles.iconContainer}>
-                                        <Ionicons name="location" size={20} color="green" />
-                                    </View>
-                                    <View>
-                                        <Text style={styles.locationSubtitle}>{rideInfo?.data?.ride?.pickupLocation?.address}</Text>
+                                    {/* <View style={styles.locationDot}> */}
+                                        {/* <View style={styles.pickupDot} /> */}
+                                    {/* </View> */}
+                                    <View style={styles.locationContent}>
+                                        <Text style={styles.locationLabel}>PICKUP</Text>
+                                        <Text style={styles.locationAddress}>{rideInfo?.data?.ride?.pickupLocation?.address}</Text>
                                     </View>
                                 </View>
+
+                                {/* Route Line */}
+                                <View style={styles.routeLine} />
 
                                 {/* Destination Location */}
                                 <View style={styles.locationRow}>
-                                    <View style={styles.iconContainer}>
-                                        <Ionicons name="location" size={20} color="red" />
-                                    </View>
-                                    <View>
-                                        {/* <Text style={styles.locationTitle}>FZ5</Text> */}
-                                        <Text style={styles.locationSubtitle}>{rideInfo?.data?.ride?.destination?.address}</Text>
+                                    {/* <View style={styles.locationDot}> */}
+                                        {/* <View style={styles.destinationDot} /> */}
+                                    {/* </View> */}
+                                    <View style={styles.locationContent}>
+                                        <Text style={styles.locationLabel}>DESTINATION</Text>
+                                        <Text style={styles.locationAddress}>{rideInfo?.data?.ride?.destination?.address}</Text>
                                     </View>
                                 </View>
                             </View>
 
-                            {/* Fare Details */}
-                            <View style={styles.fareContainer}>
-                                <Text style={styles.fareLabel}>Total</Text>
-                                <Text style={styles.fareAmount}>${rideInfo?.data?.ride?.fare.toFixed(2)}</Text>
+                            {/* Fare & Distance Card */}
+                            <View style={styles.fareCard}>
+                                <View style={styles.fareRow}>
+                                    <View style={styles.fareItem}>
+                                        <Ionicons name="cash" size={18} color={Gold} />
+                                        {/* <Text style={styles.fareLabel}>Total Fare</Text> */}
+                                        <Text style={styles.fareAmount}>${rideInfo?.data?.ride?.fare.toFixed(2)}</Text>
+                                    </View>
+                                    <View style={styles.fareDivider} />
+                                    <View style={styles.fareItem}>
+                                        <Ionicons name="speedometer" size={18} color={Gold} />
+                                        {/* <Text style={styles.fareLabel}>Distance</Text> */}
+                                        <Text style={styles.fareAmount}>{rideInfo?.data?.ride?.distance.toFixed(1)} km</Text>
+                                    </View>
+                                </View>
                             </View>
 
-                            {/* <View style={styles.divider} /> */}
-
                             {/* Action Buttons */}
-                            <TouchableOpacity
-                                style={styles.primaryButton}
-                                activeOpacity={0.8}
-                                onPress={() => driverArrivedMutation.mutateAsync(rideId)}
-                            >
-                                <Text style={styles.buttonText}>Arrived</Text>
-                            </TouchableOpacity>
+                            <View style={styles.actionButtonsContainer}>
+                                <TouchableOpacity
+                                    style={styles.arrivedButton}
+                                    activeOpacity={0.8}
+                                    onPress={() => driverArrivedMutation.mutateAsync(rideId)}
+                                >
+                                    {/* <Ionicons name="location" size={20} color={Black} style={styles.buttonIcon} /> */}
+                                    <Text style={styles.arrivedButtonText}>Arrived</Text>
+                                </TouchableOpacity>
 
-                            <TouchableOpacity
-                                style={styles.cancelButton}
-                                activeOpacity={0.8}
-                                onPress={() => setmodalVisible(!modalVisible)}
-                            >
-                                <Text style={styles.buttonText}>Cancel Ride</Text>
-                            </TouchableOpacity>
+                                <TouchableOpacity
+                                    style={styles.cancelRideButton}
+                                    activeOpacity={0.8}
+                                    onPress={() => setmodalVisible(!modalVisible)}
+                                >
+                                    {/* <Ionicons name="close-circle" size={20} color={White} style={styles.buttonIcon} /> */}
+                                    <Text style={styles.cancelRideButtonText}>Cancel</Text>
+                                </TouchableOpacity>
+                            </View>
                         </>
                     )}
 
                     {mode === 'arrived' && (
-                        <>
-                            {/* OTP Verification Section */}
-                            <View style={styles.otpContainer}>
-                                <TextInput
-                                    style={styles.otpInput}
-                                    placeholder="Enter OTP"
-                                    placeholderTextColor={Gray}
-                                    keyboardType="number-pad"
-                                    maxLength={4}
-                                    value={otp}
-                                    onChangeText={text => setotp(text)}
-                                />
-                                <TouchableOpacity
-                                    style={styles.verifyButton}
-                                    activeOpacity={0.8}
-                                    onPress={() => verifyRideOtpMutation.mutateAsync({
-                                        id: rideId,
-                                        payload: { otp }
-                                    })}
-                                >
-                                    <Text style={styles.verifyButtonText}>Verify</Text>
-                                </TouchableOpacity>
+                        <ScrollView>
+                            {/* Header Section */}
+                            {/* <View style={styles.headerSection}>
+                                <View style={styles.statusBadge}>
+                                    <Ionicons name="location" size={16} color={Black} />
+                                    <Text style={styles.statusBadgeText}>ARRIVED AT PICKUP</Text>
+                                </View>
+                                <Text style={styles.rideIdText}>Waiting for customer</Text>
+                            </View> */}
+
+                            {/* OTP Verification Card */}
+                            <View style={styles.otpCard}>
+                                {/* <View style={styles.otpHeader}>
+                                    <Ionicons name="keypad" size={24} color={Gold} />
+                                    <Text style={styles.otpHeaderText}>Verify OTP to Start Ride</Text>
+                                </View> */}
+                                {/* <Text style={styles.otpSubtext}>Ask the customer for their 4-digit OTP</Text> */}
+                                
+                                <View style={styles.otpInputContainer}>
+                                    <TextInput
+                                        style={styles.otpInput}
+                                        placeholder="Enter 4-digit OTP"
+                                        placeholderTextColor={Gray}
+                                        keyboardType="number-pad"
+                                        maxLength={4}
+                                        value={otp}
+                                        onChangeText={text => setotp(text)}
+                                        textAlign="center"
+                                    />
+                                    <TouchableOpacity
+                                        style={[styles.verifyButton, otp.length === 4 ? styles.verifyButtonActive : null]}
+                                        activeOpacity={0.8}
+                                        disabled={otp.length !== 4}
+                                        onPress={() => verifyRideOtpMutation.mutateAsync({
+                                            id: rideId,
+                                            payload: { otp }
+                                        })}
+                                    >
+                                        {/* <Ionicons name="checkmark" size={20} color={otp.length === 4 ? Black : Gray} /> */}
+                                        <Text style={[styles.verifyButtonText, otp.length === 4 ? styles.verifyButtonTextActive : null]}>
+                                            Verify
+                                        </Text>
+                                    </TouchableOpacity>
+                                </View>
                             </View>
 
-                            {/* Trip Details Card */}
-                            <View style={styles.tripDetailsCard}>
-                                {/* Pickup Location */}
-                                <View style={styles.locationRow}>
-                                    <View style={styles.iconContainer}>
-                                        <Ionicons name="location" size={20} color="green" />
-                                    </View>
-                                    <View>
-                                        {/* <Text style={styles.locationTitle}>FZ5</Text> */}
-                                        <Text style={styles.locationSubtitle}>{rideInfo?.data?.ride?.pickupLocation?.address}</Text>
+                            {/* Trip Summary Card */}
+                            <View style={styles.summaryCard}>
+                                {/* <Text style={styles.summaryTitle}>Trip Summary</Text> */}
+                                 {/* Pickup Location */}
+                                 <View style={styles.locationRow}>
+                                    {/* <View style={styles.locationDot}> */}
+                                        {/* <View style={styles.pickupDot} /> */}
+                                    {/* </View> */}
+                                    <View style={styles.locationContent}>
+                                        <Text style={styles.locationLabel}>PICKUP</Text>
+                                        <Text style={styles.locationAddress}>{rideInfo?.data?.ride?.pickupLocation?.address}</Text>
                                     </View>
                                 </View>
+
+
 
                                 {/* Destination Location */}
                                 <View style={styles.locationRow}>
-                                    <View style={styles.iconContainer}>
-                                        <Ionicons name="location" size={20} color="red" />
-                                    </View>
-                                    <View>
-                                        {/* <Text style={styles.locationTitle}>FZ5</Text> */}
-                                        <Text style={styles.locationSubtitle}>{rideInfo?.data?.ride?.destination?.address}</Text>
+                                    {/* <View style={styles.locationDot}> */}
+                                        {/* <View style={styles.destinationDot} /> */}
+                                    {/* </View> */}
+                                    <View style={styles.locationContent}>
+                                        <Text style={styles.locationLabel}>DESTINATION</Text>
+                                        <Text style={styles.locationAddress}>{rideInfo?.data?.ride?.destination?.address}</Text>
                                     </View>
                                 </View>
+                                <View style={styles.summaryRow}>
+                                    <Text style={styles.summaryLabel}>Distance:</Text>
+                                    <Text style={styles.summaryValue}>{rideInfo?.data?.ride?.distance.toFixed(1)} km</Text>
+                                </View>
+                                <View style={styles.summaryRow}>
+                                    <Text style={styles.summaryLabel}>Fare:</Text>
+                                    <Text style={styles.summaryValue}>${rideInfo?.data?.ride?.fare.toFixed(2)}</Text>
+                                </View>
+                                {/* <View style={styles.summaryRow}>
+                                    <Text style={styles.summaryLabel}>Vehicle:</Text>
+                                    <Text style={styles.summaryValue}>{rideInfo?.data?.ride?.vehicle?.type.toUpperCase()}</Text>
+                                </View> */}
                             </View>
 
-                            {/* Cancel Ride Button */}
+                            {/* Cancel Button */}
                             <TouchableOpacity
-                                style={styles.cancelRideButton}
+                                style={styles.cancelOnlyButton}
                                 activeOpacity={0.8}
                                 onPress={() => setmodalVisible(!modalVisible)}
                             >
-                                <Text style={styles.cancelRideButtonText}>Cancel Ride</Text>
+                                {/* <Ionicons name="close-circle-outline" size={18} color={maroon} /> */}
+                                <Text style={styles.cancelOnlyButtonText}>Cancel Ride</Text>
                             </TouchableOpacity>
-                        </>
+                        </ScrollView>
                     )}
 
                     {mode === 'otp_verified' && (
                         <>
-                            {/* Trip Details Card */}
-                            <View style={styles.tripDetailsCard}>
-                                {/* Pickup Location */}
-                                <View style={styles.locationRow}>
-                                    <View style={styles.iconContainer}>
-                                        <Ionicons name="location" size={20} color="green" />
-                                    </View>
-                                    <View>
-                                        {/* <Text style={styles.locationTitle}>FZ5</Text> */}
-                                        <Text style={styles.locationSubtitle}>{rideInfo?.data?.ride?.pickupLocation?.address}</Text>
-                                    </View>
+                            {/* Header Section */}
+                            {/* <View style={styles.headerSection}>
+                                <View style={styles.statusBadge}>
+                                    <Ionicons name="car-sport" size={16} color={Black} />
+                                    <Text style={styles.statusBadgeText}>TRIP IN PROGRESS</Text>
                                 </View>
+                                <Text style={styles.rideIdText}>Drive safely to destination</Text>
+                            </View> */}
 
-                                {/* Destination Location */}
-                                <View style={styles.locationRow}>
-                                    <View style={styles.iconContainer}>
-                                        <Ionicons name="location" size={20} color="red" />
+                            {/* Live Trip Status */}
+                            <View style={styles.liveStatusCard}>
+                                <View style={styles.liveStatusHeader}>
+                                    <View style={styles.pulsingDot} />
+                                    <Text style={styles.liveStatusText}>LIVE TRIP</Text>
+                                </View>
+                                <View style={styles.tripMetrics}>
+                                    <View style={styles.metricItem}>
+                                        {/* <Ionicons name="time" size={18} color={Gold} /> */}
+                                        <Text style={styles.metricLabel}>Duration:</Text>
+                                        <Text style={styles.metricValue}>In Progress</Text>
                                     </View>
-                                    <View>
-                                        {/* <Text style={styles.locationTitle}>FZ5</Text> */}
-                                        <Text style={styles.locationSubtitle}>{rideInfo?.data?.ride?.destination?.address}</Text>
+                                    <View style={styles.metricDivider} />
+                                    <View style={styles.metricItem}>
+                                        {/* <Ionicons name="speedometer" size={18} color={Gold} /> */}
+                                        <Text style={styles.metricLabel}>Distance:</Text>
+                                        <Text style={styles.metricValue}>{rideInfo?.data?.ride?.distance.toFixed(1)} km</Text>
                                     </View>
                                 </View>
                             </View>
 
-                            {/* Trip Status Information */}
-                            <View style={styles.tripStatusContainer}>
-                                <View style={styles.statusItem}>
-                                    <Ionicons name="time-outline" size={20} color={Gold} />
-                                    <Text style={styles.statusText}>Trip in progress</Text>
+                            {/* Destination Card */}
+                            <View style={styles.destinationCard}>
+                                <View style={styles.destinationHeader}>
+                                    <Ionicons name="flag" size={20} color={Gold} />
+                                    <Text style={styles.destinationHeaderText}>Destination</Text>
+                                </View>
+                                <Text style={styles.destinationAddress}>{rideInfo?.data?.ride?.destination?.address}</Text>
+                                <View style={styles.destinationMeta}>
+                                    <Text style={styles.destinationFare}>Total Fare: ${rideInfo?.data?.ride?.fare.toFixed(2)}</Text>
                                 </View>
                             </View>
 
@@ -470,8 +548,14 @@ export default function TripDetails() {
                                 activeOpacity={0.8}
                                 onPress={() => completeRideMutation.mutateAsync(rideId)}
                             >
-                                <Ionicons name="checkmark-circle" size={20} color={White} style={styles.buttonIcon} />
-                                <Text style={styles.buttonText}>Complete Trip</Text>
+                                {/* <View style={styles.completeButtonContent}> */}
+                                    {/* <Ionicons name="checkmark-circle" size={24} color={Black} /> */}
+                                    {/* <View> */}
+                                        <Text style={styles.completeButtonText}>Complete Trip</Text>
+                                        {/* <Text style={styles.completeButtonSubtext}>Mark as arrived at destination</Text> */}
+                                    {/* </View> */}
+                                {/* </View> */}
+                                {/* <Ionicons name="chevron-forward" size={20} color={Black} /> */}
                             </TouchableOpacity>
                         </>
                     )}
@@ -653,7 +737,7 @@ const styles = StyleSheet.create({
         backgroundColor: maroon,
         borderRadius: 10,
         padding: 15,
-        marginTop: 20,
+        // marginTop: 20,
         alignItems: 'center',
         elevation: 2,
         shadowColor: '#000',
@@ -753,5 +837,307 @@ const styles = StyleSheet.create({
     },
     buttonIcon: {
         marginRight: 8,
+    },
+
+    // New styles for the bottom sheet
+    headerSection: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        marginBottom: 10,
+    },
+    statusBadge: {
+        backgroundColor: Gold,
+        borderRadius: 10,
+        padding: 8,
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    statusBadgeText: {
+        color: Black,
+        fontSize: 12,
+        fontWeight: '700',
+        marginLeft: 5,
+    },
+    rideIdText: {
+        color: Gold,
+        fontSize: 14,
+        fontWeight: '500',
+    },
+    routeCard: {
+        backgroundColor: 'rgba(255, 255, 255, 0.08)',
+        borderRadius: 10,
+        padding: 10,
+        marginBottom: 10,
+    },
+    routeHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 10,
+    },
+    routeHeaderText: {
+        color: Gold,
+        fontSize: 16,
+        fontWeight: '700',
+        marginLeft: 5,
+    },
+    locationDot: {
+        width: 10,
+        height: 10,
+        borderRadius: 5,
+        backgroundColor: Gold,
+        marginRight: 10,
+    },
+    locationContent: {
+        flexDirection: 'column',
+    },
+    locationLabel: {
+        color: Gold,
+        fontSize: 12,
+        fontWeight: '700',
+    },
+    locationAddress: {
+        color: LightGold,
+        fontSize: 14,
+    },
+    routeLine: {
+        borderBottomColor: Gold,
+        borderBottomWidth: 1,
+        marginVertical: 10,
+    },
+    fareCard: {
+        backgroundColor: 'rgba(255, 255, 255, 0.08)',
+        borderRadius: 10,
+        padding: 10,
+        marginBottom: 10,
+    },
+    fareRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
+    fareItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 10,
+    },
+    fareDivider: {
+        width: 1,
+        height: '100%',
+        backgroundColor: Gold,
+        marginHorizontal: 10,
+    },
+    actionButtonsContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        // marginTop: 10,
+    },
+    arrivedButton: {
+        backgroundColor: Gold,
+        borderRadius: 10,
+        padding: 15,
+        // flexDirection: 'row',
+        // alignItems: 'center',
+        // justifyContent: 'center',
+        elevation: 3,
+        shadowColor: Gold,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.3,
+        shadowRadius: 3,
+    },
+    arrivedButtonText: {
+        color: Black,
+        fontSize: 16,
+        fontWeight: '700',
+        marginLeft: 5,
+    },
+    otpCard: {
+        backgroundColor: 'rgba(255, 255, 255, 0.08)',
+        borderRadius: 10,
+        padding: 10,
+        marginBottom: 10,
+    },
+    otpHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 10,
+    },
+    otpHeaderText: {
+        color: Gold,
+        fontSize: 16,
+        fontWeight: '700',
+        marginLeft: 5,
+    },
+    otpInputContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
+    otpSubtext: {
+        color: Gold,
+        fontSize: 12,
+        fontWeight: '500',
+        marginBottom: 10,
+    },
+    summaryCard: {
+        backgroundColor: 'rgba(255, 255, 255, 0.08)',
+        borderRadius: 10,
+        padding: 10,
+        marginBottom: 10,
+    },
+    summaryTitle: {
+        color: Gold,
+        fontSize: 16,
+        fontWeight: '700',
+        marginBottom: 10,
+    },
+    summaryRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginVertical: 5,
+    },
+    summaryLabel: {
+        color: Gold,
+        fontSize: 14,
+        fontWeight: '500',
+    },
+    summaryValue: {
+        color: LightGold,
+        fontSize: 14,
+        fontWeight: '700',
+    },
+    cancelOnlyButton: {
+        backgroundColor: maroon,
+        borderRadius: 10,
+        padding: 15,
+        alignItems: 'center',
+        elevation: 2,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.3,
+        shadowRadius: 3,
+    },
+    cancelOnlyButtonText: {
+        color: White,
+        fontSize: 16,
+        fontWeight: '700',
+    },
+    liveStatusCard: {
+        backgroundColor: 'rgba(255, 255, 255, 0.08)',
+        borderRadius: 10,
+        padding: 10,
+        marginBottom: 10,
+    },
+    liveStatusHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 10,
+    },
+    liveStatusText: {
+        color: Gold,
+        fontSize: 16,
+        fontWeight: '700',
+        marginLeft: 5,
+    },
+    tripMetrics: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
+    metricItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 10,
+    },
+    metricDivider: {
+        width: 1,
+        height: '100%',
+        backgroundColor: Gold,
+        marginHorizontal: 10,
+    },
+    metricLabel: {
+        color: Gold,
+        fontSize: 12,
+        fontWeight: '500',
+    },
+    metricValue: {
+        color: LightGold,
+        fontSize: 14,
+        fontWeight: '700',
+    },
+    destinationCard: {
+        backgroundColor: 'rgba(255, 255, 255, 0.08)',
+        borderRadius: 10,
+        padding: 10,
+        marginBottom: 10,
+    },
+    destinationHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 10,
+    },
+    destinationHeaderText: {
+        color: Gold,
+        fontSize: 16,
+        fontWeight: '700',
+        marginLeft: 5,
+    },
+    destinationAddress: {
+        color: LightGold,
+        fontSize: 14,
+    },
+    destinationMeta: {
+        marginTop: 10,
+    },
+    destinationFare: {
+        color: Gold,
+        fontSize: 14,
+        fontWeight: '700',
+    },
+    completeButtonContent: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+    },
+    completeButtonText: {
+        color: Black,
+        fontSize: 16,
+        fontWeight: '700',
+    },
+    completeButtonSubtext: {
+        color: Gold,
+        fontSize: 12,
+        fontWeight: '500',
+    },
+    
+    // Missing styles for the new UI elements
+    pickupDot: {
+        width: 8,
+        height: 8,
+        borderRadius: 4,
+        backgroundColor: '#4CAF50', // Green for pickup
+    },
+    destinationDot: {
+        width: 8,
+        height: 8,
+        borderRadius: 4,
+        backgroundColor: '#F44336', // Red for destination
+    },
+    verifyButtonActive: {
+        backgroundColor: Gold,
+        elevation: 4,
+    },
+    verifyButtonTextActive: {
+        color: Black,
+        fontWeight: '700',
+    },
+    pulsingDot: {
+        width: 10,
+        height: 10,
+        borderRadius: 5,
+        backgroundColor: '#4CAF50',
+        // Add animation effect (can be enhanced with Animated API)
     },
 });

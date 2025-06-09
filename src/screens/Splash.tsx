@@ -134,7 +134,10 @@ const Splash = ({ navigation }: { navigation: any }) => {
             const accountStatus = DriverDetails.data.accountStatus;
             
             setHasNavigated(true);
-
+            if (!DriverDetails.data.registrationComplete){
+              navigation.replace('Signup', { mobileNumber });
+              return;
+            }
             if (accountStatus === 'VehiclePending') {
               navigation.replace('vehicle-details', { mobileNumber });
             } else if (accountStatus === 'DocumentsPending') {

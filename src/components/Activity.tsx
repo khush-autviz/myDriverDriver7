@@ -55,13 +55,13 @@ const ActivityItem = ({ item }: {item: any} ) => {
 
   return (
     <TouchableOpacity onPress={() => navigation.navigate('ride-details', { ride: item })} style={styles.activityItem}>
-      <View style={styles.activityIconContainer}>
+      {/* <View style={styles.activityIconContainer}>
         <Ionicons 
           name="car" 
           size={20} 
           color={Gold} 
         />
-      </View>
+      </View> */}
       <View style={styles.activityContent}>
         <Text style={styles.activityTitle}>{getTitle()}</Text>
         <Text style={styles.activityDate}>{formatDate(item.createdAt)}</Text>
@@ -252,7 +252,7 @@ const styles = StyleSheet.create({
   },
   activityItem: {
     flexDirection: 'row',
-    alignItems: 'center',
+    // alignItems: 'center',
     backgroundColor: 'rgba(255, 255, 255, 0.05)',
     borderRadius: 12,
     padding: 16,
@@ -284,7 +284,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
   },
   amountText: {
-    color: White,
+    color: '#4CAF50',
     fontSize: 16,
     fontWeight: '700',
   },

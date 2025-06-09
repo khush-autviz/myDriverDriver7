@@ -376,12 +376,12 @@ const requestStoragePermission = async () => {
   return (
     <SafeAreaView style={styles.container}>
       {VehicleDetailsMutation.isPending && <Loader />}
-      <TouchableOpacity onPress={() => navigation.goBack()}>
+      {/* <TouchableOpacity onPress={() => navigation.goBack()}>
         <View style={styles.backRow}>
           <Ionicons name="chevron-back" size={20} color={Gold} />
           <Text style={styles.backText}>Back</Text>
         </View>
-      </TouchableOpacity>
+      </TouchableOpacity> */}
       
       <Text style={styles.headerText}>Vehicle Details</Text>
       
@@ -546,7 +546,7 @@ const styles = StyleSheet.create({
   imageUploadButton: {
     borderColor: White,
     borderWidth: 1,
-    borderStyle: 'dashed',
+    // borderStyle: 'dashed',
     marginTop: 10,
     height: 100,
     borderRadius: 8,

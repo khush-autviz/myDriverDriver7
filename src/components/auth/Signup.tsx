@@ -219,6 +219,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import {useMutation} from '@tanstack/react-query';
 import {authSignup} from '../../constants/Api';
 import {useAuthStore} from '../../store/authStore';
+import { ShowToast } from '../../lib/Toast';
 
 const {width} = Dimensions.get('window');
 
@@ -268,10 +269,15 @@ export default function Signup() {
       console.log("register mutation success", response);
       SETUSER(response?.data?.user)
       SETTOKEN({access_token: response.data.access_token, refresh_token: response.data.refresh_token})
-      navigation.navigate('vehicle-details')
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'vehicle-details' }],
+      })
+      // navigation.navigate('vehicle-details')
     },
     onError: (error: any) => {
       console.log("register mutation error", error);
+      ShowToast(error.message, { type: 'error' });
     }
   });
 

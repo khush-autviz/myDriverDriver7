@@ -45,8 +45,8 @@ const instance = axios.create({
 instance.interceptors.request.use((config) => {
   const token = useAuthStore.getState().token?.access_token;
 
-  // config.baseURL = 'https://t1wfswdh-3000.inc1.devtunnels.ms';
-  config.baseURL = 'http://3.110.180.116:3000';
+  config.baseURL = 'https://t1wfswdh-3000.inc1.devtunnels.ms';
+  // config.baseURL = 'http://3.110.180.116:3000';
 
 
   if (token) {
