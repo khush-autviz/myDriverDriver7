@@ -403,7 +403,7 @@ export default function Signup() {
               </View>
               
               {/* Phone Number Display */}
-              {mobileNumber && (
+              {/* {mobileNumber && (
                 <View style={styles.inputGroup}>
                   <Text style={styles.inputLabel}>Phone Number</Text>
                   <View style={styles.phoneDisplay}>
@@ -412,7 +412,7 @@ export default function Signup() {
                   </View>
                   <Text style={styles.phoneHint}>Phone number verified from previous step</Text>
                 </View>
-              )}
+              )} */}
             </View>
 
             {/* Terms and Conditions */}

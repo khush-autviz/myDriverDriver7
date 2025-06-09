@@ -21,7 +21,7 @@ export default function TripDetails() {
     const [mode, setmode] = useState('')
     const [modalVisible, setmodalVisible] = useState(false)
     const [otp, setotp] = useState('')
-//    const [rideInfo, setRideInfo] = useState<any>(null)
+    //    const [rideInfo, setRideInfo] = useState<any>(null)
     const bottomSheetRef = useRef<BottomSheet>(null);
     const { location, startTracking, stopTracking } = useLocation()
     // const { currentRide, fetchRideDetails} = useRide()
@@ -43,7 +43,7 @@ export default function TripDetails() {
         console.log('handleSheetChanges', index);
     }, []);
 
-    const {data: rideInfo} = useQuery({
+    const { data: rideInfo } = useQuery({
         queryKey: ['ride-details', rideId],
         queryFn: () => rideDetails(rideId),
         enabled: !!rideId,
@@ -60,7 +60,7 @@ export default function TripDetails() {
         },
         onError: (error) => {
             console.log('driver arrived error', error);
-            ShowToast(error?.message, {type: 'error'})
+            ShowToast(error?.message, { type: 'error' })
         }
     })
 
@@ -73,7 +73,7 @@ export default function TripDetails() {
         },
         onError: (error) => {
             console.log('ride otp verification error', error);
-            ShowToast(error?.message, {type: 'error'})
+            ShowToast(error?.message, { type: 'error' })
         }
     })
 
@@ -83,11 +83,16 @@ export default function TripDetails() {
         mutationFn: completeRide,
         onSuccess: (response) => {
             console.log('complete ride success', response);
-            navigation.navigate('Main')
+            setRideId(null)
+            // navigation.navigate('Main')
+            navigation.reset({
+                index: 0,
+                routes: [{ name: 'Main' }],
+            })
         },
         onError: (error) => {
             console.log('complete ride error', error);
-            ShowToast(error?.message, {type: 'error'})
+            ShowToast(error?.message, { type: 'error' })
         }
     })
 
@@ -100,8 +105,12 @@ export default function TripDetails() {
         },
         onError: (error) => {
             console.log('cancel ride error', error);
+            ShowToast(error?.message, { type: 'error' })
         }
     })
+
+    console.log(mode, 'mode');
+
 
 
     useEffect(() => {
@@ -111,20 +120,32 @@ export default function TripDetails() {
     }, [rideInfo])
 
     //ride cancel socket
-    socket?.on('rideCancelled', (data: any) => {
+    // socket?.on('rideCancelled', (data: any) => {
+    const handleRideCancel = (data: any) => {
         console.log('ride cancel socket', data);
-        setRideId(null)     
-        navigation.navigate('Main')
-        ShowToast('Ride cancelled by user', {type: 'error'})   
-    })
+        setRideId(null)
+        navigation.reset({
+            index: 0,
+            routes: [{ name: 'Main' }],
+        })
+        ShowToast('Ride cancelled by user', { type: 'error' })
+    }
+    // })
+
+    useEffect(() => {
+        socket?.on('rideCancelled', handleRideCancel)
+        return () => {
+            socket?.off('rideCancelled', handleRideCancel)
+        }
+    }, [])
 
     console.log(location, 'location');
-    
+
 
     return (
         <GestureHandlerRootView style={styles.container}>
 
-        {(cancelRideMutation.isPending || driverArrivedMutation.isPending || verifyRideOtpMutation.isPending || completeRideMutation.isPending) &&  <Loader />}
+            {(cancelRideMutation.isPending || driverArrivedMutation.isPending || verifyRideOtpMutation.isPending || completeRideMutation.isPending) && <Loader />}
 
             {/* Cancel Ride Modal */}
             <Modal
@@ -188,49 +209,51 @@ export default function TripDetails() {
             </Modal>
 
 
-            <MapView
-                style={styles.map}
-                showsCompass={false}
-                initialRegion={{
-                    latitude: location?.latitude,
-                    longitude: location?.longitude,
-                    latitudeDelta: 0.01,
-                    longitudeDelta: 0.01,
-                }}
-            >
-                {mode === 'accepted' && (
-                    <>
-                <Marker coordinate={{ latitude: location?.latitude, longitude: location?.longitude }} ></Marker>
-                <Marker coordinate={{ latitude: rideInfo?.data?.ride?.pickupLocation?.coordinates[0], longitude: rideInfo?.data?.ride?.pickupLocation?.coordinates[1] }} >
-                    <Image source={require('../assets/logo/push-pin.png')} style={{ width: 40, height: 40}} />
-                </Marker>
+            {location?.latitude && location?.longitude && (
+                <MapView
+                    style={styles.map}
+                    showsCompass={false}
+                    initialRegion={{
+                        latitude: location?.latitude,
+                        longitude: location?.longitude,
+                        latitudeDelta: 0.01,
+                        longitudeDelta: 0.01,
+                    }}
+                >
+                    {rideInfo?.data?.ride?.pickupLocation?.coordinates && location?.latitude && location?.longitude && mode === 'accepted' && (
+                        <>
+                            <Marker coordinate={{ latitude: location?.latitude, longitude: location?.longitude }} ></Marker>
+                            <Marker coordinate={{ latitude: rideInfo?.data?.ride?.pickupLocation?.coordinates[0], longitude: rideInfo?.data?.ride?.pickupLocation?.coordinates[1] }} >
+                                <Image source={require('../assets/logo/push-pin.png')} style={{ width: 40, height: 40 }} />
+                            </Marker>
 
-                <MapViewDirections
-                    origin={{latitude: location?.latitude, longitude: location?.longitude}}
-                    destination={{latitude: rideInfo?.data?.ride?.pickupLocation?.coordinates[0], longitude: rideInfo?.data?.ride?.pickupLocation?.coordinates[1]}}
-                    apikey='AIzaSyBcKgyA7urR7gHyen79h40UlkvTJJoKc9I'
-                    strokeColor={Gold}
-                    strokeWidth={4}
-                />
-                </>
-                )}
-                {mode !== 'accepted' && (
-                    <>
-                    <Marker coordinate={{ latitude: rideInfo?.data?.ride?.pickupLocation?.coordinates[0], longitude: rideInfo?.data?.ride?.pickupLocation?.coordinates[1] }} />
-                    <Marker coordinate={{ latitude: rideInfo?.data?.ride?.destination?.coordinates[0], longitude: rideInfo?.data?.ride?.destination?.coordinates[1] }} >
-                        <Image source={require('../assets/logo/push-pin.png')} style={{ width: 40, height: 40}} />
-                    </Marker>
-                    <MapViewDirections
-                    origin={{latitude: rideInfo?.data?.ride?.pickupLocation?.coordinates[0], longitude: rideInfo?.data?.ride?.pickupLocation?.coordinates[1]}}
-                    destination={{latitude: rideInfo?.data?.ride?.destination?.coordinates[0], longitude: rideInfo?.data?.ride?.destination?.coordinates[1]}}
-                    apikey='AIzaSyBcKgyA7urR7gHyen79h40UlkvTJJoKc9I'
-                    strokeColor={Gold}
-                    strokeWidth={4}
-                />
-                    </>
-                )}
+                            <MapViewDirections
+                                origin={{ latitude: location?.latitude, longitude: location?.longitude }}
+                                destination={{ latitude: rideInfo?.data?.ride?.pickupLocation?.coordinates[0], longitude: rideInfo?.data?.ride?.pickupLocation?.coordinates[1] }}
+                                apikey='AIzaSyBcKgyA7urR7gHyen79h40UlkvTJJoKc9I'
+                                strokeColor={Gold}
+                                strokeWidth={4}
+                            />
+                        </>
+                    )}
+                    {rideInfo?.data?.ride?.pickupLocation?.coordinates && location?.latitude && location?.longitude && mode !== 'accepted' && (
+                        <>
+                            <Marker coordinate={{ latitude: rideInfo?.data?.ride?.pickupLocation?.coordinates[0], longitude: rideInfo?.data?.ride?.pickupLocation?.coordinates[1] }} />
+                            <Marker coordinate={{ latitude: rideInfo?.data?.ride?.destination?.coordinates[0], longitude: rideInfo?.data?.ride?.destination?.coordinates[1] }} >
+                                <Image source={require('../assets/logo/push-pin.png')} style={{ width: 40, height: 40 }} />
+                            </Marker>
+                            <MapViewDirections
+                                origin={{ latitude: rideInfo?.data?.ride?.pickupLocation?.coordinates[0], longitude: rideInfo?.data?.ride?.pickupLocation?.coordinates[1] }}
+                                destination={{ latitude: rideInfo?.data?.ride?.destination?.coordinates[0], longitude: rideInfo?.data?.ride?.destination?.coordinates[1] }}
+                                apikey='AIzaSyBcKgyA7urR7gHyen79h40UlkvTJJoKc9I'
+                                strokeColor={Gold}
+                                strokeWidth={4}
+                            />
+                        </>
+                    )}
 
-            </MapView>
+                </MapView>
+            )}
 
 
             <BottomSheet

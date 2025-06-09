@@ -76,6 +76,7 @@ export default function Home() {
     },
     onError: (error) => {
       console.log('❌ Driver online error', error);
+      ShowToast(error?.message, {type: 'error'})
     }
   })
 
@@ -87,6 +88,7 @@ export default function Home() {
     },
     onError: (error) => {
       console.log('extra driver online error', error);
+      ShowToast(error?.message, {type: 'error'})
     }
   })
 
@@ -108,6 +110,7 @@ export default function Home() {
     },
     onError: (error) => {
       console.log('❌ Driver offline error', error);
+      ShowToast(error?.message, {type: 'error'})
     }
   })
 
@@ -143,6 +146,7 @@ export default function Home() {
     },
     onError: (error) => {
       console.log('ride accept error', error);
+      ShowToast(error?.message, {type: 'error'})
     }
   })
 
@@ -165,6 +169,11 @@ export default function Home() {
     console.log('ride accepted', rideDetails?.rideId);
     rideAcceptedMutation.mutateAsync(rideDetails?.rideId);
   }
+
+  socket?.on('forceOffline', (data) => {
+    console.log('force offline', data);
+    toggleNormalMode()
+  })
 
 
   useEffect(() => {

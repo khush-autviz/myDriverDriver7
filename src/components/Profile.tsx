@@ -407,7 +407,7 @@ useEffect(() => {
       />
       <TouchableOpacity
         style={{
-          backgroundColor: buttonDisabled ? Gray : Gold,
+          backgroundColor: Gold,
           height: 50,
           borderRadius: 8,
           display: 'flex',

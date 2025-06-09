@@ -96,13 +96,13 @@ export default function ApprovalScreen() {
           )}
         </TouchableOpacity> */}
         
-        <TouchableOpacity
+        {/* <TouchableOpacity
           style={styles.supportButton}
           onPress={() => navigation.navigate('Main')}
         >
           <Ionicons name="mail-outline" size={20} color={White} />
           <Text style={styles.supportButtonText}>Test</Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
     </SafeAreaView>
   )

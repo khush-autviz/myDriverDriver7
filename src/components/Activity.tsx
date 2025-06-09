@@ -6,60 +6,12 @@ import Ionicons from 'react-native-vector-icons/Ionicons'
 import { rideHistory } from '../constants/Api'
 import { useQuery } from '@tanstack/react-query'
 import { useFocusEffect } from '@react-navigation/native'
-
-// Sample data for demonstration
-// const sampleActivities = [
-//   {
-//     id: '1',
-//     type: 'ride',
-//     title: 'Trip to Downtown',
-//     date: '2024-03-20 14:30',
-//     amount: '$25.50',
-//     status: 'completed',
-//     distance: '12.5 km',
-//     duration: '28 min'
-//   },
-//   {
-//     id: '2',
-//     type: 'earning',
-//     title: 'Daily Earnings',
-//     date: '2024-03-20 22:00',
-//     amount: '$158.75',
-//     rides: 8
-//   },
-//   {
-//     id: '3',
-//     type: 'ride',
-//     title: 'Airport Transfer',
-//     date: '2024-03-19 09:15',
-//     amount: '$45.00',
-//     status: 'completed',
-//     distance: '28.3 km',
-//     duration: '45 min'
-//   },
-//   {
-//     id: '4',
-//     type: 'earning',
-//     title: 'Bonus Reward',
-//     date: '2024-03-19 23:59',
-//     amount: '$25.00',
-//     description: 'Peak hours bonus'
-//   },
-//   {
-//     id: '5',
-//     type: 'ride',
-//     title: 'Shopping Mall Trip',
-//     date: '2024-03-19 16:45',
-//     amount: '$18.25',
-//     status: 'completed',
-//     distance: '8.7 km',
-//     duration: '22 min'
-//   }
-// ];
+import { useNavigation } from '@react-navigation/native'
 
 
 // Activity item component
 const ActivityItem = ({ item }: {item: any} ) => {
+  const navigation = useNavigation()
   // Format the date
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -102,7 +54,7 @@ const ActivityItem = ({ item }: {item: any} ) => {
   };
 
   return (
-    <View style={styles.activityItem}>
+    <TouchableOpacity onPress={() => navigation.navigate('ride-details', { ride: item })} style={styles.activityItem}>
       <View style={styles.activityIconContainer}>
         <Ionicons 
           name="car" 
@@ -115,7 +67,7 @@ const ActivityItem = ({ item }: {item: any} ) => {
         <Text style={styles.activityDate}>{formatDate(item.createdAt)}</Text>
         <View style={styles.activityDetailsRow}>
           <Text style={styles.activityDetails}>
-            {item.distance.toFixed(1)} km • {item.vehicle?.type || 'Car'}
+            {item.distance.toFixed(1)} km 
           </Text>
           <Text style={[styles.statusText, { color: getStatusColor(item.status) }]}>
             {item.status.charAt(0).toUpperCase() + item.status.slice(1)}
@@ -127,13 +79,11 @@ const ActivityItem = ({ item }: {item: any} ) => {
           {formatFare(item.fare)}
         </Text>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 }
 
 export default function Activity() {
-  // const [isLoading, setIsLoading] = useState(false)
-  const [isFilterVisible, setIsFilterVisible] = useState(false)
 
   // ride history
 const {data: rideDetails, isLoading, refetch, error} = useQuery({
@@ -142,11 +92,11 @@ const {data: rideDetails, isLoading, refetch, error} = useQuery({
   // refetchOnWindowFocus: true,
 })
 
-useFocusEffect(
-  useCallback(() => {
-    refetch()
-  }, [])
-)
+// useFocusEffect(
+//   useCallback(() => {
+//     refetch()
+//   }, [])
+// )
 
   console.log(rideDetails, 'rideHistory');
 
@@ -170,19 +120,6 @@ useFocusEffect(
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Activity</Text>
       </View>
-
-      {/* Activity Summary Card */}
-      {/* <View style={styles.summaryCard}>
-        <View style={styles.summaryItem}>
-          <Text style={styles.summaryLabel}>Total Rides</Text>
-          <Text style={styles.summaryValue}>{totals.rides}</Text>
-        </View>
-        <View style={styles.summaryDivider} />
-        <View style={styles.summaryItem}>
-          <Text style={styles.summaryLabel}>Total Earnings</Text>
-          <Text style={styles.summaryValue}>${totals.earnings.toFixed(2)}</Text>
-        </View>
-      </View> */}
 
       {/* Activity List */}
       {isLoading ? (
@@ -412,8 +349,9 @@ const styles = StyleSheet.create({
   },
   activityDetailsRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    // justifyContent: 'space-around',
     alignItems: 'center',
+    gap: 10,
     marginTop: 4,
   },
   statusText: {

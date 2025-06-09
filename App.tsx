@@ -25,6 +25,7 @@ import { RideProvider } from './src/context/RideContext';
 import TripDetails from './src/components/TripDetails';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Toast } from './src/lib/Toast';
+import RideDetails from './src/components/RideDetails';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -93,6 +94,7 @@ export default function App() {
                     <Stack.Screen name="vehicle-documents" component={VehicleDocuments} />
                     <Stack.Screen name="approval-screen" component={ApprovalScreen} />
                     <Stack.Screen name='trip-details' component={TripDetails} />
+                    <Stack.Screen name='ride-details' component={RideDetails} />
 
                     {/* Main Tabs */}
                     <Stack.Screen name="Main" component={MainTabs} />

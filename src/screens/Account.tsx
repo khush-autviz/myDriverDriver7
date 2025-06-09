@@ -12,7 +12,11 @@ export default function Account() {
   const navigation: any = useNavigation()
 
   const handleLogout = () => {
-    navigation.navigate('Signin')
+    // navigation.navigate('Signin')
+    navigation.reset({
+      index: 0,
+      routes: [{ name: 'Signin' }],
+    })
     LOGOUT()
   }
 

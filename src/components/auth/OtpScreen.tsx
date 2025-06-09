@@ -131,25 +131,41 @@ export default function OtpScreen() {
       SETTOKEN({access_token: response.data.access_token, refresh_token: response.data.refresh_token})
 
       if (!response.data.user.registrationComplete) {
-        navigation.navigate('Signup', {mobileNumber})
+        // navigation.navigate('Signup', {mobileNumber})
+        navigation.reset({
+          index: 0,
+          routes: [{ name: 'Signup', params: {mobileNumber} }],
+        })
       }
       else if (response.data.user.accountStatus === 'VehiclePending') {
-        navigation.navigate('vehicle-details', {mobileNumber})
+        // navigation.navigate('vehicle-details', {mobileNumber})
+        navigation.reset({
+          index: 0,
+          routes: [{ name: 'vehicle-details', params: {mobileNumber} }],
+        })
       }
       else if (response.data.user.accountStatus === 'DocumentsPending') {
-        navigation.navigate('vehicle-documents', {mobileNumber})
+        // navigation.navigate('vehicle-documents', {mobileNumber})
+        navigation.reset({
+          index: 0,
+          routes: [{ name: 'vehicle-documents', params: {mobileNumber} }],
+        })
       }
       else if (response.data.user.accountStatus === 'ApprovalPending') {
-        navigation.navigate('approval-screen', {mobileNumber})
+        // navigation.navigate('approval-screen', {mobileNumber})
+        navigation.reset({
+          index: 0,
+          routes: [{ name: 'approval-screen', params: {mobileNumber} }],
+        })
       }
       else{
-        navigation.navigate('Main')
+        // navigation.navigate('Main')
+        navigation.reset({
+          index: 0,
+          routes: [{ name: 'Main' }],
+        })
       }
-      // else {
-      //   navigation.navigate('Signup', {mobileNumber})
-      // }
-      // SETUSER(response?.data?.user)
-      // SETTOKEN({access_token: response.data.access_token, refresh_token: response.data.refresh_token})
+      
     },
     onError: (error) => {
       console.log('verify otp error', error); 

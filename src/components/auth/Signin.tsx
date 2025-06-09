@@ -34,7 +34,7 @@ export default function Signin() {
     mutationFn: authSignin,
     onSuccess: (response) => {
       console.log('auth signin success', response);
-      navigation.navigate('OtpScreen', {mobileNumber});
+      navigation.replace('OtpScreen', {mobileNumber});
     },
     onError: (error: any) => {
       ShowToast(error.message ?? 'Something went wrong', { type: 'error' });
