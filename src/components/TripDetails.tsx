@@ -3,7 +3,7 @@ import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } 
 import { QueryClient, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { cancelRide, completeRide, driverArrived, driverWaiting, rideDetails, startRide, verifyRideOtp } from '../constants/Api';
 import { GestureHandlerRootView, TextInput } from 'react-native-gesture-handler';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import Ionicons from 'react-native-vector-icons/Ionicons'
 import { Black, DarkGray, Gold, Gray, LightGold, maroon, White } from '../constants/Color';
 import MapView, { Marker } from 'react-native-maps';
@@ -29,6 +29,9 @@ export default function TripDetails() {
     // const queryClient = useQueryClient()
     const socket = useSocket()
 
+    // NEW: Add screen focus state to prevent continuous operations when not visible
+    const [isScreenFocused, setIsScreenFocused] = useState(false);
+
     const snapPoints = useMemo(() => ['25%', '50%'], []);
 
     const cancelReasons = [
@@ -40,16 +43,43 @@ export default function TripDetails() {
     ];
 
     const handleSheetChanges = useCallback((index: number) => {
-        console.log('handleSheetChanges', index);
-    }, []);
+        // COMMENTED: Prevents logging when screen not focused
+        // console.log('handleSheetChanges', index);
+        if (isScreenFocused) {
+            console.log('handleSheetChanges', index);
+        }
+    }, [isScreenFocused]); // Added isScreenFocused dependency
 
+    // NEW: Track when screen is focused/blurred to prevent unnecessary operations
+    useFocusEffect(
+        useCallback(() => {
+            console.log('🔍 TripDetails screen focused');
+            setIsScreenFocused(true);
+            
+            return () => {
+                console.log('🔍 TripDetails screen blurred');
+                setIsScreenFocused(false);
+            };
+        }, [])
+    );
+
+    // FIXED: Only run query when screen is focused to prevent continuous API calls
     const { data: rideInfo } = useQuery({
         queryKey: ['ride-details', rideId],
         queryFn: () => rideDetails(rideId),
-        enabled: !!rideId,
+        enabled: !!rideId && isScreenFocused, // FIXED: Added screen focus condition
+        refetchOnWindowFocus: false, // FIXED: Prevent unnecessary refetches
     })
 
-    console.log(rideInfo, 'ride info');
+    // COMMENTED: Problematic continuous logging
+    // console.log(rideInfo, 'ride info');
+    
+    // NEW: Only log when screen is focused
+    useEffect(() => {
+        if (isScreenFocused && rideInfo) {
+            console.log(rideInfo, 'ride info');
+        }
+    }, [rideInfo, isScreenFocused]);
 
     // driver arrived mutation
     const driverArrivedMutation = useMutation({
@@ -109,37 +139,59 @@ export default function TripDetails() {
         }
     })
 
-    console.log(mode, 'mode');
-
-
-
+    // COMMENTED: Problematic continuous logging
+    // console.log(mode, 'mode');
+    
+    // NEW: Only log mode when screen is focused
     useEffect(() => {
-        if (rideInfo) {
+        if (isScreenFocused) {
+            console.log(mode, 'mode');
+        }
+    }, [mode, isScreenFocused]);
+
+    // FIXED: Only update mode when screen is focused
+    useEffect(() => {
+        if (rideInfo && isScreenFocused) { // FIXED: Added screen focus condition
             setmode(rideInfo?.data?.ride?.status)
         }
-    }, [rideInfo])
+    }, [rideInfo, isScreenFocused]) // FIXED: Added isScreenFocused dependency
 
     //ride cancel socket
-    const handleRideCancel = (data: any) => {
-        console.log('ride cancel socket', data);
-        setRideId(null)
-        navigation.reset({
-            index: 0,
-            routes: [{ name: 'Main' }],
-        })
-        ShowToast('Ride cancelled by user', { type: 'error' })
-    }
-    // })
-
-    useEffect(() => {
-        socket?.on('rideCancelled', handleRideCancel)
-        return () => {
-            socket?.off('rideCancelled', handleRideCancel)
+    const handleRideCancel = useCallback((data: any) => {
+        // FIXED: Only handle if screen is focused
+        if (isScreenFocused) {
+            console.log('ride cancel socket', data);
+            setRideId(null)
+            navigation.reset({
+                index: 0,
+                routes: [{ name: 'Main' }],
+            })
+            ShowToast('Ride cancelled by user', { type: 'error' })
         }
-    }, [])
+    }, [isScreenFocused, navigation, setRideId]) // FIXED: Added proper dependencies
 
-    console.log(location, 'location');
+    // FIXED: Socket listeners with proper cleanup and focus condition
+    useEffect(() => {
+        if (isScreenFocused && socket) { // FIXED: Only attach when screen focused
+            socket.on('rideCancelled', handleRideCancel)
+            console.log('🔌 Socket listener attached for rideCancelled');
+            
+            return () => {
+                socket.off('rideCancelled', handleRideCancel)
+                console.log('🔌 Socket listener removed for rideCancelled');
+            }
+        }
+    }, [socket, handleRideCancel, isScreenFocused]) // FIXED: Added proper dependencies
 
+    // COMMENTED: Problematic continuous logging
+    // console.log(location, 'location');
+    
+    // NEW: Only log location when screen is focused
+    useEffect(() => {
+        if (isScreenFocused && location) {
+            console.log(location, 'location');
+        }
+    }, [location, isScreenFocused]);
 
     return (
         <GestureHandlerRootView style={styles.container}>
