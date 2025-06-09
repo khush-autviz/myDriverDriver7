@@ -270,11 +270,10 @@ export const LocationProvider: React.FC<Props> = ({ children }) => {
       //   timestamp: new Date().toISOString(),
       //   driverId: user.id
       // });
-
       socket.emit('updateLocation', {
         latitude: coords.latitude,
         longitude: coords.longitude,
-        driverId: user.id,
+        driverId: user?.id,
         timestamp: Date.now()
       });
     } else {

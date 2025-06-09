@@ -118,6 +118,10 @@ export default function Home() {
   // Function to handle normal mode toggle
   const toggleNormalMode = () => {
     if (!isNormalMode) {
+      if(!location?.latitude || !location?.longitude) {
+        ShowToast('Please enable location services to go online', {type: 'error'})
+        return
+      }
       DriverOnlineMutation.mutateAsync({
         driverId: USER?.id ?? USER?._id,
         location: {
