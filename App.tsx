@@ -52,7 +52,7 @@ function MainTabs() {
           return <Ionicons name={iconName} size={size} color={Gold} />;
         },
         tabBarStyle: {
-          backgroundColor: 'black',
+          backgroundColor: Black,
         },
         tabBarLabelStyle: {
           color: Gold,
