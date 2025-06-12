@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   View,
   StyleSheet,
@@ -27,7 +27,7 @@ import { driverGoOffline, driverGoOnline, extraDriverGoOnline, rideAccepted, rid
 import { useLocation } from '../context/LocationProvider';
 import { useAuthStore } from '../store/authStore';
 import Modal from 'react-native-modal';
-import { useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { useRide } from '../context/RideContext';
 import { ShowToast } from '../lib/Toast';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -176,6 +176,7 @@ export default function Home() {
 
   socket?.on('forceOffline', (data) => {
     console.log('force offline', data);
+    SETUSER({...USER, isAvailable: false})
     toggleNormalMode()
   })
 
@@ -197,11 +198,12 @@ export default function Home() {
     console.log(`📍 Background tracking status changed: ${isBackgroundTracking ? 'ACTIVE' : 'INACTIVE'}`);
   }, [isBackgroundTracking])
 
-  useEffect(() => {
+  useFocusEffect(useCallback(() => {
+    console.log('USER isAvailable', USER?.isAvailable);
     if (USER?.isAvailable) {
       setIsNormalMode(true)
     }
-  }, [USER])
+  }, [USER]))
 
   const logAllLocalStorage = async () => {
     try {
@@ -231,7 +233,7 @@ export default function Home() {
         <View style={styles.header}>
           <View>
             <Text style={styles.headerTitle}>Driver Dashboard</Text>
-            <Text style={styles.headerSubtitle}>Welcome back, {USER?.name || 'Driver'}</Text>
+            <Text style={styles.headerSubtitle}>Welcome back, {USER?.firstName || 'Driver'}</Text>
           </View>
           {/* <View style={styles.statusContainer}>
             <View style={[styles.statusIndicator, isNormalMode ? styles.statusIndicatorOnline : styles.statusIndicatorOffline]}>
@@ -252,6 +254,7 @@ export default function Home() {
         <View style={styles.mapContainer}>
           <MapView
             style={styles.map}
+            provider='google'
             initialRegion={{
               latitude: location?.latitude || 0,
               longitude: location?.longitude || 0,

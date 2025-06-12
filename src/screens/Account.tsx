@@ -68,18 +68,18 @@ export default function Account() {
         {/* Profile Card */}
         <View style={styles.profileCard}>
           <View style={styles.profileImageContainer}>
-            {USER?.documents?.profilePhoto?.image ? (
+            {/* {USER?.documents?.profilePhoto?.image ? (
               <Image 
-                source={{ uri: `https://t1wfswdh-3000.inc1.devtunnels.ms/${USER?.documents?.profilePhoto?.image}` }} 
+                source={{ uri: `http://3.110.180.116:3000/${USER?.documents?.profilePhoto?.image}` }} 
                 style={styles.profileImage} 
               />
-            ) : (
+            ) : ( */}
               <View style={styles.profileImagePlaceholder}>
                 <Text style={styles.profileInitials}>
                   {USER?.firstName?.charAt(0) || ''}{USER?.lastName?.charAt(0) || ''}
                 </Text>
               </View>
-            )}
+            {/* )} */}
           </View>
           <View style={styles.profileInfo}>
             <Text style={styles.profileName}>{USER?.firstName} {USER?.lastName}</Text>

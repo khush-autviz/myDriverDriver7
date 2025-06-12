@@ -263,6 +263,7 @@ export default function TripDetails() {
             {location?.latitude && location?.longitude && (
                 <MapView
                     style={styles.map}
+                    provider='google'
                     showsCompass={false}
                     initialRegion={{
                         latitude: location?.latitude,
@@ -400,7 +401,11 @@ export default function TripDetails() {
                     )}
 
                     {mode === 'arrived' && (
-                        <ScrollView>
+                        <View style={{ flex: 1 }}>
+                        <ScrollView
+                          showsVerticalScrollIndicator={false}
+                          contentContainerStyle={{ paddingBottom: 20 }}
+                        >
                             {/* Header Section */}
                             {/* <View style={styles.headerSection}>
                                 <View style={styles.statusBadge}>
@@ -447,20 +452,15 @@ export default function TripDetails() {
                             </View>
 
                             {/* Trip Summary Card */}
+                            
                             <View style={styles.summaryCard}>
-                                {/* <Text style={styles.summaryTitle}>Trip Summary</Text> */}
                                  {/* Pickup Location */}
                                  <View style={styles.locationRow}>
-                                    {/* <View style={styles.locationDot}> */}
-                                        {/* <View style={styles.pickupDot} /> */}
-                                    {/* </View> */}
                                     <View style={styles.locationContent}>
                                         <Text style={styles.locationLabel}>PICKUP</Text>
                                         <Text style={styles.locationAddress}>{rideInfo?.data?.ride?.pickupLocation?.address}</Text>
                                     </View>
                                 </View>
-
-
 
                                 {/* Destination Location */}
                                 <View style={styles.locationRow}>
@@ -472,19 +472,15 @@ export default function TripDetails() {
                                         <Text style={styles.locationAddress}>{rideInfo?.data?.ride?.destination?.address}</Text>
                                     </View>
                                 </View>
-                                <View style={styles.summaryRow}>
+                                {/* <View style={styles.summaryRow}>
                                     <Text style={styles.summaryLabel}>Distance:</Text>
                                     <Text style={styles.summaryValue}>{rideInfo?.data?.ride?.distance.toFixed(1)} km</Text>
-                                </View>
+                                </View> */}
                                 <View style={styles.summaryRow}>
                                     <Text style={styles.summaryLabel}>Fare:</Text>
                                     <Text style={styles.summaryValue}>${rideInfo?.data?.ride?.fare.toFixed(2)}</Text>
                                 </View>
-                                {/* <View style={styles.summaryRow}>
-                                    <Text style={styles.summaryLabel}>Vehicle:</Text>
-                                    <Text style={styles.summaryValue}>{rideInfo?.data?.ride?.vehicle?.type.toUpperCase()}</Text>
-                                </View> */}
-                            </View>
+   
 
                             {/* Cancel Button */}
                             <TouchableOpacity
@@ -495,7 +491,10 @@ export default function TripDetails() {
                                 {/* <Ionicons name="close-circle-outline" size={18} color={maroon} /> */}
                                 <Text style={styles.cancelOnlyButtonText}>Cancel Ride</Text>
                             </TouchableOpacity>
+                            </View>
                         </ScrollView>
+                        </View>
+                        
                     )}
 
                     {mode === 'otp_verified' && (
@@ -955,7 +954,8 @@ const styles = StyleSheet.create({
     otpCard: {
         backgroundColor: 'rgba(255, 255, 255, 0.08)',
         borderRadius: 10,
-        padding: 10,
+        paddingHorizontal: 10,
+        paddingTop: 5,
         marginBottom: 10,
     },
     otpHeader: {
@@ -985,6 +985,8 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         padding: 10,
         marginBottom: 10,
+        flex: 1,
+        height: '100%',
     },
     summaryTitle: {
         color: Gold,

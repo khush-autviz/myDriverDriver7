@@ -186,12 +186,15 @@ export const LocationProvider: React.FC<Props> = ({ children }) => {
 
   // Get native modules
   const { BackgroundLocationModule } = NativeModules;
-  const backgroundLocationEmitter = Platform.OS === 'ios'
-    ? new NativeEventEmitter(BackgroundLocationModule)
-    : DeviceEventEmitter;
+  // const backgroundLocationEmitter = Platform.OS === 'ios'
+  //   ? new NativeEventEmitter(BackgroundLocationModule)
+  //   : DeviceEventEmitter;
+
+    const backgroundLocationEmitter = DeviceEventEmitter;
 
   const requestPermission = async (): Promise<boolean> => {
     if (Platform.OS === 'ios') {
+      await Geolocation.requestAuthorization('whenInUse');
       return true; // iOS handles permission automatically
     }
 
