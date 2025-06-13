@@ -277,7 +277,7 @@ export default function Signup() {
     },
     onError: (error: any) => {
       console.log("register mutation error", error);
-      ShowToast(error.message, { type: 'error' });
+      ShowToast(error?.response?.data?.message, { type: 'error' });
     }
   });
 

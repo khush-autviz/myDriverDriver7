@@ -266,14 +266,14 @@ export const LocationProvider: React.FC<Props> = ({ children }) => {
 
   // Function to send location to backend via socket
   const sendLocationToBackend = (coords: GeoCoordinates) => {
-    console.log(socket, 'socket in sendLocationToBackend');
+    // console.log(socket, 'socket in sendLocationToBackend');
     if (socket) {
-      console.log('📍 Sending location to backend:', {
-        latitude: coords.latitude,
-        longitude: coords.longitude,
-        timestamp: new Date().toISOString(),
-        driverId: user?.id ?? user?._id
-      });
+      // console.log('📍 Sending location to backend:', {
+      //   latitude: coords.latitude,
+      //   longitude: coords.longitude,
+      //   timestamp: new Date().toISOString(),
+      //   driverId: user?.id ?? user?._id
+      // });
       socket.emit('updateLocation', {
         latitude: coords.latitude,
         longitude: coords.longitude,
@@ -288,7 +288,7 @@ export const LocationProvider: React.FC<Props> = ({ children }) => {
   // Background location tracking functions
   const startBackgroundTracking = async (): Promise<void> => {
     try {
-      console.log('🚀 Starting background location tracking...');
+      // console.log('🚀 Starting background location tracking...');
 
       const hasPermission = await requestPermission();
       if (!hasPermission) {
@@ -307,11 +307,11 @@ export const LocationProvider: React.FC<Props> = ({ children }) => {
       // Set up interval to get and send location every 5 seconds
       locationUpdateInterval.current = setInterval(async () => {
         try {
-          console.log('⏰ Background location update interval triggered');
+          // console.log('⏰ Background location update interval triggered');
 
           Geolocation.getCurrentPosition(
             (position: GeoPosition) => {
-              console.log('📍 Background location obtained:', position.coords);
+              // console.log('📍 Background location obtained:', position.coords);
               setLocation(position.coords);
               sendLocationToBackend(position.coords);
             },
@@ -338,7 +338,7 @@ export const LocationProvider: React.FC<Props> = ({ children }) => {
 
   const stopBackgroundTracking = (): void => {
     try {
-      console.log('🛑 Stopping background location tracking...');
+      // console.log('🛑 Stopping background location tracking...');
 
       // Clear interval
       if (locationUpdateInterval.current) {
@@ -354,7 +354,7 @@ export const LocationProvider: React.FC<Props> = ({ children }) => {
       }
 
       setIsBackgroundTracking(false);
-      console.log('✅ Background location tracking stopped successfully');
+      // console.log('✅ Background location tracking stopped successfully');
     } catch (error) {
       console.error('❌ Error stopping background tracking:', error);
     }
@@ -376,7 +376,7 @@ export const LocationProvider: React.FC<Props> = ({ children }) => {
     const subscription = backgroundLocationEmitter.addListener(
       'BackgroundLocationUpdate',
       (locationData: any) => {
-        console.log('📍 Received background location update from native:', locationData);
+        // console.log('📍 Received background location update from native:', locationData);
         const coords = {
           latitude: locationData.latitude,
           longitude: locationData.longitude,

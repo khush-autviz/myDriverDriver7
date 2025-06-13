@@ -96,29 +96,13 @@ export default function OtpScreen() {
       }
       
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.log('verify otp error', error); 
-      ShowToast(error?.message || 'Failed to verify OTP', { type: 'error' });
+      ShowToast(error?.response?.data?.message || 'Failed to verify OTP', { type: 'error' });
     },
   });
 
-  // Resend OTP mutation
-  const resendOtpMutation = useMutation({
-    mutationFn: (data: any) => {
-      // Replace with your actual resend OTP API call
-      return Promise.resolve({ success: true });
-    },
-    onSuccess: () => {
-      setTimer(30);
-      setCanResend(false);
-    }
-  });
 
-  const handleResendOtp = () => {
-    if (canResend) {
-      resendOtpMutation.mutate({ phone: mobileNumber });
-    }
-  };
 
   const handleVerify = async () => {
     if (otp.length != 4) {
@@ -213,20 +197,14 @@ export default function OtpScreen() {
         onPress={handleVerify}
         disabled={otp.length !== 4 || verifyOtpMutation.isPending}
       >
-        {verifyOtpMutation.isPending ? (
-          <View style={styles.loadingContainer}>
-            <View style={styles.loadingDot} />
-            <View style={styles.loadingDot} />
-            <View style={styles.loadingDot} />
-          </View>
-        ) : (
+        
           <Text style={[
             styles.verifyText,
             (otp.length !== 4) && styles.verifyTextDisabled
           ]}>
-            Verify OTP
+            {verifyOtpMutation.isPending ? <ActivityIndicator size="small" color={Black} /> : 'Verify OTP'}
           </Text>
-        )}
+        
       </TouchableOpacity>
     </SafeAreaView>
   );

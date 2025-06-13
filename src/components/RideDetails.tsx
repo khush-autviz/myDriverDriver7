@@ -28,7 +28,7 @@ export default function RideDetails() {
       {/* Status and Date */}
       <View style={styles.section}>
         <View style={styles.statusContainer}>
-          <Text style={styles.status}>{ride.status.toUpperCase()}</Text>
+          <Text style={[styles.status, {color: ride.status === 'completed' ? '#4CAF50' : '#F44336'}]}>{ride.status.toUpperCase()}</Text>
           <Text style={styles.date}>{new Date(ride.createdAt).toLocaleDateString('en-US', {
             month: 'short',
             day: 'numeric',
@@ -153,7 +153,7 @@ const styles = StyleSheet.create({
     padding: 15,
   },
   status: {
-    color: Gold,
+    // color: Gold,
     fontSize: 16,
     fontWeight: '700',
   },

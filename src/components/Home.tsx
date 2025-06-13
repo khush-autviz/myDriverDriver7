@@ -68,15 +68,14 @@ export default function Home() {
         latitude: location?.latitude || 0,
         longitude: location?.longitude || 0,
       })
-      socket?.on('rideRequest', (data) => {
-        setrideDetails(data)
-        setmodalVisible(true)
-        // fetchRideDetails(data.rideId)  // This will trigger useEffect when currentRide updates
-      })
+      // socket?.on('rideRequest', (data) => {
+      //   setrideDetails(data)
+      //   setmodalVisible(true)
+      // })
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.log('❌ Driver online error', error);
-      ShowToast(error?.message, {type: 'error'})
+      ShowToast(error?.response?.data?.message, {type: 'error'})
     }
   })
 
@@ -86,9 +85,9 @@ export default function Home() {
       console.log('extra driver online success', response);
       setIsDriverMode(true);
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.log('extra driver online error', error);
-      ShowToast(error?.message, {type: 'error'})
+      ShowToast(error?.response?.data?.message, {type: 'error'})
     }
   })
 
@@ -108,9 +107,9 @@ export default function Home() {
         console.error('❌ Failed to stop background tracking:', error);
       }
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.log('❌ Driver offline error', error);
-      ShowToast(error?.message, {type: 'error'})
+      ShowToast(error?.response?.data?.message, {type: 'error'})
     }
   })
 
@@ -148,9 +147,9 @@ export default function Home() {
       // fetchRideDetails(rideDetails.rideId)
       navigation.navigate('trip-details')
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.log('ride accept error', error);
-      ShowToast(error?.message, {type: 'error'})
+      ShowToast(error?.response?.data?.message, {type: 'error'})
     }
   })
 
@@ -180,6 +179,12 @@ export default function Home() {
     toggleNormalMode()
   })
 
+  socket?.on('rideRequest', (data) => {
+    console.log('ride request', data);
+    setrideDetails(data)
+    setmodalVisible(true)
+  })
+
 
   useEffect(() => {
     startTracking()
@@ -203,28 +208,10 @@ export default function Home() {
     if (USER?.isAvailable) {
       setIsNormalMode(true)
     }
-  }, [USER]))
-
-  const logAllLocalStorage = async () => {
-    try {
-      const allKeys = await AsyncStorage.getAllKeys();
-      const allItems = await AsyncStorage.multiGet(allKeys);
-  
-      console.log('📦 AsyncStorage contents:');
-      allItems.forEach(([key, value]) => {
-        console.log(`${key}:`, value);
-      });
-    } catch (error) {
-      console.error('❌ Error reading AsyncStorage:', error);
+    else {
+      setIsNormalMode(false)
     }
-  };
-  
-  // Call this function wherever appropriate
-  useEffect(() => {
-    logAllLocalStorage();
-  }, []);
-  
-
+  }, [USER]))
 
   return (
     <>

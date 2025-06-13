@@ -11,7 +11,8 @@ import {
   Alert,
   Platform,
   PermissionsAndroid,
-  Linking
+  Linking,
+  ActivityIndicator
 } from 'react-native'
 import { Black, Gold, Gray, LightGold, White } from '../../constants/Color'
 import { useNavigation } from '@react-navigation/native'
@@ -65,9 +66,9 @@ export default function VehicleDetails() {
         routes: [{ name: 'vehicle-documents' }],
       })
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.log('vehicle details mutation error', error);
-      ShowToast(error.message, { type: 'error' });
+      ShowToast(error?.response?.data?.message, { type: 'error' });
       // Alert.alert('Error', 'Failed to save vehicle details. Please try again.');
     }
   });
@@ -432,7 +433,6 @@ const requestStoragePermission = async () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      {VehicleDetailsMutation.isPending && <Loader />}
       {/* <TouchableOpacity onPress={() => navigation.goBack()}>
         <View style={styles.backRow}>
           <Ionicons name="chevron-back" size={20} color={Gold} />
@@ -557,7 +557,7 @@ const requestStoragePermission = async () => {
           disabled={VehicleDetailsMutation.isPending}
           activeOpacity={0.7}
         >
-          <Text style={styles.submitButtonText}>Submit</Text>
+          {VehicleDetailsMutation.isPending ? <ActivityIndicator size="small" color={Black} /> : 'Submit'}
         </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>

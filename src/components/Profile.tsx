@@ -1,6 +1,6 @@
 
 
-import { View, Text, Image, TouchableOpacity, TextInput, Platform } from 'react-native'
+import { View, Text, Image, TouchableOpacity, TextInput, Platform, ActivityIndicator } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { Black, Gold, Gray, White } from '../constants/Color'
 import { useAuthStore } from '../store/authStore'
@@ -81,9 +81,9 @@ export default function Profile() {
       ShowToast('Profile updated successfully', { type: 'success' });
       refetch()
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.log('profile update error', error);
-      ShowToast(error?.message || 'Failed to update profile', { type: 'error' });
+      ShowToast(error?.response?.data?.message || 'Failed to update profile', { type: 'error' });
     }
   })
 
@@ -134,13 +134,13 @@ useEffect(() => {
 
   return (
     <SafeAreaView style={{paddingHorizontal: 20, flex: 1, backgroundColor: Black}}>
-      <View style={{display: 'flex', flexDirection: 'row', alignItems: 'center', marginTop: 20}}>
+      <View style={{display: 'flex', flexDirection: 'row', alignItems: 'center', marginTop: 20, gap: 10}}>
         <TouchableOpacity onPress={() => navigation.goBack()} >
-          <Ionicons name="chevron-back" size={20} color={Gold} />
+          <Ionicons name="chevron-back" size={24} color={Gold} />
         </TouchableOpacity>
-      <Text style={{color: Gold, fontSize: 20, fontWeight: '500'}}>Profile</Text>
+      <Text style={{color: Gold, fontSize: 20, fontWeight: '600'}}>Profile</Text>
       </View>
-      <View style={{display: 'flex', alignItems: 'center', marginTop: 40}}>
+      {/* <View style={{display: 'flex', alignItems: 'center', marginTop: 40}}> */}
         {/* <TouchableOpacity onPress={handleImageUpload}>
           {data.profilePhoto ? (
             <Image 
@@ -148,10 +148,10 @@ useEffect(() => {
               style={{width: 100, height: 100, borderRadius: 50}} 
             />
           ) : ( */}
-            <Image 
+            {/* <Image 
               source={require('..//assets/images/user.png')} 
               style={{width: 100, height: 100, borderRadius: 50}}
-            />
+            /> */}
           {/* )}
           <View style={{
             position: 'absolute',
@@ -164,8 +164,8 @@ useEffect(() => {
             <Ionicons name="camera" size={20} color={White} />
           </View>
         </TouchableOpacity> */}
-      </View>
-      <Text style={{color: White, fontSize: 20, textAlign: 'center', marginTop: 15, fontWeight: '500'}}>{user?.firstName + " " + user?.lastName}</Text>
+      {/* </View> */}
+      {/* <Text style={{color: White, fontSize: 20, textAlign: 'center', marginTop: 15, fontWeight: '500'}}>{user?.firstName + " " + user?.lastName}</Text> */}
       <Text style={{color: Gray, marginTop: 20, fontSize: 15}}>First Name</Text>
       <TextInput
         style={{
@@ -244,7 +244,7 @@ useEffect(() => {
         onPress={handleUpdate}
       >
         <Text style={{color: White, fontWeight: '500'}}>
-          {updateProfileMutation.isPending ? 'Updating...' : 'Update'}
+          {updateProfileMutation.isPending ? <ActivityIndicator size="small" color={Black} /> : 'Update'}
         </Text>
       </TouchableOpacity>
     </SafeAreaView>

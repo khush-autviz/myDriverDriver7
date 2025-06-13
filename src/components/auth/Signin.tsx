@@ -10,6 +10,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   StatusBar,
+  ActivityIndicator,
 } from 'react-native';
 import {Black, DarkGray, Gold, Gray, White, LightGold} from '../../constants/Color';
 import {useNavigation} from '@react-navigation/native';
@@ -37,7 +38,7 @@ export default function Signin() {
       navigation.replace('OtpScreen', {mobileNumber});
     },
     onError: (error: any) => {
-      ShowToast(error.message ?? 'Something went wrong', { type: 'error' });
+      ShowToast(error?.response?.data?.message ?? 'Something went wrong', { type: 'error' });
       console.log('signin error', error);
       setIsValid(false);
     },
@@ -135,15 +136,7 @@ export default function Signin() {
               ]}
               onPress={handleSignin}
               disabled={authMutation.isPending}>
-              {authMutation.isPending ? (
-                <View style={styles.loadingContainer}>
-                  <View style={[styles.loadingDot, styles.loadingDot1]} />
-                  <View style={[styles.loadingDot, styles.loadingDot2]} />
-                  <View style={[styles.loadingDot, styles.loadingDot3]} />
-                </View>
-              ) : (
-                <Text style={styles.signInButtonText}>Sign In</Text>
-              )}
+                        {authMutation.isPending ? <ActivityIndicator size="small" color={Black} /> : 'Sign In'}
             </TouchableOpacity>
           </View>
 

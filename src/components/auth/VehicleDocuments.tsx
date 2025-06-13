@@ -10,7 +10,8 @@ import {
   Alert,
   Platform,
   PermissionsAndroid,
-  Linking
+  Linking,
+  ActivityIndicator
 } from 'react-native'
 import { Black, Gold, Gray, LightGold, White } from '../../constants/Color'
 import { useNavigation } from '@react-navigation/native'
@@ -57,9 +58,9 @@ export default function VehicleDocuments() {
         routes: [{ name: 'approval-screen' }],
       })
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.log('document upload error', error);
-      ShowToast(error.message, { type: 'error' });
+      ShowToast(error?.response?.data?.message, { type: 'error' });
       // Alert.alert('Error', 'Failed to upload documents. Please try again.');
     }
   });
@@ -151,9 +152,9 @@ export default function VehicleDocuments() {
           
           // ✅ IMAGE SIZE IS ACCEPTABLE
           console.log(`✅ ${documentName} size valid: ${fileSizeInMB}MB`);
-          ShowToast(`${documentName} selected successfully (${fileSizeInMB}MB)`, { 
-            type: 'success' 
-          });
+          // ShowToast(`${documentName} selected successfully (${fileSizeInMB}MB)`, { 
+          //   type: 'success' 
+          // });
           
           setDocumentData(prev => ({
             ...prev,
@@ -252,13 +253,13 @@ export default function VehicleDocuments() {
 
   return (
     <SafeAreaView style={styles.container}>
-      {DocumentUploadMutation.isPending && <Loader />}
-      <TouchableOpacity onPress={() => navigation.goBack()}>
+      {/* {DocumentUploadMutation.isPending && <Loader />} */}
+      {/* <TouchableOpacity onPress={() => navigation.goBack()}>
         <View style={styles.backRow}>
           <Ionicons name="chevron-back" size={20} color={Gold} />
           <Text style={styles.backText}>Back</Text>
         </View>
-      </TouchableOpacity>
+      </TouchableOpacity> */}
       
       <Text style={styles.headerText}>Vehicle Documents</Text>
       <Text style={styles.subHeaderText}>Please upload clear images of all required documents</Text>
@@ -295,7 +296,7 @@ export default function VehicleDocuments() {
           disabled={DocumentUploadMutation.isPending}
         >
           <Text style={styles.submitButtonText}>
-            {DocumentUploadMutation.isPending ? 'Uploading...' : 'Submit Documents'}
+            {DocumentUploadMutation.isPending ? <ActivityIndicator size="small" color={Black} /> : 'Submit Documents'}
           </Text>
         </TouchableOpacity>
       </ScrollView>

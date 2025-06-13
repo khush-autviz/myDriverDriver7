@@ -88,9 +88,9 @@ export default function TripDetails() {
             console.log('driver arrived success', response);
             setmode('arrived')
         },
-        onError: (error) => {
+        onError: (error: any) => {
             console.log('driver arrived error', error);
-            ShowToast(error?.message, { type: 'error' })
+            ShowToast(error?.response?.data?.message, { type: 'error' })
         }
     })
 
@@ -101,9 +101,9 @@ export default function TripDetails() {
             console.log('ride otp verification success', response);
             setmode('otp_verified')
         },
-        onError: (error) => {
+        onError: (error: any) => {
             console.log('ride otp verification error', error);
-            ShowToast(error?.message, { type: 'error' })
+            ShowToast(error?.response?.data?.message, { type: 'error' })
         }
     })
 
@@ -120,9 +120,9 @@ export default function TripDetails() {
                 routes: [{ name: 'Main' }],
             })
         },
-        onError: (error) => {
+        onError: (error: any) => {
             console.log('complete ride error', error);
-            ShowToast(error?.message, { type: 'error' })
+            ShowToast(error?.response?.data?.message, { type: 'error' })
         }
     })
 
@@ -133,9 +133,9 @@ export default function TripDetails() {
             console.log('cancel ride success', response);
             navigation.navigate('Main')
         },
-        onError: (error) => {
+        onError: (error: any) => {
             console.log('cancel ride error', error);
-            ShowToast(error?.message, { type: 'error' })
+            ShowToast(error?.response?.data?.message, { type: 'error' })
         }
     })
 
