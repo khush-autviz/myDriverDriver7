@@ -136,7 +136,7 @@ export default function Signin() {
               ]}
               onPress={handleSignin}
               disabled={authMutation.isPending}>
-                        {authMutation.isPending ? <ActivityIndicator size="small" color={Black} /> : 'Sign In'}
+                     <Text style={{color: Black, fontSize: 16, fontWeight: '700'}}>   {authMutation.isPending ? <ActivityIndicator size="small" color={Black} /> : 'Sign In'}</Text>
             </TouchableOpacity>
           </View>
 

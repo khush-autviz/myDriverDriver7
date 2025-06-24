@@ -1,15 +1,32 @@
-import { StyleSheet, Text, TouchableOpacity, View, Image, ScrollView } from 'react-native'
+import { StyleSheet, Text, TouchableOpacity, View, Image, ScrollView, ActivityIndicator } from 'react-native'
 import React from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { Black, DarkGray, Gold, Gray, LightGold, White } from '../constants/Color'
 import Ionicons from 'react-native-vector-icons/Ionicons'
 import { useAuthStore } from '../store/authStore'
 import { useNavigation } from '@react-navigation/native'
+import { driverWalletBalance } from '../constants/Api'
+import { useQuery } from '@tanstack/react-query'
 
 export default function Account() {
   const USER = useAuthStore(state => state.user)
   const LOGOUT = useAuthStore(state => state.logout)
   const navigation: any = useNavigation()
+
+  // Fetch wallet balance using TanStack Query
+  const { 
+    data: walletData, 
+    isLoading: isLoadingBalance, 
+    error: walletError,
+    refetch: refetchWalletBalance 
+  } = useQuery({
+    queryKey: ['walletBalance'],
+    queryFn: driverWalletBalance,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    retry: 2,
+  })
+
+  const walletBalance = walletData?.data?.balance || 0
 
   const handleLogout = () => {
     // navigation.navigate('Signin')
@@ -28,6 +45,18 @@ export default function Account() {
       icon: 'person',
       label: 'Manage Profile',
       onPress: () => navigation.navigate('Profile'),
+      important: true
+    },
+    {
+      icon: 'card',
+      label: 'Wallet Transactions',
+      onPress: () => navigation.navigate('transactions'),
+      important: true
+    },
+    {
+      icon: 'wallet',
+      label: 'Withdraw',
+      onPress: () => navigation.navigate('withdraw'),
       important: true
     },
     // {
@@ -90,6 +119,35 @@ export default function Account() {
             >
               <Text style={styles.editProfileText}>Edit Profile</Text>
             </TouchableOpacity> */}
+          </View>
+        </View>
+
+        {/* Wallet Card */}
+        <View style={styles.walletCard}>
+          <View style={styles.walletContent}>
+            <View style={styles.walletLeft}>
+              <View style={styles.walletIconContainer}>
+                <Ionicons name="wallet" size={20} color={Gold} />
+              </View>
+              <View style={styles.walletInfo}>
+                <Text style={styles.walletTitle}>Wallet</Text>
+                <Text style={styles.walletSubtitle}>Available balance</Text>
+              </View>
+            </View>
+            <View style={styles.walletRight}>
+              {isLoadingBalance ? (
+                <ActivityIndicator size="small" color={Gold} />
+              ) : walletError ? (
+                <TouchableOpacity 
+                  style={styles.retryButton}
+                  onPress={() => refetchWalletBalance()}
+                >
+                  <Text style={styles.retryButtonText}>Retry</Text>
+                </TouchableOpacity>
+              ) : (
+                <Text style={styles.balanceAmount}>${walletBalance.toFixed(2)}</Text>
+              )}
+            </View>
           </View>
         </View>
 
@@ -311,5 +369,74 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 1,
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  walletCard: {
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+    // shadowColor: '#000',
+    // shadowOffset: { width: 0, height: 1 },
+    // shadowOpacity: 0.1,
+    // shadowRadius: 4,
+    // elevation: 2,
+  },
+  walletContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  walletLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  walletIconContainer: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(212, 175, 55, 0.15)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  walletInfo: {
+    flex: 1,
+  },
+  walletTitle: {
+    color: White,
+    fontSize: 15,
+    fontWeight: '600',
+    marginBottom: 2,
+  },
+  walletSubtitle: {
+    color: Gray,
+    fontSize: 12,
+  },
+  walletRight: {
+    // alignItems: 'flex-end',
+    // paddingRight: 10,
+  },
+  loadingText: {
+    color: Gray,
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  retryButton: {
+    backgroundColor: Gold,
+    borderRadius: 6,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+  },
+  retryButtonText: {
+    color: Black,
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  balanceAmount: {
+    color: Gold,
+    fontSize: 18,
+    fontWeight: '700',
+    textAlign: 'right',
   },
 })

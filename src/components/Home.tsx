@@ -31,6 +31,7 @@ import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { useRide } from '../context/RideContext';
 import { ShowToast } from '../lib/Toast';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Loader } from '../lib/Loader';
 
 
 export default function Home() {
@@ -68,6 +69,7 @@ export default function Home() {
         latitude: location?.latitude || 0,
         longitude: location?.longitude || 0,
       })
+      SETUSER({...USER, isAvailable: true})
       // socket?.on('rideRequest', (data) => {
       //   setrideDetails(data)
       //   setmodalVisible(true)
@@ -217,6 +219,9 @@ export default function Home() {
     <>
       {/* <StatusBar backgroundColor={Black} barStyle="light-content" /> */}
       <View style={styles.container}>
+        {(DriverOnlineMutation.isPending || DriverOfflineMutation.isPending) && (
+          <Loader />
+        )}
         <View style={styles.header}>
           <View>
             <Text style={styles.headerTitle}>Driver Dashboard</Text>

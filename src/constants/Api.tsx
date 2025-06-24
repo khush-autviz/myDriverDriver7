@@ -114,3 +114,27 @@ export const rideHistory = async () => {
     const response = await axios.get('/driverAuth/driverHistory')
     return response.data
 }
+
+// wallet balance
+export const driverWalletBalance = async () => {
+    const response = await axios.get('/driver/wallet/balance')
+    return response.data
+}
+
+// wallet transactions
+export const driverWalletTransactions = async () => {
+    const response = await axios.get('/driver/wallet/transactions')
+    return response.data
+}
+
+// create withdrawal request
+export const createWithdrawalRequest = async (data: any) => {
+    const response = await axios.post('/driver/wallet/withdrawal/request', data)
+    return response.data
+}
+
+// withdrawal history
+export const withdrawalHistory = async () => {
+    const response = await axios.get('/driver/wallet/withdrawal/requests')
+    return response.data
+}

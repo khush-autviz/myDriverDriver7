@@ -1,8 +1,8 @@
-import { View, Text, TouchableOpacity, StyleSheet, FlatList, Platform, Image, ScrollView } from 'react-native'
+import { View, Text, TouchableOpacity, StyleSheet, FlatList, Platform, Image } from 'react-native'
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { QueryClient, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { cancelRide, completeRide, driverArrived, driverWaiting, rideDetails, startRide, verifyRideOtp } from '../constants/Api';
-import { GestureHandlerRootView, TextInput } from 'react-native-gesture-handler';
+import { GestureHandlerRootView, ScrollView, TextInput } from 'react-native-gesture-handler';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import Ionicons from 'react-native-vector-icons/Ionicons'
 import { Black, DarkGray, Gold, Gray, LightGold, maroon, White } from '../constants/Color';
@@ -55,7 +55,7 @@ export default function TripDetails() {
         useCallback(() => {
             console.log('🔍 TripDetails screen focused');
             setIsScreenFocused(true);
-            
+
             return () => {
                 console.log('🔍 TripDetails screen blurred');
                 setIsScreenFocused(false);
@@ -73,7 +73,7 @@ export default function TripDetails() {
 
     // COMMENTED: Problematic continuous logging
     // console.log(rideInfo, 'ride info');
-    
+
     // NEW: Only log when screen is focused
     useEffect(() => {
         if (isScreenFocused && rideInfo) {
@@ -141,7 +141,7 @@ export default function TripDetails() {
 
     // COMMENTED: Problematic continuous logging
     // console.log(mode, 'mode');
-    
+
     // NEW: Only log mode when screen is focused
     useEffect(() => {
         if (isScreenFocused) {
@@ -175,7 +175,7 @@ export default function TripDetails() {
         if (isScreenFocused && socket) { // FIXED: Only attach when screen focused
             socket.on('rideCancelled', handleRideCancel)
             console.log('🔌 Socket listener attached for rideCancelled');
-            
+
             return () => {
                 socket.off('rideCancelled', handleRideCancel)
                 console.log('🔌 Socket listener removed for rideCancelled');
@@ -185,7 +185,7 @@ export default function TripDetails() {
 
     // COMMENTED: Problematic continuous logging
     // console.log(location, 'location');
-    
+
     // NEW: Only log location when screen is focused
     useEffect(() => {
         if (isScreenFocused && location) {
@@ -282,7 +282,7 @@ export default function TripDetails() {
                             <MapViewDirections
                                 origin={{ latitude: location?.latitude, longitude: location?.longitude }}
                                 destination={{ latitude: rideInfo?.data?.ride?.pickupLocation?.coordinates[0], longitude: rideInfo?.data?.ride?.pickupLocation?.coordinates[1] }}
-                                apikey='AIzaSyBcKgyA7urR7gHyen79h40UlkvTJJoKc9I'
+                                apikey='AIzaSyDGQZ-LNDI4iv5CyqdU3BX5dl9PaEpOfrQ'
                                 strokeColor={Gold}
                                 strokeWidth={4}
                             />
@@ -297,7 +297,7 @@ export default function TripDetails() {
                             <MapViewDirections
                                 origin={{ latitude: rideInfo?.data?.ride?.pickupLocation?.coordinates[0], longitude: rideInfo?.data?.ride?.pickupLocation?.coordinates[1] }}
                                 destination={{ latitude: rideInfo?.data?.ride?.destination?.coordinates[0], longitude: rideInfo?.data?.ride?.destination?.coordinates[1] }}
-                                apikey='AIzaSyBcKgyA7urR7gHyen79h40UlkvTJJoKc9I'
+                                apikey='AIzaSyDGQZ-LNDI4iv5CyqdU3BX5dl9PaEpOfrQ'
                                 strokeColor={Gold}
                                 strokeWidth={4}
                             />
@@ -318,8 +318,13 @@ export default function TripDetails() {
                 <BottomSheetView style={styles.contentContainer}>
                     {mode === 'accepted' && (
                         <>
-                            {/* Header Section */}
-                            {/* <View style={styles.headerSection}>
+                            <View style={{ flex: 1 }}>
+                                <ScrollView
+                                    showsVerticalScrollIndicator={false}
+                                    contentContainerStyle={{ paddingBottom: 20 }}
+                                >
+                                    {/* Header Section */}
+                                    {/* <View style={styles.headerSection}>
                                 <View style={styles.statusBadge}>
                                     <Ionicons name="checkmark-circle" size={16} color={Black} />
                                     <Text style={styles.statusBadgeText}>RIDE ACCEPTED</Text>
@@ -327,87 +332,90 @@ export default function TripDetails() {
                                 <Text style={styles.rideIdText}>Ride ID: {rideId?.slice(-8)}</Text>
                             </View> */}
 
-                            {/* Trip Route Card */}
-                            <View style={styles.routeCard}>
-                                {/* <View style={styles.routeHeader}>
+                                    {/* Trip Route Card */}
+                                    <View style={styles.routeCard}>
+                                        {/* <View style={styles.routeHeader}>
                                     <Ionicons name="navigate" size={20} color={Gold} />
                                     <Text style={styles.routeHeaderText}>Trip Route</Text>
                                 </View> */}
-                                
-                                {/* Pickup Location */}
-                                <View style={styles.locationRow}>
-                                    {/* <View style={styles.locationDot}> */}
-                                        {/* <View style={styles.pickupDot} /> */}
-                                    {/* </View> */}
-                                    <View style={styles.locationContent}>
-                                        <Text style={styles.locationLabel}>PICKUP</Text>
-                                        <Text style={styles.locationAddress}>{rideInfo?.data?.ride?.pickupLocation?.address}</Text>
+
+                                        {/* Pickup Location */}
+                                        <View style={styles.locationRow}>
+                                            {/* <View style={styles.locationDot}> */}
+                                            {/* <View style={styles.pickupDot} /> */}
+                                            {/* </View> */}
+                                            <View style={styles.locationContent}>
+                                                <Text style={styles.locationLabel}>PICKUP</Text>
+                                                <Text style={styles.locationAddress}>{rideInfo?.data?.ride?.pickupLocation?.address}</Text>
+                                            </View>
+                                        </View>
+
+                                        {/* Route Line */}
+                                        <View style={styles.routeLine} />
+
+                                        {/* Destination Location */}
+                                        <View style={styles.locationRow}>
+                                            {/* <View style={styles.locationDot}> */}
+                                            {/* <View style={styles.destinationDot} /> */}
+                                            {/* </View> */}
+                                            <View style={styles.locationContent}>
+                                                <Text style={styles.locationLabel}>DESTINATION</Text>
+                                                <Text style={styles.locationAddress}>{rideInfo?.data?.ride?.destination?.address}</Text>
+                                            </View>
+                                        </View>
                                     </View>
-                                </View>
 
-                                {/* Route Line */}
-                                <View style={styles.routeLine} />
-
-                                {/* Destination Location */}
-                                <View style={styles.locationRow}>
-                                    {/* <View style={styles.locationDot}> */}
-                                        {/* <View style={styles.destinationDot} /> */}
-                                    {/* </View> */}
-                                    <View style={styles.locationContent}>
-                                        <Text style={styles.locationLabel}>DESTINATION</Text>
-                                        <Text style={styles.locationAddress}>{rideInfo?.data?.ride?.destination?.address}</Text>
+                                    {/* Fare & Distance Card */}
+                                    <View style={styles.fareCard}>
+                                        <View style={styles.fareRow}>
+                                            <View style={styles.fareItem}>
+                                                <Ionicons name="cash" size={18} color={Gold} />
+                                                {/* <Text style={styles.fareLabel}>Total Fare</Text> */}
+                                                <Text style={styles.fareAmount}>${rideInfo?.data?.ride?.fare.toFixed(2)}</Text>
+                                            </View>
+                                            <View style={styles.fareDivider} />
+                                            <View style={styles.fareItem}>
+                                                <Ionicons name="speedometer" size={18} color={Gold} />
+                                                {/* <Text style={styles.fareLabel}>Distance</Text> */}
+                                                <Text style={styles.fareAmount}>{rideInfo?.data?.ride?.distance.toFixed(1)} km</Text>
+                                            </View>
+                                        </View>
                                     </View>
-                                </View>
-                            </View>
+                                    </ScrollView>
 
-                            {/* Fare & Distance Card */}
-                            <View style={styles.fareCard}>
-                                <View style={styles.fareRow}>
-                                    <View style={styles.fareItem}>
-                                        <Ionicons name="cash" size={18} color={Gold} />
-                                        {/* <Text style={styles.fareLabel}>Total Fare</Text> */}
-                                        <Text style={styles.fareAmount}>${rideInfo?.data?.ride?.fare.toFixed(2)}</Text>
+                                    {/* Action Buttons */}
+                                    <View style={styles.actionButtonsContainer}>
+                                        <TouchableOpacity
+                                            style={styles.arrivedButton}
+                                            activeOpacity={0.8}
+                                            onPress={() => driverArrivedMutation.mutateAsync(rideId)}
+                                        >
+                                            {/* <Ionicons name="location" size={20} color={Black} style={styles.buttonIcon} /> */}
+                                            <Text style={styles.arrivedButtonText}>Arrived</Text>
+                                        </TouchableOpacity>
+
+                                        <TouchableOpacity
+                                            style={styles.cancelRideButton}
+                                            activeOpacity={0.8}
+                                            onPress={() => setmodalVisible(!modalVisible)}
+                                        >
+                                            {/* <Ionicons name="close-circle" size={20} color={White} style={styles.buttonIcon} /> */}
+                                            <Text style={styles.cancelRideButtonText}>Cancel</Text>
+                                        </TouchableOpacity>
                                     </View>
-                                    <View style={styles.fareDivider} />
-                                    <View style={styles.fareItem}>
-                                        <Ionicons name="speedometer" size={18} color={Gold} />
-                                        {/* <Text style={styles.fareLabel}>Distance</Text> */}
-                                        <Text style={styles.fareAmount}>{rideInfo?.data?.ride?.distance.toFixed(1)} km</Text>
-                                    </View>
-                                </View>
-                            </View>
-
-                            {/* Action Buttons */}
-                            <View style={styles.actionButtonsContainer}>
-                                <TouchableOpacity
-                                    style={styles.arrivedButton}
-                                    activeOpacity={0.8}
-                                    onPress={() => driverArrivedMutation.mutateAsync(rideId)}
-                                >
-                                    {/* <Ionicons name="location" size={20} color={Black} style={styles.buttonIcon} /> */}
-                                    <Text style={styles.arrivedButtonText}>Arrived</Text>
-                                </TouchableOpacity>
-
-                                <TouchableOpacity
-                                    style={styles.cancelRideButton}
-                                    activeOpacity={0.8}
-                                    onPress={() => setmodalVisible(!modalVisible)}
-                                >
-                                    {/* <Ionicons name="close-circle" size={20} color={White} style={styles.buttonIcon} /> */}
-                                    <Text style={styles.cancelRideButtonText}>Cancel</Text>
-                                </TouchableOpacity>
+                                {/* </ScrollView> */}
                             </View>
                         </>
                     )}
 
                     {mode === 'arrived' && (
                         <View style={{ flex: 1 }}>
-                        <ScrollView
-                          showsVerticalScrollIndicator={false}
-                          contentContainerStyle={{ paddingBottom: 20 }}
-                        >
-                            {/* Header Section */}
-                            {/* <View style={styles.headerSection}>
+                            <ScrollView
+                                showsVerticalScrollIndicator={false}
+                                contentContainerStyle={{ paddingBottom: 20 }}
+                            >
+                                {/* Header Section */}
+                                {/* <View style={styles.headerSection}>
                                 <View style={styles.statusBadge}>
                                     <Ionicons name="location" size={16} color={Black} />
                                     <Text style={styles.statusBadgeText}>ARRIVED AT PICKUP</Text>
@@ -415,73 +423,74 @@ export default function TripDetails() {
                                 <Text style={styles.rideIdText}>Waiting for customer</Text>
                             </View> */}
 
-                            {/* OTP Verification Card */}
-                            <View style={styles.otpCard}>
-                                {/* <View style={styles.otpHeader}>
+                                {/* OTP Verification Card */}
+                                <View style={styles.otpCard}>
+                                    {/* <View style={styles.otpHeader}>
                                     <Ionicons name="keypad" size={24} color={Gold} />
                                     <Text style={styles.otpHeaderText}>Verify OTP to Start Ride</Text>
                                 </View> */}
-                                {/* <Text style={styles.otpSubtext}>Ask the customer for their 4-digit OTP</Text> */}
-                                
-                                <View style={styles.otpInputContainer}>
-                                    <TextInput
-                                        style={styles.otpInput}
-                                        placeholder="Enter 4-digit OTP"
-                                        placeholderTextColor={Gray}
-                                        keyboardType="number-pad"
-                                        maxLength={4}
-                                        value={otp}
-                                        onChangeText={text => setotp(text)}
-                                        textAlign="center"
-                                    />
-                                    <TouchableOpacity
-                                        style={[styles.verifyButton, otp.length === 4 ? styles.verifyButtonActive : null]}
-                                        activeOpacity={0.8}
-                                        disabled={otp.length !== 4}
-                                        onPress={() => verifyRideOtpMutation.mutateAsync({
-                                            id: rideId,
-                                            payload: { otp }
-                                        })}
-                                    >
-                                        {/* <Ionicons name="checkmark" size={20} color={otp.length === 4 ? Black : Gray} /> */}
-                                        <Text style={[styles.verifyButtonText, otp.length === 4 ? styles.verifyButtonTextActive : null]}>
-                                            Verify
-                                        </Text>
-                                    </TouchableOpacity>
-                                </View>
-                            </View>
+                                    {/* <Text style={styles.otpSubtext}>Ask the customer for their 4-digit OTP</Text> */}
 
-                            {/* Trip Summary Card */}
-                            
-                            <View style={styles.summaryCard}>
-                                 {/* Pickup Location */}
-                                 <View style={styles.locationRow}>
-                                    <View style={styles.locationContent}>
-                                        <Text style={styles.locationLabel}>PICKUP</Text>
-                                        <Text style={styles.locationAddress}>{rideInfo?.data?.ride?.pickupLocation?.address}</Text>
+                                    <View style={styles.otpInputContainer}>
+                                        <TextInput
+                                            style={styles.otpInput}
+                                            placeholder="Enter 4-digit OTP"
+                                            placeholderTextColor={Gray}
+                                            keyboardType="number-pad"
+                                            maxLength={4}
+                                            value={otp}
+                                            onChangeText={text => setotp(text)}
+                                            textAlign="center"
+                                        />
+                                        <TouchableOpacity
+                                            style={[styles.verifyButton, otp.length === 4 ? styles.verifyButtonActive : null]}
+                                            activeOpacity={0.8}
+                                            disabled={otp.length !== 4}
+                                            onPress={() => verifyRideOtpMutation.mutateAsync({
+                                                id: rideId,
+                                                payload: { otp }
+                                            })}
+                                        >
+                                            {/* <Ionicons name="checkmark" size={20} color={otp.length === 4 ? Black : Gray} /> */}
+                                            <Text style={[styles.verifyButtonText, otp.length === 4 ? styles.verifyButtonTextActive : null]}>
+                                                Verify
+                                            </Text>
+                                        </TouchableOpacity>
                                     </View>
                                 </View>
 
-                                {/* Destination Location */}
-                                <View style={styles.locationRow}>
-                                    {/* <View style={styles.locationDot}> */}
+                                {/* Trip Summary Card */}
+
+                                <View style={styles.summaryCard}>
+                                    {/* Pickup Location */}
+                                    <View style={styles.locationRow}>
+                                        <View style={styles.locationContent}>
+                                            <Text style={styles.locationLabel}>PICKUP</Text>
+                                            <Text style={styles.locationAddress}>{rideInfo?.data?.ride?.pickupLocation?.address}</Text>
+                                        </View>
+                                    </View>
+
+                                    {/* Destination Location */}
+                                    <View style={styles.locationRow}>
+                                        {/* <View style={styles.locationDot}> */}
                                         {/* <View style={styles.destinationDot} /> */}
-                                    {/* </View> */}
-                                    <View style={styles.locationContent}>
-                                        <Text style={styles.locationLabel}>DESTINATION</Text>
-                                        <Text style={styles.locationAddress}>{rideInfo?.data?.ride?.destination?.address}</Text>
+                                        {/* </View> */}
+                                        <View style={styles.locationContent}>
+                                            <Text style={styles.locationLabel}>DESTINATION</Text>
+                                            <Text style={styles.locationAddress}>{rideInfo?.data?.ride?.destination?.address}</Text>
+                                        </View>
                                     </View>
-                                </View>
-                                {/* <View style={styles.summaryRow}>
+                                    {/* <View style={styles.summaryRow}>
                                     <Text style={styles.summaryLabel}>Distance:</Text>
                                     <Text style={styles.summaryValue}>{rideInfo?.data?.ride?.distance.toFixed(1)} km</Text>
                                 </View> */}
-                                <View style={styles.summaryRow}>
-                                    <Text style={styles.summaryLabel}>Fare:</Text>
-                                    <Text style={styles.summaryValue}>${rideInfo?.data?.ride?.fare.toFixed(2)}</Text>
-                                </View>
-   
+                                    <View style={styles.summaryRow}>
+                                        <Text style={styles.summaryLabel}>Fare:</Text>
+                                        <Text style={styles.summaryValue}>${rideInfo?.data?.ride?.fare.toFixed(2)}</Text>
+                                    </View>
 
+                                </View>
+                            </ScrollView>
                             {/* Cancel Button */}
                             <TouchableOpacity
                                 style={styles.cancelOnlyButton}
@@ -491,16 +500,22 @@ export default function TripDetails() {
                                 {/* <Ionicons name="close-circle-outline" size={18} color={maroon} /> */}
                                 <Text style={styles.cancelOnlyButtonText}>Cancel Ride</Text>
                             </TouchableOpacity>
-                            </View>
-                        </ScrollView>
+
+                            {/* </View> */}
+                            {/* </ScrollView> */}
                         </View>
-                        
+
                     )}
 
                     {mode === 'otp_verified' && (
                         <>
-                            {/* Header Section */}
-                            {/* <View style={styles.headerSection}>
+                            <View style={{ flex: 1 }}>
+                                <ScrollView
+                                    showsVerticalScrollIndicator={false}
+                                    contentContainerStyle={{ paddingBottom: 20 }}
+                                >
+                                    {/* Header Section */}
+                                    {/* <View style={styles.headerSection}>
                                 <View style={styles.statusBadge}>
                                     <Ionicons name="car-sport" size={16} color={Black} />
                                     <Text style={styles.statusBadgeText}>TRIP IN PROGRESS</Text>
@@ -508,54 +523,57 @@ export default function TripDetails() {
                                 <Text style={styles.rideIdText}>Drive safely to destination</Text>
                             </View> */}
 
-                            {/* Live Trip Status */}
-                            <View style={styles.liveStatusCard}>
-                                <View style={styles.liveStatusHeader}>
-                                    <View style={styles.pulsingDot} />
-                                    <Text style={styles.liveStatusText}>LIVE TRIP</Text>
-                                </View>
-                                <View style={styles.tripMetrics}>
-                                    <View style={styles.metricItem}>
-                                        {/* <Ionicons name="time" size={18} color={Gold} /> */}
-                                        <Text style={styles.metricLabel}>Duration:</Text>
-                                        <Text style={styles.metricValue}>In Progress</Text>
+                                    {/* Live Trip Status */}
+                                    <View style={styles.liveStatusCard}>
+                                        <View style={styles.liveStatusHeader}>
+                                            <View style={styles.pulsingDot} />
+                                            <Text style={styles.liveStatusText}>LIVE TRIP</Text>
+                                        </View>
+                                        <View style={styles.tripMetrics}>
+                                            <View style={styles.metricItem}>
+                                                {/* <Ionicons name="time" size={18} color={Gold} /> */}
+                                                <Text style={styles.metricLabel}>Duration:</Text>
+                                                <Text style={styles.metricValue}>In Progress</Text>
+                                            </View>
+                                            <View style={styles.metricDivider} />
+                                            <View style={styles.metricItem}>
+                                                {/* <Ionicons name="speedometer" size={18} color={Gold} /> */}
+                                                <Text style={styles.metricLabel}>Distance:</Text>
+                                                <Text style={styles.metricValue}>{rideInfo?.data?.ride?.distance.toFixed(1)} km</Text>
+                                            </View>
+                                        </View>
                                     </View>
-                                    <View style={styles.metricDivider} />
-                                    <View style={styles.metricItem}>
-                                        {/* <Ionicons name="speedometer" size={18} color={Gold} /> */}
-                                        <Text style={styles.metricLabel}>Distance:</Text>
-                                        <Text style={styles.metricValue}>{rideInfo?.data?.ride?.distance.toFixed(1)} km</Text>
+
+                                    {/* Destination Card */}
+                                    <View style={styles.destinationCard}>
+                                        <View style={styles.destinationHeader}>
+                                            <Ionicons name="flag" size={20} color={Gold} />
+                                            <Text style={styles.destinationHeaderText}>Destination</Text>
+                                        </View>
+                                        <Text style={styles.destinationAddress}>{rideInfo?.data?.ride?.destination?.address}</Text>
+                                        <View style={styles.destinationMeta}>
+                                            <Text style={styles.destinationFare}>Total Fare: ${rideInfo?.data?.ride?.fare.toFixed(2)}</Text>
+                                        </View>
                                     </View>
-                                </View>
-                            </View>
+                                    </ScrollView>
 
-                            {/* Destination Card */}
-                            <View style={styles.destinationCard}>
-                                <View style={styles.destinationHeader}>
-                                    <Ionicons name="flag" size={20} color={Gold} />
-                                    <Text style={styles.destinationHeaderText}>Destination</Text>
-                                </View>
-                                <Text style={styles.destinationAddress}>{rideInfo?.data?.ride?.destination?.address}</Text>
-                                <View style={styles.destinationMeta}>
-                                    <Text style={styles.destinationFare}>Total Fare: ${rideInfo?.data?.ride?.fare.toFixed(2)}</Text>
-                                </View>
-                            </View>
-
-                            {/* Complete Trip Button */}
-                            <TouchableOpacity
-                                style={styles.completeButton}
-                                activeOpacity={0.8}
-                                onPress={() => completeRideMutation.mutateAsync(rideId)}
-                            >
-                                {/* <View style={styles.completeButtonContent}> */}
-                                    {/* <Ionicons name="checkmark-circle" size={24} color={Black} /> */}
-                                    {/* <View> */}
+                                    {/* Complete Trip Button */}
+                                    <TouchableOpacity
+                                        style={styles.completeButton}
+                                        activeOpacity={0.8}
+                                        onPress={() => completeRideMutation.mutateAsync(rideId)}
+                                    >
+                                        {/* <View style={styles.completeButtonContent}> */}
+                                        {/* <Ionicons name="checkmark-circle" size={24} color={Black} /> */}
+                                        {/* <View> */}
                                         <Text style={styles.completeButtonText}>Complete Trip</Text>
                                         {/* <Text style={styles.completeButtonSubtext}>Mark as arrived at destination</Text> */}
-                                    {/* </View> */}
-                                {/* </View> */}
-                                {/* <Ionicons name="chevron-forward" size={20} color={Black} /> */}
-                            </TouchableOpacity>
+                                        {/* </View> */}
+                                        {/* </View> */}
+                                        {/* <Ionicons name="chevron-forward" size={20} color={Black} /> */}
+                                    </TouchableOpacity>
+                                {/* </ScrollView> */}
+                            </View>
                         </>
                     )}
 
@@ -1113,7 +1131,7 @@ const styles = StyleSheet.create({
         fontSize: 12,
         fontWeight: '500',
     },
-    
+
     // Missing styles for the new UI elements
     pickupDot: {
         width: 8,
