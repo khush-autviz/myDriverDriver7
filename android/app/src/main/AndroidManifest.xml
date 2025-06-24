@@ -38,7 +38,7 @@
 
           <meta-data
      android:name="com.google.android.geo.API_KEY"
-     android:value="AIzaSyBcKgyA7urR7gHyen79h40UlkvTJJoKc9I"/>
+     android:value="AIzaSyDGQZ-LNDI4iv5CyqdU3BX5dl9PaEpOfrQ"/>
 
         <!-- Background Location Service -->
         <service
