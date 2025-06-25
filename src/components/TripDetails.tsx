@@ -371,7 +371,7 @@ export default function TripDetails() {
                                             <View style={styles.fareItem}>
                                                 <Ionicons name="cash" size={18} color={Gold} />
                                                 {/* <Text style={styles.fareLabel}>Total Fare</Text> */}
-                                                <Text style={styles.fareAmount}>${rideInfo?.data?.ride?.fare.toFixed(2)}</Text>
+                                                <Text style={styles.fareAmount}>R{rideInfo?.data?.ride?.fare.toFixed(2)}</Text>
                                             </View>
                                             <View style={styles.fareDivider} />
                                             <View style={styles.fareItem}>
@@ -486,7 +486,7 @@ export default function TripDetails() {
                                 </View> */}
                                     <View style={styles.summaryRow}>
                                         <Text style={styles.summaryLabel}>Fare:</Text>
-                                        <Text style={styles.summaryValue}>${rideInfo?.data?.ride?.fare.toFixed(2)}</Text>
+                                        <Text style={styles.summaryValue}>R{rideInfo?.data?.ride?.fare.toFixed(2)}</Text>
                                     </View>
 
                                 </View>
@@ -552,7 +552,7 @@ export default function TripDetails() {
                                         </View>
                                         <Text style={styles.destinationAddress}>{rideInfo?.data?.ride?.destination?.address}</Text>
                                         <View style={styles.destinationMeta}>
-                                            <Text style={styles.destinationFare}>Total Fare: ${rideInfo?.data?.ride?.fare.toFixed(2)}</Text>
+                                            <Text style={styles.destinationFare}>Total Fare: R{rideInfo?.data?.ride?.fare.toFixed(2)}</Text>
                                         </View>
                                     </View>
                                     </ScrollView>

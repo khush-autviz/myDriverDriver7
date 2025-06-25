@@ -1,5 +1,5 @@
-import { StyleSheet, Text, TouchableOpacity, View, ScrollView, ActivityIndicator, FlatList } from 'react-native'
-import React from 'react'
+import { StyleSheet, Text, TouchableOpacity, View, ScrollView, ActivityIndicator, FlatList, RefreshControl } from 'react-native'
+import React, { useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { Black, DarkGray, Gold, Gray, LightGold, White } from '../constants/Color'
 import Ionicons from 'react-native-vector-icons/Ionicons'
@@ -9,6 +9,7 @@ import { useQuery } from '@tanstack/react-query'
 
 export default function Transactions() {
   const navigation: any = useNavigation()
+  const [refreshing, setRefreshing] = useState(false)
 
   // Fetch wallet transactions using TanStack Query
   const { 
@@ -25,6 +26,17 @@ export default function Transactions() {
 
   const transactions = transactionsData?.data?.transactions || []
 
+  const onRefresh = async () => {
+    setRefreshing(true)
+    try {
+      await refetch()
+    } catch (error) {
+      console.error('Error refreshing transactions:', error)
+    } finally {
+      setRefreshing(false)
+    }
+  }
+
   // Format date
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
@@ -39,7 +51,7 @@ export default function Transactions() {
 
   // Format amount
   const formatAmount = (amount: number) => {
-    return `$${Math.abs(amount).toFixed(2)}`
+    return `R${Math.abs(amount).toFixed(2)}`
   }
 
   // Get transaction type icon and color
@@ -182,6 +194,15 @@ export default function Transactions() {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.listContainer}
           ItemSeparatorComponent={() => <View style={styles.separator} />}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor={Gold}
+              colors={[Gold]}
+              progressBackgroundColor={Black}
+            />
+          }
         />
       )}
     </SafeAreaView>

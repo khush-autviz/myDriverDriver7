@@ -1,4 +1,4 @@
-import { StyleSheet, Text, TouchableOpacity, View, ScrollView, ActivityIndicator, FlatList, TextInput, Alert, Modal } from 'react-native'
+import { StyleSheet, Text, TouchableOpacity, View, ScrollView, ActivityIndicator, FlatList, TextInput, Alert, Modal, RefreshControl } from 'react-native'
 import React, { useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { Black, DarkGray, Gold, Gray, LightGold, White } from '../constants/Color'
@@ -102,7 +102,7 @@ export default function Withdraw() {
 
   // Format amount
   const formatAmount = (amount: number) => {
-    return `$${amount.toFixed(2)}`
+    return `R${amount.toFixed(2)}`
   }
 
   // Get status color and icon
@@ -175,7 +175,7 @@ export default function Withdraw() {
         </View>
         </View>
         {item.status?.toLowerCase() === 'rejected' && (
-          <Text style={{color: '#FF6B6B', fontSize: 12, fontWeight: '600', marginTop: 10}}>{item.rejectionReason}</Text>
+          <Text style={{color: '#FF6B6B', backgroundColor: 'rgba(255, 255 , 255, 0.05)', padding: 10, borderRadius: 12, fontSize: 13, fontWeight: '600', marginTop: 10}}>{item.rejectionReason}</Text>
         )}
       </View>
     )
@@ -236,7 +236,7 @@ export default function Withdraw() {
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>Withdrawal Amount</Text>
               <View style={styles.amountInputContainer}>
-                <Text style={styles.currencySymbol}>$</Text>
+                <Text style={styles.currencySymbol}>R</Text>
                 <TextInput
                   style={styles.amountInput}
                   value={amount}
@@ -345,6 +345,15 @@ export default function Withdraw() {
               showsVerticalScrollIndicator={false}
               contentContainerStyle={styles.listContainer}
               ItemSeparatorComponent={() => <View style={styles.separator} />}
+              refreshControl={
+                <RefreshControl
+                  refreshing={isLoadingHistory}
+                  onRefresh={refetchHistory}
+                  tintColor={Gold}
+                  colors={[Gold]}
+                  progressBackgroundColor={Black}
+                />
+              }
             />
           )}
         </>
@@ -374,7 +383,7 @@ export default function Withdraw() {
                 <View style={styles.withdrawalDetails}>
                   <View style={styles.detailRow}>
                     <Text style={styles.detailLabel}>Amount:</Text>
-                    <Text style={styles.detailValue}>${parseFloat(amount).toFixed(2)}</Text>
+                    <Text style={styles.detailValue}>R{parseFloat(amount).toFixed(2)}</Text>
                   </View>
                   <View style={styles.detailRow}>
                     <Text style={styles.detailLabel}>Bank:</Text>

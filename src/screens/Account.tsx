@@ -1,5 +1,5 @@
-import { StyleSheet, Text, TouchableOpacity, View, Image, ScrollView, ActivityIndicator } from 'react-native'
-import React from 'react'
+import { StyleSheet, Text, TouchableOpacity, View, Image, ScrollView, ActivityIndicator, RefreshControl } from 'react-native'
+import React, { useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { Black, DarkGray, Gold, Gray, LightGold, White } from '../constants/Color'
 import Ionicons from 'react-native-vector-icons/Ionicons'
@@ -12,6 +12,7 @@ export default function Account() {
   const USER = useAuthStore(state => state.user)
   const LOGOUT = useAuthStore(state => state.logout)
   const navigation: any = useNavigation()
+  const [refreshing, setRefreshing] = useState(false)
 
   // Fetch wallet balance using TanStack Query
   const { 
@@ -35,6 +36,17 @@ export default function Account() {
       routes: [{ name: 'Signin' }],
     })
     LOGOUT()
+  }
+
+  const onRefresh = async () => {
+    setRefreshing(true)
+    try {
+      await refetchWalletBalance()
+    } catch (error) {
+      console.error('Error refreshing wallet balance:', error)
+    } finally {
+      setRefreshing(false)
+    }
   }
 
   console.log('USER', USER?.documents?.profilePhoto?.image)
@@ -88,7 +100,18 @@ export default function Account() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView 
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={Gold}
+            colors={[Gold]}
+            progressBackgroundColor={Black}
+          />
+        }
+      >
         {/* Header Section */}
         <View style={styles.header}>
           <Text style={styles.headerTitle}>Account</Text>
@@ -145,7 +168,7 @@ export default function Account() {
                   <Text style={styles.retryButtonText}>Retry</Text>
                 </TouchableOpacity>
               ) : (
-                <Text style={styles.balanceAmount}>${walletBalance.toFixed(2)}</Text>
+                <Text style={styles.balanceAmount}>R{walletBalance.toFixed(2)}</Text>
               )}
             </View>
           </View>

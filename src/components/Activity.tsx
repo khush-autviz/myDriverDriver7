@@ -1,5 +1,5 @@
-import React, { useCallback, useState } from 'react'
-import { StyleSheet, Text, View, TouchableOpacity, FlatList, Image, ActivityIndicator } from 'react-native'
+import React, { useCallback, useEffect, useState } from 'react'
+import { StyleSheet, Text, View, TouchableOpacity, FlatList, Image, ActivityIndicator, RefreshControl } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { Black, Gray, Gold, LightGold, White, DarkGray } from '../constants/Color'
 import Ionicons from 'react-native-vector-icons/Ionicons'
@@ -11,7 +11,8 @@ import { useNavigation } from '@react-navigation/native'
 
 // Activity item component
 const ActivityItem = ({ item }: {item: any} ) => {
-  const navigation = useNavigation()
+  const [isRefreshing, setIsRefreshing] = useState(false)
+  const navigation: any = useNavigation()
   // Format the date
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -36,7 +37,7 @@ const ActivityItem = ({ item }: {item: any} ) => {
 
   // Format fare as currency
   const formatFare = (fare: number) => {
-    return `$${fare.toFixed(2)}`;
+    return `R${fare.toFixed(2)}`;
   };
 
   // Get status color
@@ -98,8 +99,11 @@ const {data: rideDetails, isLoading, refetch, error} = useQuery({
 //   }, [])
 // )
 
-  console.log(rideDetails, 'rideHistory');
-
+  console.log(rideDetails, 'rideHistory'); // Handle refresh
+  const handleRefresh = () => {
+    console.log('refreshing')
+    refetch()
+  }
 
   // Empty state component
   const EmptyState = () => (
@@ -113,6 +117,9 @@ const {data: rideDetails, isLoading, refetch, error} = useQuery({
       </Text>
     </View>
   )
+  useEffect(() => {
+    console.log(isLoading, 'isLoading')
+  },[isLoading])
 
   return (
     <SafeAreaView style={styles.container}>
@@ -135,6 +142,15 @@ const {data: rideDetails, isLoading, refetch, error} = useQuery({
           ListEmptyComponent={EmptyState}
           contentContainerStyle={styles.activityListContent}
           showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={isLoading}
+              onRefresh={handleRefresh}
+              tintColor={Gold}
+              colors={[Gold]}
+              progressBackgroundColor={Black}
+            />
+          }
         />
       )}
     </SafeAreaView>

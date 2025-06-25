@@ -350,7 +350,7 @@ export default function Home() {
               color: LightGold,
               fontSize: 24,
               fontWeight: '900',
-            }}>${rideDetails?.fare}</Text>
+            }}>R{rideDetails?.fare}</Text>
           </View>
 
           <View style={{
@@ -537,12 +537,12 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
   },
   headerTitle: {
-    color: White,
+    color: Gold,
     fontSize: 20,
     fontWeight: '700',
   },
   headerSubtitle: {
-    color: Gray,
+    color: Gold,
     fontSize: 14,
     marginTop: 4,
   },
