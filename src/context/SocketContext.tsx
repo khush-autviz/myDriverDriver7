@@ -131,7 +131,7 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
       return;
     }
 
-    const newSocket = io('http://3.110.180.116:3000/', {
+    const newSocket = io('https://api.mydriversa.co.za', {
       auth: {
         access_token: accessToken,
       },

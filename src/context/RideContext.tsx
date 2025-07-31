@@ -66,7 +66,7 @@ export const RideProvider: React.FC<RideProviderProps> = ({ children }) => {
  
     const getRideDetails = async (ride: string) => {
         try {
-          const response = await axios.get(`https://t1wfswdh-3000.inc1.devtunnels.ms/ride/driver/${ride}`, {
+          const response = await axios.get(`https://api.mydriversa.co.za/ride/driver/${ride}`, {
             headers: {
               Authorization: `Bearer ${token?.access_token}`, // Make sure token is accessible
             }
