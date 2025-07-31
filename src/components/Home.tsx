@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState, useRef } from 'react';
 import {
   View,
   StyleSheet,
@@ -32,6 +32,7 @@ import { useRide } from '../context/RideContext';
 import { ShowToast } from '../lib/Toast';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Loader } from '../lib/Loader';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 
 export default function Home() {
@@ -42,8 +43,9 @@ export default function Home() {
   const socket = useSocket();
   const { location, startTracking, stopTracking, startBackgroundTracking, stopBackgroundTracking, isBackgroundTracking } = useLocation()
   const { user: USER, setUser: SETUSER, setRideId } = useAuthStore()
-  const navigation = useNavigation()
+  const navigation: any = useNavigation()
   const { fetchRideDetails } = useRide()
+  const mapRef = useRef<MapView | null>(null);
 
 
 
@@ -215,6 +217,17 @@ export default function Home() {
     }
   }, [USER]))
 
+  const recenter = () => {
+    if (mapRef.current) {
+      mapRef.current.animateToRegion({
+        latitude: location?.latitude || 0,
+        longitude: location?.longitude || 0,
+        latitudeDelta: 0.01,
+        longitudeDelta: 0.01,
+      }, 1000);
+    }
+  };
+
   return (
     <>
       {/* <StatusBar backgroundColor={Black} barStyle="light-content" /> */}
@@ -245,6 +258,7 @@ export default function Home() {
         {/* Map Section */}
         <View style={styles.mapContainer}>
           <MapView
+            ref={mapRef}
             style={styles.map}
             provider='google'
             initialRegion={{
@@ -258,6 +272,12 @@ export default function Home() {
               <Image source={require('../assets/logo/push-pin.png')} style={{ width: 40, height: 40 }} />
             </Marker>
           </MapView>
+          <TouchableOpacity
+            style={styles.recenterButton}
+            onPress={recenter}
+          >
+            <Ionicons name="locate" size={24} color={Gold} />
+          </TouchableOpacity>
         </View>
 
 
@@ -673,6 +693,14 @@ const styles = StyleSheet.create({
     color: White,
     fontSize: 16,
     fontWeight: '700',
+  },
+  recenterButton: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    padding: 10,
+    borderRadius: 12,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
 
 });

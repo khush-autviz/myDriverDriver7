@@ -12,7 +12,8 @@ import {
   Platform,
   PermissionsAndroid,
   Linking,
-  ActivityIndicator
+  ActivityIndicator,
+  KeyboardAvoidingView
 } from 'react-native'
 import { Black, Gold, Gray, LightGold, White } from '../../constants/Color'
 import { useNavigation } from '@react-navigation/native'
@@ -432,6 +433,10 @@ const requestStoragePermission = async () => {
   }
 
   return (
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={{flex: 1, backgroundColor: Black}}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 0}>
     <SafeAreaView style={styles.container}>
       {/* <TouchableOpacity onPress={() => navigation.goBack()}>
         <View style={styles.backRow}>
@@ -561,6 +566,7 @@ const requestStoragePermission = async () => {
         </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
+    </KeyboardAvoidingView>
   )
 }
 

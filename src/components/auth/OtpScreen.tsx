@@ -11,6 +11,7 @@ import {
   Dimensions,
   StatusBar,
   ActivityIndicator,
+  KeyboardAvoidingView,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {useNavigation, useRoute} from '@react-navigation/native';
@@ -128,6 +129,10 @@ export default function OtpScreen() {
   };
 
   return (
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={{flex: 1, backgroundColor: Black}}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 0}>
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="light-content" backgroundColor={Black} />
       <View style={styles.container}>
@@ -207,6 +212,7 @@ export default function OtpScreen() {
         
       </TouchableOpacity>
     </SafeAreaView>
+    </KeyboardAvoidingView>
   );
 }
 

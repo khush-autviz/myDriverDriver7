@@ -67,7 +67,7 @@ export default function Signin() {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={{flex: 1}}
+      style={{flex: 1, backgroundColor: Black}}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 0}>
       <StatusBar barStyle="light-content" backgroundColor={Black} />
       <SafeAreaView style={styles.container}>

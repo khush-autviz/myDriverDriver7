@@ -11,7 +11,8 @@ import {
   Platform,
   PermissionsAndroid,
   Linking,
-  ActivityIndicator
+  ActivityIndicator,
+  KeyboardAvoidingView
 } from 'react-native'
 import { Black, Gold, Gray, LightGold, White } from '../../constants/Color'
 import { useNavigation } from '@react-navigation/native'
@@ -252,6 +253,10 @@ export default function VehicleDocuments() {
   );
 
   return (
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={{flex: 1, backgroundColor: Black}}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 0}>
     <SafeAreaView style={styles.container}>
       {/* {DocumentUploadMutation.isPending && <Loader />} */}
       {/* <TouchableOpacity onPress={() => navigation.goBack()}>
@@ -301,6 +306,7 @@ export default function VehicleDocuments() {
         </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
+    </KeyboardAvoidingView>
   )
 }
 

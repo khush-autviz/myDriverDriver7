@@ -1,0 +1,6 @@
+projectKey=mydriver_driver
+serverUrl=http://127.0.0.1:9000
+serverVersion=25.6.0.109173
+dashboardUrl=http://127.0.0.1:9000/dashboard?id=mydriver_driver
+ceTaskId=da3c3308-aa0c-4c52-a610-9f9b04e23d20
+ceTaskUrl=http://127.0.0.1:9000/api/ce/task?id=da3c3308-aa0c-4c52-a610-9f9b04e23d20

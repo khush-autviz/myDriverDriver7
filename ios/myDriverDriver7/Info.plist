@@ -24,20 +24,57 @@
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
-	<key>NSAppTransportSecurity</key>
+	<!-- <key>NSAppTransportSecurity</key>
 	<dict>
-	  <!-- Do not change NSAllowsArbitraryLoads to true, or you will risk app rejection! -->
 		<key>NSAllowsArbitraryLoads</key>
 		<false/>
 		<key>NSAllowsLocalNetworking</key>
 		<true/>
+	</dict> -->
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
+		<key>NSExceptionDomains</key>
+		<dict>
+			<key>3.110.180.116</key>
+			<dict>
+				<key>NSExceptionAllowsInsecureHTTPLoads</key>
+				<true/>
+				<key>NSExceptionMinimumTLSVersion</key>
+				<string>1.0</string>
+			</dict>
+		</dict>
 	</dict>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>This app needs location access to track driver location for ride requests.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>We need access to your camera</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>This app needs location access to track driver location for ride requests even when the app is in background.</string>
 	<key>NSLocationAlwaysUsageDescription</key>
 	<string>This app needs location access to track driver location for ride requests even when the app is in background.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>This app needs location access to track driver location for ride requests.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>We need to save photos</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>We need access to your photo library</string>
+	<key>UIAppFonts</key>
+	<array>
+		<string>AntDesign.ttf</string>
+		<string>Entypo.ttf</string>
+		<string>EvilIcons.ttf</string>
+		<string>Feather.ttf</string>
+		<string>FontAwesome.ttf</string>
+		<string>FontAwesome5_Brands.ttf</string>
+		<string>FontAwesome5_Regular.ttf</string>
+		<string>FontAwesome5_Solid.ttf</string>
+		<string>Foundation.ttf</string>
+		<string>Ionicons.ttf</string>
+		<string>MaterialIcons.ttf</string>
+		<string>MaterialCommunityIcons.ttf</string>
+	</array>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>location</string>
@@ -57,30 +94,5 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
-
-	<key>NSCameraUsageDescription</key>
-<string>We need access to your camera</string>
-<key>NSPhotoLibraryUsageDescription</key>
-<string>We need access to your photo library</string>
-<key>NSPhotoLibraryAddUsageDescription</key>
-<string>We need to save photos</string>
-
-<key>UIAppFonts</key>
-<array>
-  <string>AntDesign.ttf</string>
-  <string>Entypo.ttf</string>
-  <string>EvilIcons.ttf</string>
-  <string>Feather.ttf</string>
-  <string>FontAwesome.ttf</string>
-  <string>FontAwesome5_Brands.ttf</string>
-  <string>FontAwesome5_Regular.ttf</string>
-  <string>FontAwesome5_Solid.ttf</string>
-  <string>Foundation.ttf</string>
-  <string>Ionicons.ttf</string>
-  <string>MaterialIcons.ttf</string>
-  <string>MaterialCommunityIcons.ttf</string>
-</array>
-
-
 </dict>
 </plist>

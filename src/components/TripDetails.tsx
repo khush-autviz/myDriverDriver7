@@ -23,6 +23,7 @@ export default function TripDetails() {
     const [otp, setotp] = useState('')
     //    const [rideInfo, setRideInfo] = useState<any>(null)
     const bottomSheetRef = useRef<BottomSheet>(null);
+    const mapRef = useRef<MapView | null>(null);
     const { location, startTracking, stopTracking } = useLocation()
     // const { currentRide, fetchRideDetails} = useRide()
     const { user: USER, rideId, setRideId } = useAuthStore()
@@ -193,6 +194,17 @@ export default function TripDetails() {
         }
     }, [location, isScreenFocused]);
 
+    const recenter = () => {
+        if (mapRef.current && location?.latitude && location?.longitude) {
+            mapRef.current.animateToRegion({
+                latitude: location.latitude,
+                longitude: location.longitude,
+                latitudeDelta: 0.01,
+                longitudeDelta: 0.01,
+            }, 1000);
+        }
+    };
+
     return (
         <GestureHandlerRootView style={styles.container}>
 
@@ -261,50 +273,59 @@ export default function TripDetails() {
 
 
             {location?.latitude && location?.longitude && (
-                <MapView
-                    style={styles.map}
-                    provider='google'
-                    showsCompass={false}
-                    initialRegion={{
-                        latitude: location?.latitude,
-                        longitude: location?.longitude,
-                        latitudeDelta: 0.01,
-                        longitudeDelta: 0.01,
-                    }}
-                >
-                    {rideInfo?.data?.ride?.pickupLocation?.coordinates && location?.latitude && location?.longitude && mode === 'accepted' && (
-                        <>
-                            <Marker coordinate={{ latitude: location?.latitude, longitude: location?.longitude }} ></Marker>
-                            <Marker coordinate={{ latitude: rideInfo?.data?.ride?.pickupLocation?.coordinates[0], longitude: rideInfo?.data?.ride?.pickupLocation?.coordinates[1] }} >
-                                <Image source={require('../assets/logo/push-pin.png')} style={{ width: 40, height: 40 }} />
-                            </Marker>
+                <View style={styles.mapContainer}>
+                    <MapView
+                        style={styles.map}
+                        provider='google'
+                        showsCompass={false}
+                        initialRegion={{
+                            latitude: location?.latitude,
+                            longitude: location?.longitude,
+                            latitudeDelta: 0.01,
+                            longitudeDelta: 0.01,
+                        }}
+                        ref={mapRef}
+                    >
+                        {rideInfo?.data?.ride?.pickupLocation?.coordinates && location?.latitude && location?.longitude && mode === 'accepted' && (
+                            <>
+                                <Marker coordinate={{ latitude: location?.latitude, longitude: location?.longitude }} ></Marker>
+                                <Marker coordinate={{ latitude: rideInfo?.data?.ride?.pickupLocation?.coordinates[0], longitude: rideInfo?.data?.ride?.pickupLocation?.coordinates[1] }} >
+                                    <Image source={require('../assets/logo/push-pin.png')} style={{ width: 40, height: 40 }} />
+                                </Marker>
 
-                            <MapViewDirections
-                                origin={{ latitude: location?.latitude, longitude: location?.longitude }}
-                                destination={{ latitude: rideInfo?.data?.ride?.pickupLocation?.coordinates[0], longitude: rideInfo?.data?.ride?.pickupLocation?.coordinates[1] }}
-                                apikey='AIzaSyDGQZ-LNDI4iv5CyqdU3BX5dl9PaEpOfrQ'
-                                strokeColor={Gold}
-                                strokeWidth={4}
-                            />
-                        </>
-                    )}
-                    {rideInfo?.data?.ride?.pickupLocation?.coordinates && location?.latitude && location?.longitude && mode !== 'accepted' && (
-                        <>
-                            <Marker coordinate={{ latitude: rideInfo?.data?.ride?.pickupLocation?.coordinates[0], longitude: rideInfo?.data?.ride?.pickupLocation?.coordinates[1] }} />
-                            <Marker coordinate={{ latitude: rideInfo?.data?.ride?.destination?.coordinates[0], longitude: rideInfo?.data?.ride?.destination?.coordinates[1] }} >
-                                <Image source={require('../assets/logo/push-pin.png')} style={{ width: 40, height: 40 }} />
-                            </Marker>
-                            <MapViewDirections
-                                origin={{ latitude: rideInfo?.data?.ride?.pickupLocation?.coordinates[0], longitude: rideInfo?.data?.ride?.pickupLocation?.coordinates[1] }}
-                                destination={{ latitude: rideInfo?.data?.ride?.destination?.coordinates[0], longitude: rideInfo?.data?.ride?.destination?.coordinates[1] }}
-                                apikey='AIzaSyDGQZ-LNDI4iv5CyqdU3BX5dl9PaEpOfrQ'
-                                strokeColor={Gold}
-                                strokeWidth={4}
-                            />
-                        </>
-                    )}
+                                <MapViewDirections
+                                    origin={{ latitude: location?.latitude, longitude: location?.longitude }}
+                                    destination={{ latitude: rideInfo?.data?.ride?.pickupLocation?.coordinates[0], longitude: rideInfo?.data?.ride?.pickupLocation?.coordinates[1] }}
+                                    apikey='AIzaSyDGQZ-LNDI4iv5CyqdU3BX5dl9PaEpOfrQ'
+                                    strokeColor={Gold}
+                                    strokeWidth={4}
+                                />
+                            </>
+                        )}
+                        {rideInfo?.data?.ride?.pickupLocation?.coordinates && location?.latitude && location?.longitude && mode !== 'accepted' && (
+                            <>
+                                <Marker coordinate={{ latitude: rideInfo?.data?.ride?.pickupLocation?.coordinates[0], longitude: rideInfo?.data?.ride?.pickupLocation?.coordinates[1] }} />
+                                <Marker coordinate={{ latitude: rideInfo?.data?.ride?.destination?.coordinates[0], longitude: rideInfo?.data?.ride?.destination?.coordinates[1] }} >
+                                    <Image source={require('../assets/logo/push-pin.png')} style={{ width: 40, height: 40 }} />
+                                </Marker>
+                                <MapViewDirections
+                                    origin={{ latitude: rideInfo?.data?.ride?.pickupLocation?.coordinates[0], longitude: rideInfo?.data?.ride?.pickupLocation?.coordinates[1] }}
+                                    destination={{ latitude: rideInfo?.data?.ride?.destination?.coordinates[0], longitude: rideInfo?.data?.ride?.destination?.coordinates[1] }}
+                                    apikey='AIzaSyDGQZ-LNDI4iv5CyqdU3BX5dl9PaEpOfrQ'
+                                    strokeColor={Gold}
+                                    strokeWidth={4}
+                                />
+                            </>
+                        )}
 
-                </MapView>
+                    </MapView>
+                    <TouchableOpacity
+                        style={styles.recenterButton}
+                        onPress={recenter}
+                    >
+                        <Ionicons name="locate" size={24} color={Gold} />
+                    </TouchableOpacity>
+                </View>
             )}
 
 
@@ -1159,5 +1180,16 @@ const styles = StyleSheet.create({
         borderRadius: 5,
         backgroundColor: '#4CAF50',
         // Add animation effect (can be enhanced with Animated API)
+    },
+    mapContainer: {
+        ...StyleSheet.absoluteFillObject,
+    },
+    recenterButton: {
+        position: 'absolute',
+        top: 10,
+        right: 10,
+        padding: 10,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        borderRadius: 20,
     },
 });

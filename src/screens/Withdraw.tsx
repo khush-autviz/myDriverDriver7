@@ -1,4 +1,4 @@
-import { StyleSheet, Text, TouchableOpacity, View, ScrollView, ActivityIndicator, FlatList, TextInput, Alert, Modal, RefreshControl } from 'react-native'
+import { StyleSheet, Text, TouchableOpacity, View, ScrollView, ActivityIndicator, FlatList, TextInput, Alert, Modal, RefreshControl, Platform, KeyboardAvoidingView } from 'react-native'
 import React, { useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { Black, DarkGray, Gold, Gray, LightGold, White } from '../constants/Color'
@@ -195,6 +195,10 @@ export default function Withdraw() {
   )
 
   return (
+    <KeyboardAvoidingView
+    behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    style={{flex: 1, backgroundColor: Black}}
+    keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 0}>
     <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
@@ -430,6 +434,7 @@ export default function Withdraw() {
         </Modal>
       )}
     </SafeAreaView>
+    </KeyboardAvoidingView>
   )
 }
 

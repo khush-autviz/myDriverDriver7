@@ -1363,9 +1363,9 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - react-native-maps (1.23.7):
-    - react-native-maps/Maps (= 1.23.7)
-  - react-native-maps/Generated (1.23.7):
+  - react-native-maps (1.24.3):
+    - react-native-maps/Maps (= 1.24.3)
+  - react-native-maps/Generated (1.24.3):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1389,7 +1389,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - react-native-maps/Google (1.23.7):
+  - react-native-maps/Google (1.24.3):
     - DoubleConversion
     - glog
     - Google-Maps-iOS-Utils (= 6.1.0)
@@ -1417,7 +1417,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - react-native-maps/Maps (1.23.7):
+  - react-native-maps/Maps (1.24.3):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -2410,7 +2410,7 @@ SPEC CHECKSUMS:
   React-microtasksnativemodule: ca2804a25fdcefffa0aa942aa23ab53b99614a34
   react-native-geolocation-service: 608e1da71a1ac31b4de64d9ef2815f697978c55b
   react-native-image-picker: c73e6edfdbc2bbc1c12b3fe9c2149441fa08f149
-  react-native-maps: d0a634f6e887d5faf894af8728fda12cb75880a3
+  react-native-maps: 6fe27ded251e01192ed30806a62ef9861162a607
   react-native-safe-area-context: 00d03dc688ba86664be66f9e3f203fc7d747d899
   React-NativeModulesApple: 452b86b29fae99ed0a4015dca3ad9cd222f88abf
   React-oscompat: ef5df1c734f19b8003e149317d041b8ce1f7d29c
