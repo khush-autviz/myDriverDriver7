@@ -562,7 +562,9 @@ const requestStoragePermission = async () => {
           disabled={VehicleDetailsMutation.isPending}
           activeOpacity={0.7}
         >
+          <Text style={styles.submitButtonText}>
           {VehicleDetailsMutation.isPending ? <ActivityIndicator size="small" color={Black} /> : 'Submit'}
+          </Text>
         </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>

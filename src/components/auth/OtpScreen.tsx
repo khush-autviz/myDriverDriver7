@@ -171,6 +171,7 @@ export default function OtpScreen() {
               maxLength={4}
               autoFocus={true}
               selectionColor={Gold}
+              textAlignVertical="center"
             />
             {/* {otp.length > 0 && (
               <Text style={styles.otpCounter}>{otp.length}/4</Text>
@@ -286,8 +287,8 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: '600',
     paddingHorizontal: 20,
-    textAlign: 'center',
     letterSpacing: 4,
+    textAlignVertical: 'center',
   },
   otpCounter: {
     color: Gold,
