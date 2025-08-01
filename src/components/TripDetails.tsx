@@ -495,7 +495,7 @@ export default function TripDetails() {
                                             value={customerVehiclePlateNumber}
                                             onChangeText={text => setCustomerVehiclePlateNumber(text.toUpperCase())}
                                             autoCapitalize="characters"
-                                            maxLength={10}
+                                            // maxLength={10}
                                         />
                                     </View>
                                 </View>
