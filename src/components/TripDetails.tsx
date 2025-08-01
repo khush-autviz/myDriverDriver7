@@ -21,6 +21,7 @@ export default function TripDetails() {
     const [mode, setmode] = useState('')
     const [modalVisible, setmodalVisible] = useState(false)
     const [otp, setotp] = useState('')
+    const [customerVehiclePlateNumber, setCustomerVehiclePlateNumber] = useState('')
     //    const [rideInfo, setRideInfo] = useState<any>(null)
     const bottomSheetRef = useRef<BottomSheet>(null);
     const mapRef = useRef<MapView | null>(null);
@@ -36,11 +37,11 @@ export default function TripDetails() {
     const snapPoints = useMemo(() => ['25%', '50%'], []);
 
     const cancelReasons = [
-        'Rider not at pickup location',
-        'Rider not responding',
+        'Customer not at pickup location',
+        'Customer not responding',
         'Vehicle issue or breakdown',
         'Personal emergency',
-        'Rider asked to cancel the trip',
+        'Unsafe or blocked pickup location',    
     ];
 
     const handleSheetChanges = useCallback((index: number) => {
@@ -464,19 +465,38 @@ export default function TripDetails() {
                                             textAlign="center"
                                         />
                                         <TouchableOpacity
-                                            style={[styles.verifyButton, otp.length === 4 ? styles.verifyButtonActive : null]}
+                                            style={[styles.verifyButton, otp.length === 4 && customerVehiclePlateNumber.trim() ? styles.verifyButtonActive : null]}
                                             activeOpacity={0.8}
-                                            disabled={otp.length !== 4}
+                                            disabled={otp.length !== 4 || !customerVehiclePlateNumber.trim()}
                                             onPress={() => verifyRideOtpMutation.mutateAsync({
                                                 id: rideId,
-                                                payload: { otp }
+                                                payload: { 
+                                                    otp,
+                                                    customerVehiclePlateNumber: customerVehiclePlateNumber.trim()
+                                                }
                                             })}
                                         >
                                             {/* <Ionicons name="checkmark" size={20} color={otp.length === 4 ? Black : Gray} /> */}
-                                            <Text style={[styles.verifyButtonText, otp.length === 4 ? styles.verifyButtonTextActive : null]}>
+                                            <Text style={[styles.verifyButtonText, otp.length === 4 && customerVehiclePlateNumber.trim() ? styles.verifyButtonTextActive : null]}>
                                                 Verify
                                             </Text>
                                         </TouchableOpacity>
+                                    </View>
+                                    
+                                    <View style={styles.plateNumberContainer}>
+                                        <View style={styles.plateNumberHeader}>
+                                            <Ionicons name="car" size={18} color={Gold} />
+                                            <Text style={styles.plateNumberLabel}>Customer Vehicle Plate</Text>
+                                        </View>
+                                        <TextInput
+                                            style={styles.plateNumberInput}
+                                            placeholder="Enter plate number"
+                                            placeholderTextColor={Gray}
+                                            value={customerVehiclePlateNumber}
+                                            onChangeText={text => setCustomerVehiclePlateNumber(text.toUpperCase())}
+                                            autoCapitalize="characters"
+                                            maxLength={10}
+                                        />
                                     </View>
                                 </View>
 
@@ -562,6 +582,17 @@ export default function TripDetails() {
                                                 <Text style={styles.metricLabel}>Distance:</Text>
                                                 <Text style={styles.metricValue}>{rideInfo?.data?.ride?.distance.toFixed(1)} km</Text>
                                             </View>
+                                        </View>
+                                    </View>
+
+                                    {/* Customer Vehicle Info Card */}
+                                    <View style={styles.customerVehicleCard}>
+                                        <View style={styles.customerVehicleHeader}>
+                                            <Ionicons name="car" size={20} color={Gold} />
+                                            <Text style={styles.customerVehicleHeaderText}>Customer Vehicle</Text>
+                                        </View>
+                                        <View style={styles.plateNumberDisplay}>
+                                            <Text style={styles.plateNumberText}>{customerVehiclePlateNumber}</Text>
                                         </View>
                                     </View>
 
@@ -1191,5 +1222,68 @@ const styles = StyleSheet.create({
         padding: 10,
         backgroundColor: 'rgba(0, 0, 0, 0.5)',
         borderRadius: 20,
+    },
+    plateNumberContainer: {
+        marginTop: 15,
+        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+        borderRadius: 12,
+        padding: 15,
+        borderWidth: 1,
+        borderColor: 'rgba(255, 255, 255, 0.1)',
+    },
+    plateNumberHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 10,
+    },
+    plateNumberLabel: {
+        color: Gold,
+        fontSize: 14,
+        fontWeight: '600',
+        marginLeft: 8,
+    },
+    plateNumberInput: {
+        backgroundColor: 'rgba(255, 255, 255, 0.08)',
+        borderRadius: 8,
+        paddingHorizontal: 15,
+        paddingVertical: 12,
+        color: White,
+        fontSize: 16,
+        fontWeight: '600',
+        borderWidth: 1,
+        borderColor: 'rgba(255, 255, 255, 0.2)',
+        textAlign: 'center',
+        letterSpacing: 1,
+    },
+    customerVehicleCard: {
+        backgroundColor: 'rgba(255, 255, 255, 0.08)',
+        borderRadius: 10,
+        padding: 15,
+        marginBottom: 10,
+    },
+    customerVehicleHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 10,
+    },
+    customerVehicleHeaderText: {
+        color: Gold,
+        fontSize: 16,
+        fontWeight: '700',
+        marginLeft: 8,
+    },
+    plateNumberDisplay: {
+        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+        borderRadius: 8,
+        padding: 12,
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: 'rgba(255, 255, 255, 0.1)',
+    },
+    plateNumberText: {
+        color: LightGold,
+        fontSize: 18,
+        fontWeight: '700',
+        letterSpacing: 2,
     },
 });
