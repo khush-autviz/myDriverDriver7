@@ -69,7 +69,7 @@ export default function VehicleDetails() {
     },
     onError: (error: any) => {
       console.log('vehicle details mutation error', error);
-      ShowToast(error?.response?.data?.message, { type: 'error' });
+      ShowToast(error?.response?.data?.message || 'Failed to save vehicle details. Please try again.', { type: 'error' });
       // Alert.alert('Error', 'Failed to save vehicle details. Please try again.');
     }
   });

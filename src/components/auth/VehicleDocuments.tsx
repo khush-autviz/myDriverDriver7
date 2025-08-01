@@ -61,7 +61,7 @@ export default function VehicleDocuments() {
     },
     onError: (error: any) => {
       console.log('document upload error', error);
-      ShowToast(error?.response?.data?.message, { type: 'error' });
+      ShowToast(error?.response?.data?.message || 'Failed to upload documents. Please try again with less than 1MB file size.', { type: 'error' });
       // Alert.alert('Error', 'Failed to upload documents. Please try again.');
     }
   });
