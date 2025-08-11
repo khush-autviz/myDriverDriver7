@@ -60,6 +60,12 @@ export default function Account() {
       important: true
     },
     {
+      icon: 'car-sport',
+      label: 'Drivers',
+      onPress: () => navigation.navigate('fellow-drivers'),
+      important: true
+    },
+    {
       icon: 'card',
       label: 'Wallet Transactions',
       onPress: () => navigation.navigate('transactions'),

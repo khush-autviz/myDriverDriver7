@@ -28,6 +28,7 @@ import { Toast } from './src/lib/Toast';
 import RideDetails from './src/components/RideDetails';
 import Transactions from './src/screens/Transactions';
 import Withdraw from './src/screens/Withdraw';
+import FellowDrivers from './src/screens/FellowDrivers';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -99,6 +100,7 @@ export default function App() {
                     <Stack.Screen name='ride-details' component={RideDetails} />
                     <Stack.Screen name='transactions' component={Transactions} />
                     <Stack.Screen name='withdraw' component={Withdraw} />
+                    <Stack.Screen name='fellow-drivers' component={FellowDrivers} />
 
                     {/* Main Tabs */}
                     <Stack.Screen name="Main" component={MainTabs} />

@@ -138,3 +138,23 @@ export const withdrawalHistory = async () => {
     const response = await axios.get('/driver/wallet/withdrawal/requests')
     return response.data
 }
+
+// add fellow driver
+export const addFellowDriver = async (data: any) => {
+    const response = await axios.post(`/fellow-drivers`, data, {
+        headers: {'Content-Type': 'multipart/form-data'}
+    })
+    return response.data
+}
+
+// get fellow drivers
+export const getFellowDrivers = async () => {
+    const response = await axios.get(`/fellow-drivers`)
+    return response.data
+}
+
+// delete fellow driver
+export const deleteFellowDriver = async (fellowDriverId: string) => {
+    const response = await axios.delete(`/fellow-drivers/${fellowDriverId}`)
+    return response.data
+}
