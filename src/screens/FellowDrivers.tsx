@@ -163,18 +163,22 @@ export default function FellowDrivers() {
   };
 
   const handleImageUpload = async (type: 'profilePhoto' | 'drivingLicenseFront' | 'drivingLicenseBack') => {
+    // Enhanced options for image picker with better compression
     const options: ImageLibraryOptions = {
       mediaType: 'photo',
       includeBase64: false,
       maxHeight: 2000,
       maxWidth: 2000,
       selectionLimit: 1,
-      quality: 0.8,
+      quality: 0.8, // Reduce quality to help with file size
     };
   
     try {
       console.log('Launching image library...');
+      
+      // Simple direct call without complex wrapping
       const result = await launchImageLibrary(options);
+      
       console.log('Image picker result:', result);
       
       if (result.didCancel) {
@@ -184,7 +188,7 @@ export default function FellowDrivers() {
       
       if (result.errorMessage) {
         console.log('Image picker error:', result.errorMessage);
-        Alert.alert('Error', 'Failed to select image');
+        ShowToast('Failed to select image', { type: 'error' });
         return;
       }
       
@@ -192,12 +196,15 @@ export default function FellowDrivers() {
         const asset = result.assets[0];
         
         if (asset.uri) {
+          // ✅ VALIDATE IMAGE SIZE using multiple methods for accuracy
           const maxSizeInBytes = 1 * 1024 * 1024; // 1MB limit
           
           console.log(`Selected ${type} URI: ${asset.uri}`);
           
+          // Method 1: Use fileSize from asset (if available)
           let fileSizeInBytes = asset.fileSize || 0;
           
+          // Method 2: Try to get more accurate file size using fetch (for better accuracy)
           try {
             const response = await fetch(asset.uri);
             const blob = await response.blob();
@@ -205,9 +212,12 @@ export default function FellowDrivers() {
             console.log(`✅ Got accurate file size from blob: ${fileSizeInBytes} bytes`);
           } catch (fetchError) {
             console.log('❌ Could not fetch blob, using asset.fileSize:', asset.fileSize);
+            // Fallback to asset.fileSize if available
             if (!asset.fileSize) {
               console.log('⚠️ No file size available, allowing upload with warning');
-              Alert.alert('Warning', `${type === 'profilePhoto' ? 'Profile photo' : type === 'drivingLicenseFront' ? 'License front' : 'License back'} selected (size validation not available)`);
+              ShowToast(`${type === 'profilePhoto' ? 'Profile photo' : type === 'drivingLicenseFront' ? 'License front' : 'License back'} selected (size validation not available)`, { 
+                type: 'warning' 
+              });
               
               setNewDriver(prev => ({
                 ...prev,
@@ -220,11 +230,15 @@ export default function FellowDrivers() {
           const fileSizeInMB = (fileSizeInBytes / (1024 * 1024)).toFixed(2);
           console.log(`File size: ${fileSizeInMB}MB (${fileSizeInBytes} bytes)`);
           
+          // 🚫 REJECT IF TOO LARGE
           if (fileSizeInBytes > maxSizeInBytes) {
-            Alert.alert('Image Too Large', `Please select an image smaller than 1MB. Current size: ${fileSizeInMB}MB`);
+            ShowToast(`Image too large! Please select an image smaller than 1MB. Current size: ${fileSizeInMB}MB`, { 
+              type: 'error' 
+            });
             return;
           }
           
+          // ✅ IMAGE SIZE IS ACCEPTABLE
           console.log(`✅ ${type} size valid: ${fileSizeInMB}MB`);
           
           setNewDriver(prev => ({
@@ -235,7 +249,7 @@ export default function FellowDrivers() {
       }
     } catch (error) {
       console.error('Error in image picker:', error);
-      Alert.alert('Error', 'Something went wrong while selecting image');
+      ShowToast('Something went wrong while selecting image', { type: 'error' });
     }
   };
 
@@ -265,6 +279,13 @@ export default function FellowDrivers() {
     // Validate required fields
     if (!newDriver.name || !newDriver.gender || !newDriver.mobileNumber || !newDriver.licenseNumber) {
       ShowToast('Please fill in all required fields', { type: 'warning' });
+      return;
+    }
+
+    // Validate mobile number format
+    const mobileRegex = /^\+?[1-9]\d{1,14}$/;
+    if (!mobileRegex.test(newDriver.mobileNumber)) {
+      ShowToast('Please enter a valid mobile number', { type: 'warning' });
       return;
     }
 
@@ -554,7 +575,14 @@ export default function FellowDrivers() {
             <Text style={styles.labelText}>Profile Photo <Text style={styles.requiredField}>*</Text></Text>
             <TouchableOpacity 
               style={styles.imageUploadButton}
-              onPress={() => handleImageUpload('profilePhoto')}
+              onPress={() => {
+                try {
+                  handleImageUpload('profilePhoto');
+                } catch (error) {
+                  console.error('Error in image upload button:', error);
+                  ShowToast('Failed to open image picker', { type: 'error' });
+                }
+              }}
               activeOpacity={0.7}
             >
               {newDriver.profilePhoto ? (
@@ -571,7 +599,14 @@ export default function FellowDrivers() {
             <Text style={styles.labelText}>Driving License Front <Text style={styles.requiredField}>*</Text></Text>
             <TouchableOpacity 
               style={styles.imageUploadButton}
-              onPress={() => handleImageUpload('drivingLicenseFront')}
+              onPress={() => {
+                try {
+                  handleImageUpload('drivingLicenseFront');
+                } catch (error) {
+                  console.error('Error in image upload button:', error);
+                  ShowToast('Failed to open image picker', { type: 'error' });
+                }
+              }}
               activeOpacity={0.7}
             >
               {newDriver.drivingLicenseFront ? (
@@ -588,7 +623,14 @@ export default function FellowDrivers() {
             <Text style={styles.labelText}>Driving License Back <Text style={styles.requiredField}>*</Text></Text>
             <TouchableOpacity 
               style={styles.imageUploadButton}
-              onPress={() => handleImageUpload('drivingLicenseBack')}
+              onPress={() => {
+                try {
+                  handleImageUpload('drivingLicenseBack');
+                } catch (error) {
+                  console.error('Error in image upload button:', error);
+                  ShowToast('Failed to open image picker', { type: 'error' });
+                }
+              }}
               activeOpacity={0.7}
             >
               {newDriver.drivingLicenseBack ? (

@@ -23,7 +23,7 @@ import {
 import MapView, { Marker } from 'react-native-maps';
 import { useSocket } from '../context/SocketContext';
 import { useMutation } from '@tanstack/react-query';
-import { driverGoOffline, driverGoOnline, extraDriverGoOnline, rideAccepted, rideDetails } from '../constants/Api';
+import { driverGoOffline, driverGoOnline, extraDriverGoOnline, rideAccepted, rideDetails, getFellowDrivers } from '../constants/Api';
 import { useLocation } from '../context/LocationProvider';
 import { useAuthStore } from '../store/authStore';
 import Modal from 'react-native-modal';
@@ -40,6 +40,9 @@ export default function Home() {
   const [isDriverMode, setIsDriverMode] = useState(false);
   const [modalVisible, setmodalVisible] = useState(false)
   const [rideDetails, setrideDetails] = useState<any>()
+  const [fellowDriverModalVisible, setFellowDriverModalVisible] = useState(false)
+  const [fellowDrivers, setFellowDrivers] = useState<any[]>([])
+  const [selectedFellowDriver, setSelectedFellowDriver] = useState<any>(null)
   const socket = useSocket();
   const { location, startTracking, stopTracking, startBackgroundTracking, stopBackgroundTracking, isBackgroundTracking } = useLocation()
   const { user: USER, setUser: SETUSER, setRideId } = useAuthStore()
@@ -72,6 +75,7 @@ export default function Home() {
         longitude: location?.longitude || 0,
       })
       SETUSER({...USER, isAvailable: true})
+      ShowToast('Successfully went online with fellow driver', { type: 'success' });
       // socket?.on('rideRequest', (data) => {
       //   setrideDetails(data)
       //   setmodalVisible(true)
@@ -80,6 +84,7 @@ export default function Home() {
     onError: (error: any) => {
       console.log('❌ Driver online error', error);
       ShowToast(error?.response?.data?.message, {type: 'error'})
+      setSelectedFellowDriver(null);
     }
   })
 
@@ -88,10 +93,12 @@ export default function Home() {
     onSuccess: (response) => {
       console.log('extra driver online success', response);
       setIsDriverMode(true);
+      ShowToast('Successfully went online with fellow driver', { type: 'success' });
     },
     onError: (error: any) => {
       console.log('extra driver online error', error);
       ShowToast(error?.response?.data?.message, {type: 'error'})
+      setSelectedFellowDriver(null);
     }
   })
 
@@ -125,13 +132,9 @@ export default function Home() {
         ShowToast('Please enable location services to go online', {type: 'error'})
         return
       }
-      DriverOnlineMutation.mutateAsync({
-        driverId: USER?.id ?? USER?._id,
-        location: {
-          latitude: location?.latitude || 0,
-          longitude: location?.longitude || 0,
-        }
-      })
+      // Show modal to select fellow driver
+      fetchFellowDrivers();
+      setFellowDriverModalVisible(true);
     } else {
       // Use the offline mutation to properly stop background tracking
       DriverOfflineMutation.mutateAsync({
@@ -157,6 +160,21 @@ export default function Home() {
     }
   })
 
+  // Function to fetch fellow drivers
+  const fetchFellowDrivers = async () => {
+    try {
+      const response = await getFellowDrivers();
+      console.log('response fellow drivers', response);
+      const approvedDrivers = response.data.fellowDrivers.filter((driver: any) => driver.approvalStatus === 'approved');
+      setFellowDrivers(approvedDrivers);
+    } catch (error) {
+      console.log('Error fetching fellow drivers:', error);
+      ShowToast('Failed to fetch fellow drivers', { type: 'error' });
+    }
+  };
+
+  console.log('fellowDrivers', fellowDrivers);
+
   // Function to handle driver mode toggle
   const toggleDriverMode = () => {
     if (!isDriverMode) {
@@ -170,6 +188,21 @@ export default function Home() {
     } else {
       setIsDriverMode(false);
     }
+  };
+
+  // Function to select fellow driver and go online
+  const selectFellowDriverAndGoOnline = (fellowDriver: any) => {
+    setSelectedFellowDriver(fellowDriver);
+    setFellowDriverModalVisible(false);
+    
+    DriverOnlineMutation.mutateAsync({
+      driverId: USER?.id ?? USER?._id,
+      fellowDriverId: fellowDriver.id,
+      location: {
+        latitude: location?.latitude || 0,
+        longitude: location?.longitude || 0,
+      }
+    });
   };
 
   const onAccept = () => {
@@ -492,6 +525,172 @@ export default function Home() {
                 }}>Accept</Text>
               </TouchableOpacity>
             </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Fellow Driver Selection Modal */}
+      <Modal
+        isVisible={fellowDriverModalVisible}
+        animationIn="slideInUp"
+        animationOut="slideOutDown"
+        backdropOpacity={0.7}
+        onBackdropPress={() => setFellowDriverModalVisible(false)}
+        style={{
+          margin: 0,
+          justifyContent: 'flex-end',
+        }}
+        statusBarTranslucent
+        useNativeDriver
+        hideModalContentWhileAnimating
+      >
+        <View style={{
+          backgroundColor: Black,
+          borderRadius: 24,
+          borderColor: LightGold,
+          borderWidth: 1,
+          maxHeight: '80%',
+        }}>
+          <View style={{
+            alignItems: 'center',
+            paddingTop: 12,
+            paddingBottom: 16,
+            borderBottomWidth: 1,
+            borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+          }}>
+            <Text style={{
+              color: Gold,
+              fontSize: 18,
+              fontWeight: '700',
+            }}>Select Fellow Driver</Text>
+            <Text style={{
+              color: LightGold,
+              fontSize: 14,
+              marginTop: 4,
+            }}>Choose a driver to go online with</Text>
+          </View>
+
+          <ScrollView style={{
+            padding: 20,
+            maxHeight: 400,
+          }} showsVerticalScrollIndicator={false}>
+            {fellowDrivers.length === 0 ? (
+              <View style={{
+                alignItems: 'center',
+                paddingVertical: 40,
+              }}>
+                <Ionicons name="people-outline" size={48} color={Gray} />
+                <Text style={{
+                  color: Gray,
+                  fontSize: 16,
+                  fontWeight: '600',
+                  marginTop: 16,
+                }}>No approved drivers found</Text>
+                <Text style={{
+                  color: Gray,
+                  fontSize: 14,
+                  marginTop: 8,
+                  textAlign: 'center',
+                }}>Add and get approval for fellow drivers first</Text>
+              </View>
+            ) : (
+              fellowDrivers.map((driver) => (
+                <TouchableOpacity
+                  key={driver.id}
+                  style={{
+                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                    borderRadius: 12,
+                    padding: 16,
+                    marginBottom: 12,
+                    borderWidth: 1,
+                    borderColor: 'rgba(255, 255, 255, 0.1)',
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                  }}
+                  onPress={() => selectFellowDriverAndGoOnline(driver)}
+                  activeOpacity={0.7}
+                >
+                  <View style={{
+                    width: 50,
+                    height: 50,
+                    borderRadius: 25,
+                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginRight: 12,
+                    overflow: 'hidden',
+                  }}>
+                    {driver.profilePhoto ? (
+                      <Image 
+                        source={{ uri: `https://v56c5ncc-3000.inc1.devtunnels.ms/${driver.profilePhoto}` }} 
+                        style={{
+                          width: 50,
+                          height: 50,
+                          borderRadius: 25,
+                        }}
+                        resizeMode="cover"
+                      />
+                    ) : (
+                      <Ionicons name="person" size={24} color={Gold} />
+                    )}
+                  </View>
+                  
+                  <View style={{
+                    flex: 1,
+                  }}>
+                    <Text style={{
+                      color: White,
+                      fontSize: 16,
+                      fontWeight: '600',
+                      marginBottom: 4,
+                    }}>{driver.name}</Text>
+                    <Text style={{
+                      color: Gray,
+                      fontSize: 14,
+                      marginBottom: 2,
+                    }}>{driver.mobileNumber}</Text>
+                    <View style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                    }}>
+                      <Ionicons name="card" size={14} color={Gray} />
+                      <Text style={{
+                        color: Gray,
+                        fontSize: 12,
+                        marginLeft: 4,
+                      }}>{driver.licenseNumber}</Text>
+                    </View>
+                  </View>
+                  
+                  <Ionicons name="chevron-forward" size={20} color={Gray} />
+                </TouchableOpacity>
+              ))
+            )}
+          </ScrollView>
+
+          <View style={{
+            padding: 20,
+            borderTopWidth: 1,
+            borderTopColor: 'rgba(255, 255, 255, 0.1)',
+          }}>
+            <TouchableOpacity
+              style={{
+                backgroundColor: DarkGray,
+                borderRadius: 12,
+                paddingVertical: 15,
+                alignItems: 'center',
+                borderWidth: 1,
+                borderColor: 'rgba(255, 255, 255, 0.1)',
+              }}
+              onPress={() => setFellowDriverModalVisible(false)}
+              activeOpacity={0.7}
+            >
+              <Text style={{
+                color: White,
+                fontSize: 16,
+                fontWeight: '600',
+              }}>Cancel</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </Modal>
