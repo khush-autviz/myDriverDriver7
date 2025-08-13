@@ -189,11 +189,11 @@ export default function TripDetails() {
     // console.log(location, 'location');
 
     // NEW: Only log location when screen is focused
-    useEffect(() => {
-        if (isScreenFocused && location) {
-            console.log(location, 'location');
-        }
-    }, [location, isScreenFocused]);
+    // useEffect(() => {
+    //     if (isScreenFocused && location) {
+    //         console.log(location, 'location');
+    //     }
+    // }, [location, isScreenFocused]);
 
     const recenter = () => {
         if (mapRef.current && location?.latitude && location?.longitude) {
@@ -289,15 +289,17 @@ export default function TripDetails() {
                     >
                         {rideInfo?.data?.ride?.pickupLocation?.coordinates && location?.latitude && location?.longitude && mode === 'accepted' && (
                             <>
-                                <Marker coordinate={{ latitude: location?.latitude, longitude: location?.longitude }} ></Marker>
+                                <Marker coordinate={{ latitude: location?.latitude, longitude: location?.longitude }} >
+                                      
+                                </Marker>
                                 <Marker coordinate={{ latitude: rideInfo?.data?.ride?.pickupLocation?.coordinates[0], longitude: rideInfo?.data?.ride?.pickupLocation?.coordinates[1] }} >
-                                    <Image source={require('../assets/logo/push-pin.png')} style={{ width: 40, height: 40 }} />
+                                    {/* <Image source={require('../assets/logo/push-pin.png')} style={{ width: 40, height: 40 }} /> */}
                                 </Marker>
 
                                 <MapViewDirections
                                     origin={{ latitude: location?.latitude, longitude: location?.longitude }}
                                     destination={{ latitude: rideInfo?.data?.ride?.pickupLocation?.coordinates[0], longitude: rideInfo?.data?.ride?.pickupLocation?.coordinates[1] }}
-                                    apikey='AIzaSyDGQZ-LNDI4iv5CyqdU3BX5dl9PaEpOfrQ'
+                                    apikey='AIzaSyCD1L-TRXFfxXI0H8TSakx84C_x7NIIrJ4'
                                     strokeColor={Gold}
                                     strokeWidth={4}
                                 />
@@ -307,12 +309,12 @@ export default function TripDetails() {
                             <>
                                 <Marker coordinate={{ latitude: rideInfo?.data?.ride?.pickupLocation?.coordinates[0], longitude: rideInfo?.data?.ride?.pickupLocation?.coordinates[1] }} />
                                 <Marker coordinate={{ latitude: rideInfo?.data?.ride?.destination?.coordinates[0], longitude: rideInfo?.data?.ride?.destination?.coordinates[1] }} >
-                                    <Image source={require('../assets/logo/push-pin.png')} style={{ width: 40, height: 40 }} />
+                                    {/* <Image source={require('../assets/logo/push-pin.png')} style={{ width: 40, height: 40 }} /> */}
                                 </Marker>
                                 <MapViewDirections
                                     origin={{ latitude: rideInfo?.data?.ride?.pickupLocation?.coordinates[0], longitude: rideInfo?.data?.ride?.pickupLocation?.coordinates[1] }}
                                     destination={{ latitude: rideInfo?.data?.ride?.destination?.coordinates[0], longitude: rideInfo?.data?.ride?.destination?.coordinates[1] }}
-                                    apikey='AIzaSyDGQZ-LNDI4iv5CyqdU3BX5dl9PaEpOfrQ'
+                                    apikey='AIzaSyCD1L-TRXFfxXI0H8TSakx84C_x7NIIrJ4'
                                     strokeColor={Gold}
                                     strokeWidth={4}
                                 />

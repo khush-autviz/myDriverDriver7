@@ -56,7 +56,7 @@ export default function FellowDrivers() {
     },
     onError: (error: any) => {
       console.log('Error adding fellow driver:', error);
-      ShowToast(error?.response?.data?.message || 'Failed to add fellow driver', { type: 'error' });
+      ShowToast(error?.response?.data?.message || 'failed to add fellow driver. Try with smaller image size less than 100kb', { type: 'error' });
     }
   });
 
@@ -355,7 +355,7 @@ export default function FellowDrivers() {
         <View style={styles.driverAvatar}>
           {item.profilePhoto ? (
             <Image 
-              source={{ uri: `https://v56c5ncc-3000.inc1.devtunnels.ms/${item.profilePhoto}` }} 
+              source={{ uri: `https://api.mydriversa.co.za/${item.profilePhoto}` }} 
               style={styles.avatarImage} 
               resizeMode="cover"
             />

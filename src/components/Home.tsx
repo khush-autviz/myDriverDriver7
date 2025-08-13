@@ -49,6 +49,7 @@ export default function Home() {
   const navigation: any = useNavigation()
   const { fetchRideDetails } = useRide()
   const mapRef = useRef<MapView | null>(null);
+  const [componentKey, setComponentKey] = useState(0); // Added for component reload
 
 
 
@@ -67,12 +68,16 @@ export default function Home() {
       }
 
       socket?.emit('goOnDuty', {
-        latitude: location?.latitude || 0,
-        longitude: location?.longitude || 0,
+          // latitude: location?.latitude || 0,
+          // longitude: location?.longitude || 0,
+          latitude: location?.longitude || 0,
+          longitude: location?.latitude || 0,
       })
       socket?.emit('updateLocation', {
-        latitude: location?.latitude || 0,
-        longitude: location?.longitude || 0,
+        // latitude: location?.latitude || 0,
+        // longitude: location?.longitude || 0,
+        latitude: location?.longitude || 0,
+        longitude: location?.latitude || 0,
       })
       SETUSER({...USER, isAvailable: true})
       ShowToast('Successfully went online with fellow driver', { type: 'success' });
@@ -199,8 +204,8 @@ export default function Home() {
       driverId: USER?.id ?? USER?._id,
       fellowDriverId: fellowDriver.id,
       location: {
-        latitude: location?.latitude || 0,
-        longitude: location?.longitude || 0,
+        latitude: location?.longitude || 0,
+        longitude: location?.latitude || 0,
       }
     });
   };
@@ -248,21 +253,30 @@ export default function Home() {
     else {
       setIsNormalMode(false)
     }
+    // Reload entire component when tab is focused with delay to prevent Java errors
+    console.log('🔄 Home tab focused - reloading component');
+    setTimeout(() => {
+      setComponentKey(prev => prev + 1);
+    }, 100); // Small delay to prevent rapid remounting
   }, [USER]))
 
   const recenter = () => {
-    if (mapRef.current) {
-      mapRef.current.animateToRegion({
-        latitude: location?.latitude || 0,
-        longitude: location?.longitude || 0,
-        latitudeDelta: 0.01,
-        longitudeDelta: 0.01,
-      }, 1000);
+    if (mapRef.current && location?.latitude && location?.longitude) {
+      try {
+        mapRef.current.animateToRegion({
+          latitude: location.latitude,
+          longitude: location.longitude,
+          latitudeDelta: 0.01,
+          longitudeDelta: 0.01,
+        }, 1000);
+      } catch (error) {
+        console.log('🗺️ Recenter error:', error);
+      }
     }
   };
 
   return (
-    <>
+    <React.Fragment key={componentKey}>
       {/* <StatusBar backgroundColor={Black} barStyle="light-content" /> */}
       <View style={styles.container}>
         {(DriverOnlineMutation.isPending || DriverOfflineMutation.isPending) && (
@@ -290,21 +304,32 @@ export default function Home() {
 
         {/* Map Section */}
         <View style={styles.mapContainer}>
-          <MapView
-            ref={mapRef}
-            style={styles.map}
-            provider='google'
-            initialRegion={{
-              latitude: location?.latitude || 0,
-              longitude: location?.longitude || 0,
-              latitudeDelta: 0.01,
-              longitudeDelta: 0.01,
-            }}
-          >
-            <Marker coordinate={{ latitude: location?.latitude || 0, longitude: location?.longitude || 0 }} >
-              <Image source={require('../assets/logo/push-pin.png')} style={{ width: 40, height: 40 }} />
-            </Marker>
-          </MapView>
+          {location?.latitude && location?.longitude && (
+            <MapView
+              ref={mapRef}
+              style={styles.map}
+              provider='google'
+              initialRegion={{
+                latitude: location.latitude,
+                longitude: location.longitude,
+                latitudeDelta: 0.01,
+                longitudeDelta: 0.01,
+              }}
+              onMapReady={() => {
+                console.log('🗺️ Map is ready');
+              }}
+            >
+              <Marker 
+                coordinate={{ 
+                  latitude: location.latitude, 
+                  longitude: location.longitude 
+                }}
+                tracksViewChanges={false}
+              >
+                {/* <Image source={require('../assets/logo/push-pin.png')} style={{ width: 40, height: 40 }} /> */}
+              </Marker>
+            </MapView>
+          )}
           <TouchableOpacity
             style={styles.recenterButton}
             onPress={recenter}
@@ -694,7 +719,7 @@ export default function Home() {
           </View>
         </View>
       </Modal>
-    </>
+    </React.Fragment>
   );
 
 
