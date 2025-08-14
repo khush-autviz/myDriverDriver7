@@ -296,28 +296,28 @@ export default function TripDetails() {
                                     {/* <Image source={require('../assets/logo/push-pin.png')} style={{ width: 40, height: 40 }} /> */}
                                 </Marker>
 
-                                <MapViewDirections
+                                {/* <MapViewDirections
                                     origin={{ latitude: location?.latitude, longitude: location?.longitude }}
                                     destination={{ latitude: rideInfo?.data?.ride?.pickupLocation?.coordinates[0], longitude: rideInfo?.data?.ride?.pickupLocation?.coordinates[1] }}
                                     apikey='AIzaSyCD1L-TRXFfxXI0H8TSakx84C_x7NIIrJ4'
                                     strokeColor={Gold}
                                     strokeWidth={4}
-                                />
+                                /> */}
                             </>
                         )}
                         {rideInfo?.data?.ride?.pickupLocation?.coordinates && location?.latitude && location?.longitude && mode !== 'accepted' && (
                             <>
                                 <Marker coordinate={{ latitude: rideInfo?.data?.ride?.pickupLocation?.coordinates[0], longitude: rideInfo?.data?.ride?.pickupLocation?.coordinates[1] }} />
                                 <Marker coordinate={{ latitude: rideInfo?.data?.ride?.destination?.coordinates[0], longitude: rideInfo?.data?.ride?.destination?.coordinates[1] }} >
-                                    {/* <Image source={require('../assets/logo/push-pin.png')} style={{ width: 40, height: 40 }} /> */}
+                                    <Image source={require('../assets/logo/push-pin.png')} style={{ width: 40, height: 40 }} />
                                 </Marker>
-                                <MapViewDirections
+                                {/* <MapViewDirections
                                     origin={{ latitude: rideInfo?.data?.ride?.pickupLocation?.coordinates[0], longitude: rideInfo?.data?.ride?.pickupLocation?.coordinates[1] }}
                                     destination={{ latitude: rideInfo?.data?.ride?.destination?.coordinates[0], longitude: rideInfo?.data?.ride?.destination?.coordinates[1] }}
                                     apikey='AIzaSyCD1L-TRXFfxXI0H8TSakx84C_x7NIIrJ4'
                                     strokeColor={Gold}
                                     strokeWidth={4}
-                                />
+                                /> */}
                             </>
                         )}
 

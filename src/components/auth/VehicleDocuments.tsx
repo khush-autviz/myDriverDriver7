@@ -271,15 +271,15 @@ export default function VehicleDocuments() {
       
       <ScrollView showsVerticalScrollIndicator={false}>
         {renderDocumentUploader(
-          'Driving License (Front)', 
+          'Driving License', 
           'drivingLicenseFront',
           'Upload a clear image of the front side of your driving license'
         )}
         
         {renderDocumentUploader(
-          'Driving License (Back)', 
+          'Criminal Record Check', 
           'drivingLicenseBack',
-          'Upload a clear image of the back side of your driving license'
+          'Upload a clear image of your criminal record check'
         )}
         
         {renderDocumentUploader(
