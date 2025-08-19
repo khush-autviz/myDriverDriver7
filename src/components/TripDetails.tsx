@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, StyleSheet, FlatList, Platform, Image } from 'react-native'
+import { View, Text, TouchableOpacity, StyleSheet, FlatList, Platform, Image, Linking } from 'react-native'
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { QueryClient, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { cancelRide, completeRide, driverArrived, driverWaiting, rideDetails, startRide, verifyRideOtp } from '../constants/Api';
@@ -206,6 +206,43 @@ export default function TripDetails() {
         }
     };
 
+    // Function to open directions in maps app
+    const openDirections = (type: 'pickup' | 'destination') => {
+        let destination = '';
+        let destinationName = '';
+        
+        if (type === 'pickup') {
+            // Navigate to pickup location
+            destination = `${rideInfo?.data?.ride?.pickupLocation?.coordinates[0]},${rideInfo?.data?.ride?.pickupLocation?.coordinates[1]}`;
+            destinationName = rideInfo?.data?.ride?.pickupLocation?.address || 'Pickup Location';
+        } else if (type === 'destination') {
+            // Navigate to destination
+            destination = `${rideInfo?.data?.ride?.destination?.coordinates[0]},${rideInfo?.data?.ride?.destination?.coordinates[1]}`;
+            destinationName = rideInfo?.data?.ride?.destination?.address || 'Destination';
+        }
+
+        if (destination) {
+            const url = Platform.OS === 'ios' 
+                ? `http://maps.apple.com/?daddr=${destination}&dirflg=d`
+                : `https://www.google.com/maps/dir/?api=1&destination=${destination}&travelmode=driving`;
+            
+            Linking.canOpenURL(url).then(supported => {
+                if (supported) {
+                    Linking.openURL(url);
+                } else {
+                    // Fallback to web browser
+                    const webUrl = `https://www.google.com/maps/dir/?api=1&destination=${destination}&travelmode=driving`;
+                    Linking.openURL(webUrl);
+                }
+            }).catch(err => {
+                console.error('Error opening directions:', err);
+                // Fallback to web browser
+                const webUrl = `https://www.google.com/maps/dir/?api=1&destination=${destination}&travelmode=driving`;
+                Linking.openURL(webUrl);
+            });
+        }
+    };
+
     return (
         <GestureHandlerRootView style={styles.container}>
 
@@ -322,6 +359,38 @@ export default function TripDetails() {
                         )}
 
                     </MapView>
+                    
+                    {/* Directions Buttons - Top Right */}
+                    {(mode === 'accepted' || mode === 'arrived' || mode === 'otp_verified') && (
+                        <>
+                            {/* To Pickup Button - Show for all modes */}
+                            <TouchableOpacity
+                                style={[styles.directionsButton, styles.pickupButton]}
+                                onPress={() => openDirections('pickup')}
+                                activeOpacity={0.8}
+                            >
+                                <View style={styles.directionsButtonContent}>
+                                    <Ionicons name="location" size={20} color={Gold} />
+                                    <Text style={styles.directionsButtonText}>To Pickup</Text>
+                                </View>
+                            </TouchableOpacity>
+                            
+                            {/* To Destination Button - Show for all modes */}
+                            <TouchableOpacity
+                                style={[styles.directionsButton, styles.destinationButton]}
+                                onPress={() => openDirections('destination')}
+                                activeOpacity={0.8}
+                            >
+                                <View style={styles.directionsButtonContent}>
+                                    <Ionicons name="flag" size={20} color={Gold} />
+                                    <Text style={styles.directionsButtonText}>To Destination</Text>
+                                    
+                                </View>
+                            </TouchableOpacity>
+                        </>
+                    )}
+                    
+                    {/* Recenter Button - Bottom Right */}
                     <TouchableOpacity
                         style={styles.recenterButton}
                         onPress={recenter}
@@ -1224,6 +1293,40 @@ const styles = StyleSheet.create({
         padding: 10,
         backgroundColor: 'rgba(0, 0, 0, 0.5)',
         borderRadius: 20,
+    },
+    directionsButton: {
+        position: 'absolute',
+        padding: 12,
+        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+        borderRadius: 20,
+        borderWidth: 1,
+        borderColor: 'rgba(255, 255, 255, 0.2)',
+        elevation: 5,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.3,
+        shadowRadius: 3,
+        minWidth: 80,
+        minHeight: 60,
+    },
+    pickupButton: {
+        top: 60,
+        right: 10,
+    },
+    destinationButton: {
+        top: 130,
+        right: 10,
+    },
+    directionsButtonContent: {
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    directionsButtonText: {
+        color: Gold,
+        fontSize: 10,
+        fontWeight: '600',
+        marginTop: 2,
+        textAlign: 'center',
     },
     plateNumberContainer: {
         marginTop: 15,

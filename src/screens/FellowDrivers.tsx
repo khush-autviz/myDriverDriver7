@@ -596,7 +596,7 @@ export default function FellowDrivers() {
               )}
             </TouchableOpacity>
 
-            <Text style={styles.labelText}>Driving License Front <Text style={styles.requiredField}>*</Text></Text>
+            <Text style={styles.labelText}>Driving License <Text style={styles.requiredField}>*</Text></Text>
             <TouchableOpacity 
               style={styles.imageUploadButton}
               onPress={() => {
@@ -620,7 +620,7 @@ export default function FellowDrivers() {
               )}
             </TouchableOpacity>
 
-            <Text style={styles.labelText}>Driving License Back <Text style={styles.requiredField}>*</Text></Text>
+            <Text style={styles.labelText}>Criminal Record Check<Text style={styles.requiredField}>*</Text></Text>
             <TouchableOpacity 
               style={styles.imageUploadButton}
               onPress={() => {
