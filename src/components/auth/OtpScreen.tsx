@@ -12,6 +12,7 @@ import {
   StatusBar,
   ActivityIndicator,
   KeyboardAvoidingView,
+  ScrollView,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {useNavigation, useRoute} from '@react-navigation/native';
@@ -134,6 +135,10 @@ export default function OtpScreen() {
       style={{flex: 1, backgroundColor: Black}}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 0}>
     <SafeAreaView style={styles.safeArea}>
+    <ScrollView
+      contentContainerStyle={styles.scrollContainer}
+      keyboardShouldPersistTaps="handled"
+    >
       <StatusBar barStyle="light-content" backgroundColor={Black} />
       <View style={styles.container}>
         <TouchableOpacity 
@@ -194,6 +199,7 @@ export default function OtpScreen() {
           </View> */}
         </View>
       </View>
+      </ScrollView>
 
       <TouchableOpacity 
         style={[
@@ -212,6 +218,7 @@ export default function OtpScreen() {
           </Text>
         
       </TouchableOpacity>
+      {/* </ScrollView> */}
     </SafeAreaView>
     </KeyboardAvoidingView>
   );
@@ -222,13 +229,20 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Black,
   },
+  scrollContainer: {
+    flexGrow: 1,
+    justifyContent: 'space-between',
+    paddingHorizontal: 24,
+    // paddingTop: 20,
+    paddingBottom: 40, // give space for keyboard
+  },
   container: {
     flex: 1,
     paddingHorizontal: 24,
-    paddingTop: 20,
+    // paddingTop: 20,
   },
   backButton: {
-    marginTop: 10,
+    // marginTop: 10,
     // marginBottom: 10,
   },
   backRow: {
@@ -320,7 +334,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginHorizontal: 24,
-    marginBottom: 35,
+    marginBottom: 5,
     shadowColor: Gold,
     shadowOffset: {
       width: 0,

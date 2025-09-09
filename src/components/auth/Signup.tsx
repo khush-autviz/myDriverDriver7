@@ -457,12 +457,13 @@ const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
     backgroundColor: Black,
+    paddingHorizontal: 24,
   },
   container: {
     flex: 1,
     backgroundColor: Black,
     paddingTop: 20,
-    paddingHorizontal: 24,
+    // paddingHorizontal: 24,
     paddingBottom: 40,
   },
   backButton: {

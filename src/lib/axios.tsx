@@ -5,7 +5,7 @@ import axios from 'axios';
 import { useAuthStore } from '../store/authStore';
 
 const instance = axios.create({
-  timeout: 10000,
+  timeout: 15000,
   withCredentials: true,
 });
 

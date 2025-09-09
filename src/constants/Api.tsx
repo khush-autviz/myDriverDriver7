@@ -20,13 +20,13 @@ export const authSignup = async (data: any) => {
 
 // vehicle details
 export const vehicleDetailsApi = async (driverId: number, data: any) => {
-    const response = await axios.put(`/driverAuth/drivers/${driverId}/vehicle-details`, data, {headers: {'Content-Type': 'multipart/form-data'}})
+    const response = await axios.put(`/driverAuth/drivers/${driverId}/vehicle-details`, data, {headers: {'Content-Type': 'multipart/form-data'}, timeout: 250000})
     return response.data
 }
 
 // vehicle documents
 export const vehicleDocumentsApi = async (driverId: number, data: any) => {
-    const response = await axios.put(`/driverAuth/drivers/${driverId}/upload-documents`, data, {headers: {'Content-Type': 'multipart/form-data'}})
+    const response = await axios.put(`/driverAuth/drivers/${driverId}/upload-documents`, data, {headers: {'Content-Type': 'multipart/form-data'}, timeout: 20000})
     return response.data
 }  
 
@@ -142,7 +142,8 @@ export const withdrawalHistory = async () => {
 // add fellow driver
 export const addFellowDriver = async (data: any) => {
     const response = await axios.post(`/fellow-drivers`, data, {
-        headers: {'Content-Type': 'multipart/form-data'}
+        headers: {'Content-Type': 'multipart/form-data'},
+        timeout: 250000
     })
     return response.data
 }
@@ -156,5 +157,11 @@ export const getFellowDrivers = async () => {
 // delete fellow driver
 export const deleteFellowDriver = async (fellowDriverId: string) => {
     const response = await axios.delete(`/fellow-drivers/${fellowDriverId}`)
+    return response.data
+}
+
+//delete account
+export const deleteAccount = async (data: any) => {
+    const response = await axios.post('/driverAuth/delete-account', data)
     return response.data
 }

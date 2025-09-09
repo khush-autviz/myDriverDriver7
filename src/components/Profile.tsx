@@ -1,11 +1,11 @@
-import { View, Text, Image, TouchableOpacity, TextInput, Platform, ActivityIndicator, ScrollView, StyleSheet, KeyboardAvoidingView } from 'react-native'
+import { View, Text, Image, TouchableOpacity, TextInput, Platform, ActivityIndicator, ScrollView, StyleSheet, KeyboardAvoidingView, Modal } from 'react-native'
 import React, { useEffect, useState } from 'react'
-import { Black, Gold, Gray, White } from '../constants/Color'
+import { Black, Gold, Gray, maroon, White } from '../constants/Color'
 import { useAuthStore } from '../store/authStore'
 import Ionicons from 'react-native-vector-icons/Ionicons'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useMutation, useQuery } from '@tanstack/react-query'
-import { editProfile, getProfile } from '../constants/Api'
+import { editProfile, getProfile, deleteAccount } from '../constants/Api'
 import { launchImageLibrary, ImageLibraryOptions } from 'react-native-image-picker'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { useNavigation } from '@react-navigation/native'
@@ -13,7 +13,8 @@ import { ShowToast } from '../lib/Toast'
 
 export default function Profile() {
   const [buttonDisabled, setbuttonDisabled] = useState(true)
-  const { user, setUser, token } = useAuthStore()
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const { user, setUser, setToken } = useAuthStore()
   const navigation: any = useNavigation()
 
   // fetches driver info
@@ -83,6 +84,28 @@ export default function Profile() {
     }
   })
 
+  // Delete account mutation
+  const deleteAccountMutation = useMutation({
+    mutationFn: deleteAccount,
+    onSuccess: (response) => {
+      console.log('Account deleted successfully', response);
+      ShowToast('Account deleted successfully', { type: 'success' });
+      setShowDeleteModal(false)
+      // Clear user data and navigate to login
+      
+     setUser({} as any)
+     setToken({} as any)
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Signin' }],
+      });
+    },
+    onError: (error: any) => {
+      console.log('Delete account error', error);
+      ShowToast(error?.response?.data?.message || 'Failed to delete account', { type: 'error' });
+    }
+  })
+
   // handles update
   const handleUpdate = () => {
     if (data.email.trim() === '' || data.firstName.trim() === '' || data.lastName.trim() === '') {
@@ -110,6 +133,29 @@ export default function Profile() {
     // }
     
     updateProfileMutation.mutateAsync(formData)
+  }
+
+  // handles delete account
+  const handleDeleteAccount = () => {
+    setShowDeleteModal(true)
+  }
+
+  // confirm delete account
+  const confirmDeleteAccount = () => {
+    // setShowDeleteModal(false)
+    
+    // Prepare data for delete account API using authStore data
+    const deleteData = {
+      phone: user?.phone,
+      
+    }
+    
+    deleteAccountMutation.mutateAsync(deleteData)
+  }
+
+  // cancel delete account
+  const cancelDeleteAccount = () => {
+    setShowDeleteModal(false)
   }
 
   useEffect(() => {
@@ -233,8 +279,56 @@ export default function Profile() {
               <Text style={styles.updateButtonText}>Update Profile</Text>
             )}
           </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.deleteButton}
+            onPress={handleDeleteAccount}
+          >
+            <Text style={styles.deleteButtonText}>Delete Account</Text>
+          </TouchableOpacity>
         </View>
       </ScrollView>
+
+      {/* Delete Account Confirmation Modal */}
+      <Modal
+        visible={showDeleteModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={cancelDeleteAccount}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <View style={styles.modalHeader}>
+              <Ionicons name="warning" size={32} color={maroon} />
+              <Text style={styles.modalTitle}>Delete Account</Text>
+            </View>
+            
+            <Text style={styles.modalMessage}>
+              Are you sure you want to delete your account? This action cannot be undone and all your data will be permanently lost.
+            </Text>
+            
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={styles.cancelButton}
+                onPress={cancelDeleteAccount}
+              >
+                <Text style={styles.cancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity
+                style={styles.confirmDeleteButton}
+                onPress={confirmDeleteAccount}
+                disabled={deleteAccountMutation.isPending}
+              >
+                {deleteAccountMutation.isPending ? (
+                  <ActivityIndicator size="small" color={White} />
+                ) : (
+                  <Text style={styles.confirmDeleteButtonText}>Delete</Text>
+                )}
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
     </KeyboardAvoidingView>
   )
@@ -370,6 +464,82 @@ const styles = StyleSheet.create({
   },
   updateButtonText: {
     color: Black,
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  deleteButton: {
+    backgroundColor: maroon,
+    borderRadius: 12,
+    paddingVertical: 16,
+    alignItems: 'center',
+    marginTop: 16,
+  },
+  deleteButtonText: {
+    color: White,
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContainer: {
+    backgroundColor: Black,
+    borderRadius: 16,
+    padding: 24,
+    width: '80%',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  modalTitle: {
+    color: White,
+    fontSize: 20,
+    fontWeight: '700',
+    marginLeft: 12,
+  },
+  modalMessage: {
+    color: Gray,
+    fontSize: 14,
+    textAlign: 'center',
+    marginBottom: 24,
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    width: '100%',
+  },
+  cancelButton: {
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+  },
+  cancelButtonText: {
+    color: White,
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  confirmDeleteButton: {
+    backgroundColor: maroon,
+    borderRadius: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+  },
+  confirmDeleteButtonText: {
+    color: White,
     fontSize: 16,
     fontWeight: '700',
   },
