@@ -20,13 +20,13 @@ export const authSignup = async (data: any) => {
 
 // vehicle details
 export const vehicleDetailsApi = async (driverId: number, data: any) => {
-    const response = await axios.put(`/driverAuth/drivers/${driverId}/vehicle-details`, data, {headers: {'Content-Type': 'multipart/form-data'}, timeout: 250000})
+    const response = await axios.put(`/driverAuth/drivers/${driverId}/vehicle-details`, data, {headers: {'Content-Type': 'multipart/form-data'}})
     return response.data
 }
 
 // vehicle documents
 export const vehicleDocumentsApi = async (driverId: number, data: any) => {
-    const response = await axios.put(`/driverAuth/drivers/${driverId}/upload-documents`, data, {headers: {'Content-Type': 'multipart/form-data'}, timeout: 20000})
+    const response = await axios.put(`/driverAuth/drivers/${driverId}/upload-documents`, data, {headers: {'Content-Type': 'multipart/form-data'}})
     return response.data
 }  
 
@@ -143,7 +143,7 @@ export const withdrawalHistory = async () => {
 export const addFellowDriver = async (data: any) => {
     const response = await axios.post(`/fellow-drivers`, data, {
         headers: {'Content-Type': 'multipart/form-data'},
-        timeout: 250000
+        
     })
     return response.data
 }

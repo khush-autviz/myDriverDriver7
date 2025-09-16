@@ -13,7 +13,8 @@ import {
   PermissionsAndroid,
   Linking,
   ActivityIndicator,
-  KeyboardAvoidingView
+  KeyboardAvoidingView,
+
 } from 'react-native'
 import { Black, Gold, Gray, LightGold, White } from '../../constants/Color'
 import { useNavigation } from '@react-navigation/native'
@@ -73,6 +74,7 @@ export default function VehicleDetails() {
       // Alert.alert('Error', 'Failed to save vehicle details. Please try again.');
     }
   });
+
 
   // Check permissions when component mounts
   useEffect(() => {
@@ -272,92 +274,54 @@ const requestStoragePermission = async () => {
 
 
   const handleImageUpload = async (type: 'vehicleImage' | 'numberPlateImage') => {
-    // Enhanced options for image picker with better compression
+
+    // Aggressive compression )
     const options: ImageLibraryOptions = {
       mediaType: 'photo',
       includeBase64: false,
-      maxHeight: 2000,
-      maxWidth: 2000,
+      maxHeight: 1500,        // Much smaller for poor connections
+      maxWidth: 1500,         // Much smaller for poor connections
       selectionLimit: 1,
-      quality: 0.8, // Reduce quality to help with file size
-    };
+      quality: 0.5,      
   
+    };
+
     try {
-      console.log('Launching image library...');
       const result = await launchImageLibrary(options);
-      console.log('Image picker result:', result);
-      
-      if (result.didCancel) {
-        console.log('User cancelled image selection');
-        return;
-      }
-      
-      if (result.errorMessage) {
-        console.log('Image picker error:', result.errorMessage);
-        ShowToast('Failed to select image', { type: 'error' });
-        return;
-      }
       
       if (result.assets && result.assets.length > 0) {
         const asset = result.assets[0];
         
         if (asset.uri) {
-          // ✅ VALIDATE IMAGE SIZE using multiple methods for accuracy
-          const maxSizeInBytes = 1 * 1024 * 1024; // 1MB limit
+          // 3. Smaller size limit (BIGGEST IMPACT)
+          const maxSizeInBytes = 50 * 1024; // 200KB instead of 1MB
           
-          console.log(`Selected ${type} URI: ${asset.uri}`);
-          
-          // Method 1: Use fileSize from asset (if available)
           let fileSizeInBytes = asset.fileSize || 0;
           
-          // Method 2: Try to get more accurate file size using fetch (for better accuracy)
           try {
             const response = await fetch(asset.uri);
             const blob = await response.blob();
             fileSizeInBytes = blob.size;
-            console.log(`✅ Got accurate file size from blob: ${fileSizeInBytes} bytes`);
           } catch (fetchError) {
-            console.log('❌ Could not fetch blob, using asset.fileSize:', asset.fileSize);
-            // Fallback to asset.fileSize if available
             if (!asset.fileSize) {
-              console.log('⚠️ No file size available, allowing upload with warning');
-              ShowToast(`${type === 'vehicleImage' ? 'Vehicle image' : 'Number plate image'} selected (size validation not available)`, { 
-                type: 'warning' 
-              });
-              
-              setVehicleData(prev => ({
-                ...prev,
-                [type]: asset.uri
-              }));
+              setVehicleData(prev => ({ ...prev, [type]: asset.uri }));
               return;
             }
           }
           
-          const fileSizeInMB = (fileSizeInBytes / (1024 * 1024)).toFixed(2);
-          console.log(`File size: ${fileSizeInMB}MB (${fileSizeInBytes} bytes)`);
+          const fileSizeInKB = (fileSizeInBytes / 1024).toFixed(2);
           
-          // 🚫 REJECT IF TOO LARGE
           if (fileSizeInBytes > maxSizeInBytes) {
-            ShowToast(`Image too large! Please select an image smaller than 1MB. Current size: ${fileSizeInMB}MB`, { 
+            ShowToast(`Image too large! Please select a smaller image.`, { 
               type: 'error' 
             });
             return;
           }
           
-          // ✅ IMAGE SIZE IS ACCEPTABLE
-          console.log(`✅ ${type} size valid: ${fileSizeInMB}MB`);
-          // ShowToast(`${type === 'vehicleImage' ? 'Vehicle image' : 'Number plate image'} selected successfully (${fileSizeInMB}MB)`, { 
-          //   type: 'success' 
-          // });
-          
-          setVehicleData(prev => ({
-            ...prev,
-            [type]: asset.uri
-          }));
+          setVehicleData(prev => ({ ...prev, [type]: asset.uri }));
         }
       }
     } catch (error) {
-      console.error('Error in image picker:', error);
       ShowToast('Something went wrong while selecting image', { type: 'error' });
     }
   };
@@ -578,6 +542,7 @@ const styles = StyleSheet.create({
     flex: 1,
     // paddingTop: 30,
     paddingHorizontal: 20,
+    marginHorizontal: Platform.OS === 'ios' ? 20 : 0,
   },
   backRow: {
     flexDirection: 'row',

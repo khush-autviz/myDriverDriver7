@@ -9,7 +9,7 @@ const GOLD_COLOR = '#FFD700';
 
 export const Loader = () => (
   <View style={styles.container}>
-    <ActivityIndicator size="large" color={GOLD_COLOR} />
+    <ActivityIndicator size="small" color={GOLD_COLOR} />
   </View>
 );
 
