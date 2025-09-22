@@ -871,8 +871,8 @@ export default function FellowDrivers() {
             
             {lookupResult && (
               <View style={styles.driverInfoCard}>
-                <Text style={styles.driverInfoName}>{lookupResult.fellowDriver.name}</Text>
-                <Text style={styles.driverInfoPhone}>{lookupResult.fellowDriver.mobileNumber}</Text>
+                <Text style={styles.driverInfoName}>{lookupResult?.fellowDriver?.name}</Text>
+                <Text style={styles.driverInfoPhone}>{lookupResult?.fellowDriver?.mobileNumber}</Text>
               </View>
             )}
 
