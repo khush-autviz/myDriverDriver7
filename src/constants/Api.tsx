@@ -154,6 +154,18 @@ export const getFellowDrivers = async () => {
     return response.data
 }
 
+// look up fellow driver
+export const lookUpFellowDriver = async (data: any) => {
+    const response = await axios.post(`/fellow-drivers/lookup`, data)
+    return response.data
+}
+
+// link existing driver
+export const linkExistingDriver = async (data: any) => {
+    const response = await axios.post(`/fellow-drivers/link-by-number`, data)
+    return response.data
+}
+
 // delete fellow driver
 export const deleteFellowDriver = async (fellowDriverId: string) => {
     const response = await axios.delete(`/fellow-drivers/${fellowDriverId}`)

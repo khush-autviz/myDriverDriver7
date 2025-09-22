@@ -1,14 +1,15 @@
-import { View, Text, TouchableOpacity, ScrollView, TextInput, FlatList, StyleSheet, Image, Alert, Platform, PermissionsAndroid, Linking } from 'react-native'
-import React, { useState, useEffect } from 'react'
+import { View, Text, TouchableOpacity, ScrollView, TextInput, FlatList, StyleSheet, Image, Alert, Platform, PermissionsAndroid, Linking, Modal, Dimensions } from 'react-native'
+import React, { useState, useEffect, useRef } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useNavigation } from '@react-navigation/native'
 import { Black, White, Gold, Gray, LightGold, maroon } from '../constants/Color'
 import Ionicons from 'react-native-vector-icons/Ionicons'
 import { launchImageLibrary, ImageLibraryOptions } from 'react-native-image-picker'
 import { useMutation, useQuery } from '@tanstack/react-query'
-import { addFellowDriver, getFellowDrivers, deleteFellowDriver } from '../constants/Api'
+import { addFellowDriver, getFellowDrivers, deleteFellowDriver, lookUpFellowDriver, linkExistingDriver } from '../constants/Api'
 import { ShowToast } from '../lib/Toast'
 import { Loader } from '../lib/Loader'
+import PhoneInput from 'react-native-phone-number-input'
 
 
 interface FellowDriver {
@@ -23,9 +24,21 @@ interface FellowDriver {
 
 }
 
+const { width } = Dimensions.get('window');
+
 export default function FellowDrivers() {
   const navigation: any = useNavigation();
   const [activeTab, setActiveTab] = useState<'info' | 'add'>('info');
+  const [addStep, setAddStep] = useState<'phone' | 'details'>('phone');
+  const [showModal, setShowModal] = useState(false);
+  const [lookupResult, setLookupResult] = useState<any>(null);
+  const phoneInput = useRef<PhoneInput>(null);
+  
+  // Phone number states
+  const [phoneValue, setPhoneValue] = useState('');
+  const [formattedPhone, setFormattedPhone] = useState('');
+  const [isPhoneValid, setIsPhoneValid] = useState(true);
+  
   // Fetch fellow drivers
   const { data: fellowDriversData, isLoading: isLoadingDrivers, refetch: refetchDrivers } = useQuery({
     queryKey: ['fellowDrivers'],
@@ -52,6 +65,9 @@ export default function FellowDrivers() {
         drivingLicenseFront: '', 
         drivingLicenseBack: '' 
       });
+      setAddStep('phone');
+      setPhoneValue('');
+      setFormattedPhone('');
       refetchDrivers(); // Refresh the list
       setActiveTab('info'); // Switch to info tab
     },
@@ -77,6 +93,50 @@ export default function FellowDrivers() {
     }
   });
 
+  // Lookup fellow driver mutation
+  const lookupFellowDriverMutation = useMutation({
+    mutationFn: (data: { mobileNumber: string }) => lookUpFellowDriver(data),
+    onSuccess: (response) => {
+      console.log('Lookup successful:', response);
+      setLookupResult(response.data);
+      console.log(phoneValue, 'phoneValue');
+      // setShowModal(true);
+      if (!response.data.fellowDriver) {
+        setAddStep('details');
+      } else {
+        setShowModal(true);
+      }
+    },
+    onError: (error: any) => {
+      console.log('Lookup error:', error);
+      if (error?.response?.status === 404) {
+        // Driver not found, proceed to add new driver
+        setAddStep('details');
+      } else {
+        ShowToast(error?.response?.data?.message || 'Failed to lookup driver', { type: 'error' });
+      }
+    }
+  });
+
+  // Link existing driver mutation
+  const linkExistingDriverMutation = useMutation({
+    mutationFn: (data: { mobileNumber: string }) => linkExistingDriver(data),
+    onSuccess: (response) => {
+      console.log('Driver linked successfully:', response);
+      ShowToast('Fellow driver added successfully', { type: 'success' });
+      setShowModal(false);
+      setAddStep('phone');
+      setPhoneValue('');
+      setFormattedPhone('');
+      refetchDrivers(); // Refresh the list
+      setActiveTab('info'); // Switch to info tab
+    },
+    onError: (error: any) => {
+      console.log('Error linking driver:', error);
+      ShowToast(error?.response?.data?.message || 'Failed to add fellow driver', { type: 'error' });
+    }
+  });
+
   // Update local state when API data is available
   useEffect(() => {
     if (fellowDriversData?.data?.fellowDrivers) {
@@ -98,6 +158,16 @@ export default function FellowDrivers() {
   useEffect(() => {
     checkPermissions();
   }, []);
+
+  // Reset add step when component mounts
+  useEffect(() => {
+    if (activeTab === 'add') {
+      setAddStep('phone');
+      setPhoneValue('');
+      setFormattedPhone('');
+      setIsPhoneValid(true);
+    }
+  }, [activeTab]);
 
   const checkPermissions = async () => {
     if (Platform.OS === 'android') {
@@ -281,18 +351,51 @@ export default function FellowDrivers() {
     );
   };
 
+  // Handle phone lookup
+  const handlePhoneLookup = async () => {
+    if (phoneValue.trim() === '') {
+      setIsPhoneValid(false);
+      return;
+    }
+
+    const isValidNumber = phoneInput.current?.isValidNumber(phoneValue);
+    if (!isValidNumber) {
+      setIsPhoneValid(false);
+      return;
+    }
+
+    setIsPhoneValid(true);
+    lookupFellowDriverMutation.mutate({ mobileNumber: formattedPhone });
+  };
+
+  // Handle modal actions
+  const handleAddExistingDriver = () => {
+    setShowModal(false);
+    linkExistingDriverMutation.mutate({ mobileNumber: formattedPhone });
+  };
+
+  const handleAddNewDriver = () => {
+    setShowModal(false);
+    setAddStep('details');
+    // Set the phone number in the newDriver state
+    setNewDriver(prev => ({
+      ...prev,
+      mobileNumber: formattedPhone
+    }));
+  };
+
   // Enhanced addNewDriver function with network check
   const addNewDriver = async () => {
 
     // Validate required fields
-    if (!newDriver.name || !newDriver.gender || !newDriver.mobileNumber || !newDriver.licenseNumber) {
+    if (!newDriver.name || !newDriver.gender || !phoneValue || !newDriver.licenseNumber) {
       ShowToast('Please fill in all required fields', { type: 'warning' });
       return;
     }
 
     // Validate mobile number format
     const mobileRegex = /^\+?[1-9]\d{1,14}$/;
-    if (!mobileRegex.test(newDriver.mobileNumber)) {
+    if (!mobileRegex.test(phoneValue)) {
       ShowToast('Please enter a valid mobile number', { type: 'warning' });
       return;
     }
@@ -309,7 +412,7 @@ export default function FellowDrivers() {
     // Append text fields
     formData.append('name', newDriver.name);
     formData.append('gender', newDriver.gender);
-    formData.append('mobileNumber', newDriver.mobileNumber);
+    formData.append('mobileNumber', phoneValue);
     formData.append('licenseNumber', newDriver.licenseNumber);
     
     // Append profile photo
@@ -461,7 +564,13 @@ export default function FellowDrivers() {
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.tab, activeTab === 'add' && styles.activeTab]}
-          onPress={() => setActiveTab('add')}
+          onPress={() => {
+            setActiveTab('add');
+            setAddStep('phone');
+            setPhoneValue('');
+            setFormattedPhone('');
+            setIsPhoneValid(true);
+          }}
         >
           <Ionicons 
             name="add-circle" 
@@ -513,60 +622,132 @@ export default function FellowDrivers() {
         </ScrollView>
       ) : (
         <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-          <View style={styles.addFormContainer}>
-
-            <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Full Name *</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Enter driver's full name"
-                placeholderTextColor={Gray}
-                value={newDriver.name}
-                onChangeText={(text) => setNewDriver({...newDriver, name: text})}
-              />
-            </View>
-
-            <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Gender *</Text>
-              <View style={styles.genderContainer}>
-                <TouchableOpacity
-                  style={[
-                    styles.genderButton,
-                    newDriver.gender === 'male' && styles.genderButtonActive
-                  ]}
-                  onPress={() => setNewDriver({...newDriver, gender: 'male'})}
-                >
-                  <Text style={[
-                    styles.genderButtonText,
-                    newDriver.gender === 'male' && styles.genderButtonTextActive
-                  ]}>Male</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[
-                    styles.genderButton,
-                    newDriver.gender === 'female' && styles.genderButtonActive
-                  ]}
-                  onPress={() => setNewDriver({...newDriver, gender: 'female'})}
-                >
-                  <Text style={[
-                    styles.genderButtonText,
-                    newDriver.gender === 'female' && styles.genderButtonTextActive
-                  ]}>Female</Text>
-                </TouchableOpacity>
+          {addStep === 'phone' ? (
+            <View style={styles.addFormContainer}>
+              <Text style={styles.formTitle}>Add Fellow Driver</Text>
+              <Text style={styles.formSubtitle}>Enter the driver's phone number to check if they already exist</Text>
+              
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Phone Number *</Text>
+                <View style={styles.phoneInputWrapper}>
+                  {/* @ts-ignore */}
+                  <PhoneInput
+                    ref={phoneInput}
+                    defaultValue={phoneValue}
+                    defaultCode="ZA"
+                    layout="first"
+                    disableArrowIcon={true}
+                    onChangeText={(text) => {
+                      setPhoneValue(text);
+                      setIsPhoneValid(true);
+                    }}
+                    onChangeFormattedText={(text) => {
+                      setFormattedPhone(text);
+                    }}
+                    containerStyle={[
+                      styles.phoneInputContainer,
+                      !isPhoneValid && styles.phoneInputError
+                    ]}
+                    textContainerStyle={styles.phoneInputTextContainer}
+                    textInputStyle={styles.phoneInputText}
+                    codeTextStyle={styles.phoneInputCodeText}
+                    flagButtonStyle={styles.flagButtonStyle}
+                    countryPickerButtonStyle={styles.countryPickerButtonStyle}
+                    countryPickerProps={{
+                      withFilter: true,
+                      theme: {
+                        backgroundColor: '#1a1a1a',
+                        onBackgroundTextColor: '#ffffff',
+                      },
+                    }}
+                  />
+                  {!isPhoneValid && (
+                    <View style={styles.errorContainer}>
+                      <Ionicons name="alert-circle-outline" size={16} color="#FF6B6B" />
+                      <Text style={styles.errorText}>Please enter a valid phone number</Text>
+                    </View>
+                  )}
+                </View>
               </View>
-            </View>
 
-            <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Mobile Number *</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Enter mobile number"
-                placeholderTextColor={Gray}
-                value={newDriver.mobileNumber}
-                onChangeText={(text) => setNewDriver({...newDriver, mobileNumber: text})}
-                keyboardType="phone-pad"
-              />
+              <TouchableOpacity
+                style={styles.addButton}
+                onPress={handlePhoneLookup}
+                disabled={lookupFellowDriverMutation.isPending}
+              >
+                <Text style={styles.addButtonText}>
+                  {lookupFellowDriverMutation.isPending ? (
+                    <Loader />
+                  ) : (
+                    'Check Driver'
+                  )}
+                </Text>
+              </TouchableOpacity>
             </View>
+          ) : (
+            <View style={styles.addFormContainer}>
+              <View style={styles.stepHeader}>
+                <TouchableOpacity
+                  style={styles.backButton}
+                  onPress={() => setAddStep('phone')}
+                >
+                  <Ionicons name="arrow-back" size={20} color={Gold} />
+                </TouchableOpacity>
+                <Text style={styles.stepTitle}>Driver Details</Text>
+                <View style={styles.stepSpacer} />
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Full Name *</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Enter driver's full name"
+                  placeholderTextColor={Gray}
+                  value={newDriver.name}
+                  onChangeText={(text) => setNewDriver({...newDriver, name: text})}
+                />
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Gender *</Text>
+                <View style={styles.genderContainer}>
+                  <TouchableOpacity
+                    style={[
+                      styles.genderButton,
+                      newDriver.gender === 'male' && styles.genderButtonActive
+                    ]}
+                    onPress={() => setNewDriver({...newDriver, gender: 'male'})}
+                  >
+                    <Text style={[
+                      styles.genderButtonText,
+                      newDriver.gender === 'male' && styles.genderButtonTextActive
+                    ]}>Male</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[
+                      styles.genderButton,
+                      newDriver.gender === 'female' && styles.genderButtonActive
+                    ]}
+                    onPress={() => setNewDriver({...newDriver, gender: 'female'})}
+                  >
+                    <Text style={[
+                      styles.genderButtonText,
+                      newDriver.gender === 'female' && styles.genderButtonTextActive
+                    ]}>Female</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+
+              {/* <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Mobile Number *</Text>
+                <TextInput
+                  style={[styles.input, styles.disabledInput]}
+                  placeholder="Phone number from previous step"
+                  placeholderTextColor={Gray}
+                  value={newDriver.mobileNumber}
+                  editable={false}
+                />
+              </View> */}
 
             <View style={styles.inputGroup}>
               <Text style={styles.inputLabel}>License Number *</Text>
@@ -653,25 +834,80 @@ export default function FellowDrivers() {
               )}
             </TouchableOpacity>
 
-            <TouchableOpacity
-              style={[
-                styles.addButton,
-              ]}
-              onPress={addNewDriver}
-              disabled={!newDriver.name || !newDriver.gender || !newDriver.mobileNumber || !newDriver.licenseNumber || !newDriver.profilePhoto || !newDriver.drivingLicenseFront || !newDriver.drivingLicenseBack || addFellowDriverMutation.isPending}
-            >
-             
-                
-                  <Text style={styles.addButtonText}>{addFellowDriverMutation.isPending ? (
+              <TouchableOpacity
+                style={[
+                  styles.addButton,
+                ]}
+                onPress={addNewDriver}
+                // disabled={!newDriver.name || !newDriver.gender || !newDriver.licenseNumber || !phoneValue || !newDriver.profilePhoto || !newDriver.drivingLicenseFront || !newDriver.drivingLicenseBack || addFellowDriverMutation.isPending}
+              >
+                <Text style={styles.addButtonText}>{addFellowDriverMutation.isPending ? (
+                  <Loader />
+                ) : (
+                  'Add Driver'
+                )}</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+        </ScrollView>
+      )}
+
+      {/* Modal for existing driver confirmation */}
+      <Modal
+        visible={showModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <View style={styles.modalHeader}>
+              <Ionicons name="person-circle" size={48} color={Gold} />
+              <Text style={styles.modalTitle}>Driver Found</Text>
+              <Text style={styles.modalSubtitle}>
+                A driver with this phone number already exists. Would you like to add them as a fellow driver?
+              </Text>
+            </View>
+            
+            {lookupResult && (
+              <View style={styles.driverInfoCard}>
+                <Text style={styles.driverInfoName}>{lookupResult.fellowDriver.name}</Text>
+                <Text style={styles.driverInfoPhone}>{lookupResult.fellowDriver.mobileNumber}</Text>
+              </View>
+            )}
+
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.modalButtonSecondary]}
+                onPress={() => setShowModal(false)}
+              >
+                <Text style={styles.modalButtonTextSecondary}>Cancel</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity
+                style={[styles.modalButton, styles.modalButtonPrimary]}
+                onPress={handleAddExistingDriver}
+                disabled={linkExistingDriverMutation.isPending}
+              >
+                <Text style={styles.modalButtonTextPrimary}>
+                  {linkExistingDriverMutation.isPending ? (
                     <Loader />
                   ) : (
                     'Add Driver'
-                  )}</Text>
-         
+                  )}
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            <TouchableOpacity
+              style={styles.addNewDriverButton}
+              onPress={handleAddNewDriver}
+            >
+              <Text style={styles.addNewDriverText}>Add as New Driver Instead</Text>
             </TouchableOpacity>
           </View>
-        </ScrollView>
-      )}
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -1015,5 +1251,166 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginLeft: 6,
     flex: 1,
+  },
+  // Phone input styles
+  phoneInputWrapper: {
+    marginBottom: 24,
+  },
+  phoneInputContainer: {
+    width: '100%',
+    backgroundColor: 'rgba(53, 56, 63, 0.8)',
+    borderRadius: 12,
+    height: 56,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  phoneInputError: {
+    borderColor: '#FF6B6B',
+    borderWidth: 1,
+  },
+  phoneInputTextContainer: {
+    backgroundColor: 'transparent',
+    borderLeftWidth: 1,
+    borderLeftColor: 'rgba(255, 255, 255, 0.1)',
+    height: 56,
+    paddingVertical: 0,
+  },
+  phoneInputText: {
+    color: White,
+    height: 56,
+    padding: 0,
+    fontSize: 16,
+  },
+  phoneInputCodeText: {
+    color: Gray,
+    marginTop: 0,
+    padding: 0,
+    fontSize: 16,
+  },
+  flagButtonStyle: {
+    height: 56,
+  },
+  countryPickerButtonStyle: {
+    height: 56,
+  },
+  errorContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  errorText: {
+    color: '#FF6B6B',
+    fontSize: 14,
+    marginLeft: 6,
+  },
+  // Step header styles
+  stepHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  stepTitle: {
+    color: White,
+    fontSize: 18,
+    fontWeight: '600',
+    flex: 1,
+    textAlign: 'center',
+  },
+  stepSpacer: {
+    width: 40,
+  },
+  // Disabled input style
+  disabledInput: {
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    color: Gray,
+  },
+  // Modal styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+  },
+  modalContainer: {
+    backgroundColor: 'rgba(30, 30, 30, 0.95)',
+    borderRadius: 16,
+    padding: 24,
+    width: '100%',
+    maxWidth: 400,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  modalHeader: {
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  modalTitle: {
+    color: White,
+    fontSize: 20,
+    fontWeight: '700',
+    marginTop: 12,
+    marginBottom: 8,
+  },
+  modalSubtitle: {
+    color: Gray,
+    fontSize: 14,
+    textAlign: 'center',
+    lineHeight: 20,
+  },
+  driverInfoCard: {
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 20,
+    alignItems: 'center',
+  },
+  driverInfoName: {
+    color: White,
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 4,
+  },
+  driverInfoPhone: {
+    color: Gold,
+    fontSize: 14,
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    gap: 12,
+    marginBottom: 16,
+  },
+  modalButton: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  modalButtonPrimary: {
+    backgroundColor: Gold,
+  },
+  modalButtonSecondary: {
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+  },
+  modalButtonTextPrimary: {
+    color: Black,
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  modalButtonTextSecondary: {
+    color: White,
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  addNewDriverButton: {
+    alignItems: 'center',
+    paddingVertical: 8,
+  },
+  addNewDriverText: {
+    color: Gold,
+    fontSize: 14,
+    textDecorationLine: 'underline',
   },
 });
