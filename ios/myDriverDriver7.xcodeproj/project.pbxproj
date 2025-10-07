@@ -117,7 +117,7 @@
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
 				780286C5BC0EB1F24618BB58 /* [CP] Embed Pods Frameworks */,
 				75061CE565F0917E5163CDB1 /* [CP] Copy Pods Resources */,
-				6C5A1056BB242563C91818F8 /* [CP-User] [RNFB] Core Configuration */,
+				5612BF924A9F4CCD11455AA1 /* [CP-User] [RNFB] Core Configuration */,
 			);
 			buildRules = (
 			);
@@ -212,7 +212,7 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		6C5A1056BB242563C91818F8 /* [CP-User] [RNFB] Core Configuration */ = {
+		5612BF924A9F4CCD11455AA1 /* [CP-User] [RNFB] Core Configuration */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (

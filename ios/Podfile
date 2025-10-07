@@ -24,7 +24,7 @@ target 'myDriverDriver7' do
   )
 
   # Firebase dependencies 
-  pod 'FirebaseCoreInternal', :modular_headers => true
+  pod 'FirebaseCore', :modular_headers => true
   pod 'GoogleUtilities', :modular_headers => true
   
   
