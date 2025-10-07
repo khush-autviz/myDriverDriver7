@@ -85,6 +85,19 @@ export default function App() {
         console.log('Notification permission denied');
       }
     }
+    else if (Platform.OS === 'ios') {
+      // Add iOS notification permission request
+      const authStatus = await messaging().requestPermission();
+      const enabled =
+        authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+        authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+
+      if (enabled) {
+        console.log('iOS notification permission granted');
+      } else {
+        console.log('iOS notification permission denied');
+      }
+    }
   }
 
   useEffect(() => {
