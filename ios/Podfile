@@ -23,7 +23,12 @@ target 'myDriverDriver7' do
     :app_path => "#{Pod::Config.instance.installation_root}/.."
   )
 
-    # React Native Maps dependencies
+  # Firebase dependencies 
+  pod 'FirebaseCoreInternal', :modular_headers => true
+  pod 'GoogleUtilities', :modular_headers => true
+  
+  
+  # React Native Maps dependencies
 
 rn_maps_path = '../node_modules/react-native-maps'
 pod 'react-native-maps/Google', :path => rn_maps_path

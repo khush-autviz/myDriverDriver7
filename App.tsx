@@ -1,4 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { Platform, PermissionsAndroid } from 'react-native';
+import messaging from '@react-native-firebase/messaging';
+import notifee, { AndroidImportance } from '@notifee/react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -71,6 +74,57 @@ function MainTabs() {
 }
 
 export default function App() {
+  async function requestPermission() {
+    if (Platform.OS === 'android') {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
+      );
+      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+        console.log('Notification permission granted');
+      } else {
+        console.log('Notification permission denied');
+      }
+    }
+  }
+
+  useEffect(() => {
+    requestPermission();
+    // messaging()
+    //   .getToken()
+    //   .then(token => console.log('🔥 FIREBASE FCM TOKEN:', token));
+  }, []);
+
+  // Handle foreground messages
+  useEffect(() => {
+    const unsubscribe = messaging().onMessage(async remoteMessage => {
+      console.log('Foreground message:', remoteMessage);
+
+      // Request permissions if needed
+      await notifee.requestPermission();
+
+      // Create a channel (Android)
+      const channelId = await notifee.createChannel({
+        id: 'default',
+        name: 'Default Channel',
+        importance: AndroidImportance.HIGH,
+      });
+
+      // Display a notification
+      await notifee.displayNotification({
+        title: remoteMessage.notification?.title,
+        body: remoteMessage.notification?.body,
+        android: {
+          channelId,
+          pressAction: {
+            id: 'default',
+          },
+        },
+      });
+    });
+
+    return unsubscribe;
+  }, []);
+
   return (
     // <LocationProvider>
     <SocketProvider>
@@ -79,35 +133,35 @@ export default function App() {
           <RideProvider>
             {/* <SocketProvider> */}
               <LocationProvider>
-              <SafeAreaView style={{ flex: 1, backgroundColor: Black, paddingTop: 10 }}>
-                <NavigationContainer>
-                  <Stack.Navigator screenOptions={{ headerShown: false }}>
-                    {/* Splash Screen as initial screen */}
-                    <Stack.Screen name="Splash" component={Splash} />
+                <SafeAreaView style={{ flex: 1, backgroundColor: Black, paddingTop: 10 }}>
+                  <NavigationContainer>
+                    <Stack.Navigator screenOptions={{ headerShown: false }}>
+                      {/* Splash Screen as initial screen */}
+                      <Stack.Screen name="Splash" component={Splash} />
 
-                    {/* Onboarding Screen */}
-                    <Stack.Screen name="Onboarding" component={Onboarding} />
+                      {/* Onboarding Screen */}
+                      <Stack.Screen name="Onboarding" component={Onboarding} />
 
-                    {/* Auth Screens */}
-                    <Stack.Screen name="Signin" component={Signin} />
-                    <Stack.Screen name="Signup" component={Signup} />
-                    <Stack.Screen name="OtpScreen" component={OtpScreen} />
-                    <Stack.Screen name="Profile" component={Profile} />
-                    <Stack.Screen name="vehicle-details" component={VehicleDetails} />
-                    <Stack.Screen name="vehicle-documents" component={VehicleDocuments} />
-                    <Stack.Screen name="approval-screen" component={ApprovalScreen} />
-                    <Stack.Screen name='trip-details' component={TripDetails} />
-                    <Stack.Screen name='ride-details' component={RideDetails} />
-                    <Stack.Screen name='transactions' component={Transactions} />
-                    <Stack.Screen name='withdraw' component={Withdraw} />
-                    <Stack.Screen name='fellow-drivers' component={FellowDrivers} />
+                      {/* Auth Screens */}
+                      <Stack.Screen name="Signin" component={Signin} />
+                      <Stack.Screen name="Signup" component={Signup} />
+                      <Stack.Screen name="OtpScreen" component={OtpScreen} />
+                      <Stack.Screen name="Profile" component={Profile} />
+                      <Stack.Screen name="vehicle-details" component={VehicleDetails} />
+                      <Stack.Screen name="vehicle-documents" component={VehicleDocuments} />
+                      <Stack.Screen name="approval-screen" component={ApprovalScreen} />
+                      <Stack.Screen name='trip-details' component={TripDetails} />
+                      <Stack.Screen name='ride-details' component={RideDetails} />
+                      <Stack.Screen name='transactions' component={Transactions} />
+                      <Stack.Screen name='withdraw' component={Withdraw} />
+                      <Stack.Screen name='fellow-drivers' component={FellowDrivers} />
 
-                    {/* Main Tabs */}
-                    <Stack.Screen name="Main" component={MainTabs} />
-                  </Stack.Navigator>
-                  <Toast/>
-                </NavigationContainer>
-              </SafeAreaView>
+                      {/* Main Tabs */}
+                      <Stack.Screen name="Main" component={MainTabs} />
+                    </Stack.Navigator>
+                    <Toast/>
+                  </NavigationContainer>
+                </SafeAreaView>
               </LocationProvider>
             {/* </SocketProvider> */}
           </RideProvider>

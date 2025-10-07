@@ -177,3 +177,11 @@ export const deleteAccount = async (data: any) => {
     const response = await axios.post('/driverAuth/delete-account', data)
     return response.data
 }
+
+// update FCM token
+export const updateFcmToken = async (fcmToken: string) => {
+    const response = await axios.post('/fcm/driver/update-token', {
+        fcmToken: fcmToken
+    })
+    return response.data
+}

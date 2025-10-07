@@ -50,6 +50,8 @@
 	<string>We need to save photos</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>We need access to your photo library</string>
+	<key>NSUserNotificationsUsageDescription</key>
+	<string>This app needs notification permission to send you ride updates, trip alerts, and important driver notifications.</string>
 	<key>UIAppFonts</key>
 	<array>
 		<string>AntDesign.ttf</string>

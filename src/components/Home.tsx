@@ -10,6 +10,7 @@ import {
   Alert,
   TouchableOpacity,
   Image,
+  PermissionsAndroid,
 } from 'react-native';
 import {
   Black,
@@ -23,7 +24,7 @@ import {
 import MapView, { Marker } from 'react-native-maps';
 import { useSocket } from '../context/SocketContext';
 import { useMutation } from '@tanstack/react-query';
-import { driverGoOffline, driverGoOnline, extraDriverGoOnline, rideAccepted, rideDetails, getFellowDrivers } from '../constants/Api';
+import { driverGoOffline, driverGoOnline, extraDriverGoOnline, rideAccepted, rideDetails, getFellowDrivers, updateFcmToken } from '../constants/Api';
 import { useLocation } from '../context/LocationProvider';
 import { useAuthStore } from '../store/authStore';
 import Modal from 'react-native-modal';
@@ -33,6 +34,7 @@ import { ShowToast } from '../lib/Toast';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Loader } from '../lib/Loader';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import messaging from '@react-native-firebase/messaging';
 
 
 export default function Home() {
@@ -50,8 +52,52 @@ export default function Home() {
   const { fetchRideDetails } = useRide()
   const mapRef = useRef<MapView | null>(null);
   const [componentKey, setComponentKey] = useState(0); // Added for component reload
+  const [fcmToken, setFcmToken] = useState<string | null>(null);
 
+  // FCM Token functions
+  const requestNotificationPermission = async () => {
+    if (Platform.OS === 'android') {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
+      );
+      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+        console.log('Notification permission granted');
+        return true;
+      } else {
+        console.log('Notification permission denied');
+        return false;
+      }
+    }
+    return true; // iOS doesn't need explicit permission request here
+  };
 
+  const getFcmTokenAndSendToBackend = async () => {
+    try {
+      // Request permission first
+      const hasPermission = await requestNotificationPermission();
+      if (!hasPermission) {
+        console.log('Cannot get FCM token: permission denied');
+        return;
+      }
+
+      // Get FCM token from Firebase
+      const token = await messaging().getToken();
+      console.log('🔥 FCM TOKEN in Home:', token);
+      setFcmToken(token);
+
+      // Send token to backend
+      if (token) {
+        try {
+          const response = await updateFcmToken(token);
+          console.log('✅ FCM token sent to backend successfully:', response);
+        } catch (error) {
+          console.error('❌ Error sending FCM token to backend:', error);
+        }
+      }
+    } catch (error) {
+      console.error('❌ Error getting FCM token:', error);
+    }
+  };
 
   const DriverOnlineMutation = useMutation({
     mutationFn: driverGoOnline,
@@ -230,6 +276,9 @@ export default function Home() {
 
   useEffect(() => {
     startTracking()
+    
+    // Get FCM token and send to backend when Home component mounts
+    getFcmTokenAndSendToBackend()
 
     return () => {
       stopTracking()
@@ -925,6 +974,19 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 12,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  fcmTokenText: {
+    color: Gray,
+    fontSize: 10,
+    marginTop: 2,
+    fontFamily: 'monospace',
+  },
+  refreshTokenButton: {
+    padding: 8,
+    borderRadius: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
   },
 
 });
