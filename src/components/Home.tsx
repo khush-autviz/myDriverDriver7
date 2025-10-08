@@ -81,6 +81,7 @@ export default function Home() {
       }
 
       // Get FCM token from Firebase
+      await messaging().registerDeviceForRemoteMessages()
       const token = await messaging().getToken();
       console.log('🔥 FCM TOKEN in Home:', token);
       setFcmToken(token);

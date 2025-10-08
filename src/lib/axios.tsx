@@ -12,8 +12,8 @@ const instance = axios.create({
 instance.interceptors.request.use((config) => {
   const token = useAuthStore.getState().token?.access_token;
 
-  config.baseURL = 'https://2ppcf4sc-3000.inc1.devtunnels.ms/';
-  // config.baseURL = 'https://api.mydriversa.co.za';
+ // config.baseURL = 'https://2ppcf4sc-3000.inc1.devtunnels.ms/';
+   config.baseURL = 'https://api.mydriversa.co.za';
 
 
   if (token) {
