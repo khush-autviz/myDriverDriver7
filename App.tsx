@@ -37,6 +37,40 @@ const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 const queryClient = new QueryClient();
 
+
+// Background handler - MUST be at the top level, before any component
+messaging().setBackgroundMessageHandler(async remoteMessage => {
+  console.log('Background notification received:', remoteMessage);
+  
+  const notifType = remoteMessage.data?.type || 'default';
+  
+  // Create channel for background notification
+  const channelId = await notifee.createChannel({
+    id: notifType === 'ride_requested' ? 'ride_channel' : 'default_channel',
+    name: notifType === 'ride_requested' ? 'Ride Requests' : 'Default Channel',
+    importance: AndroidImportance.HIGH,
+    vibration: true,
+    // vibrationPattern: notifType === 'ride_requested' ? [0, 500, 200, 500] : [0, 300, 200, 300],
+    sound: notifType === 'ride_requested' ? 'mytone' : 'default',
+  });
+  
+  // Display the notification
+  await notifee.displayNotification({
+    title: remoteMessage.notification?.title || remoteMessage.data?.title || 'New Message',
+    body: remoteMessage.notification?.body || remoteMessage.data?.body || 'You have a new notification',
+    ios: {
+      sound: notifType === 'ride_requested' ? 'mytone.mp3' : 'default',
+    },
+    android: {
+      channelId,
+      pressAction: {
+        id: 'default',
+      },
+      sound: notifType === 'ride_requested' ? 'mytone' : 'default',
+    },
+  });
+});
+
 function MainTabs() {
   return (
     <Tab.Navigator
@@ -122,7 +156,7 @@ export default function App() {
   //       alert: true,
   //     });
 
-  //     await notifee.deleteChannel('default');
+  //     // await notifee.deleteChannel('default');
 
   //     // Create a channel (Android)
   //     const channelId = await notifee.createChannel({
@@ -153,80 +187,90 @@ export default function App() {
   //   return unsubscribe;
   // }, []);
 
-  // Cache created channels
-  const channels: Record<string, string> = {};
-
-  // Get or create channel per notification type
-  const getChannelId = async (notifType: string) => {
-    if (channels[notifType]) return channels[notifType];
-
-    const channel = await notifee.createChannel({
-      id: notifType === 'ride_requested' ? 'ride_channel' : 'default_channel',
-      name: notifType === 'ride_requested' ? 'Ride Requests' : 'Default Channel',
-      importance: AndroidImportance.HIGH,
-      vibration: true,
-      vibrationPattern:
-        notifType === 'ride_requested'
-          ? [0, 500, 200, 500] // custom vibration pattern
-          : [0, 300, 200, 300],
-      sound: notifType === 'ride_requested' ? 'mytone' : 'default', // sound files in res/raw
-    });
-
-    channels[notifType] = channel;
-    return channel;
-  };
-
-  // Handle notifications
-  const handleNotification = async (
-    remoteMessage: any,
-    state: 'foreground' | 'background'
-  ) => {
-    console.log(`Notification received in ${state} state:`, remoteMessage);
-
-    const notifType = remoteMessage.data?.type || 'default';
-    console.log('Notification type:', notifType);
-
-    const channelId = await getChannelId(notifType);
-
-    await notifee.displayNotification({
-      title: remoteMessage.notification?.title || remoteMessage.data?.title,
-      body: remoteMessage.notification?.body || remoteMessage.data?.body,
-      ios: {
-        sound: notifType === 'ride_requested' ? 'mytone' : 'default',
-      },
-      android: {
-        channelId,
-        pressAction: { id: 'default' },
-        sound: notifType === 'ride_requested' ? 'mytone' : 'default',
-      },
-    });
-  };
-
   useEffect(() => {
-    // 1️⃣ Request permissions
-    const requestPermission = async () => {
-      const settings = await notifee.requestPermission({
-        sound: true,
-        badge: true,
-        alert: true,
-      });
-      console.log('Notification permission settings:', settings);
+    console.log('App mounted - setting up notifications');
+    
+    // Request permissions and setup
+    const setupNotifications = async () => {
+      try {
+        // Request Notifee permissions
+        await notifee.requestPermission({
+          sound: true,
+          badge: true,
+          alert: true,
+        });
+        
+        // Request Firebase messaging permissions (iOS)
+        await messaging().requestPermission();
+        
+        // Get FCM token
+        const token = await messaging().getToken();
+        console.log('FCM Token:', token);
+        
+        // Pre-create channels to ensure they exist
+        await notifee.createChannel({
+          id: 'ride_channel',
+          name: 'Ride Requests',
+          importance: AndroidImportance.HIGH,
+          vibration: true,
+          // vibrationPattern: [0, 500, 200, 500],
+          sound: 'mytone',
+        });
+        
+        await notifee.createChannel({
+          id: 'default_channel',
+          name: 'Default Channel',
+          importance: AndroidImportance.HIGH,
+          vibration: true,
+          // vibrationPattern: [0, 300, 200, 300],
+          sound: 'default',
+        });
+        
+        console.log('Channels created successfully');
+      } catch (error) {
+        console.error('Setup error:', error);
+      }
     };
-    requestPermission();
-
-    // 2️⃣ Foreground notifications
-    const unsubscribeOnMessage = messaging().onMessage(async remoteMessage => {
-      handleNotification(remoteMessage, 'foreground');
+    
+    setupNotifications();
+    
+    // Handle foreground notifications
+    const unsubscribe = messaging().onMessage(async remoteMessage => {
+      console.log('=== FOREGROUND NOTIFICATION RECEIVED ===');
+      console.log('Full message:', JSON.stringify(remoteMessage, null, 2));
+      
+      const notifType = remoteMessage.data?.type || 'default';
+      console.log('Notification type:', notifType);
+      
+      // Use pre-created channel
+      const channelId = notifType === 'ride_requested' ? 'ride_channel' : 'default_channel';
+      console.log('Using channel:', channelId);
+      
+      try {
+        // Display the notification
+        const notificationId = await notifee.displayNotification({
+          title: remoteMessage.notification?.title || remoteMessage.data?.title || 'New Message',
+          body: remoteMessage.notification?.body || remoteMessage.data?.body || 'You have a new notification',
+          ios: {
+            sound: notifType === 'ride_requested' ? 'mytone.mp3' : 'default',
+          },
+          android: {
+            channelId,
+            pressAction: {
+              id: 'default',
+            },
+            sound: notifType === 'ride_requested' ? 'mytone' : 'default',
+            importance: AndroidImportance.HIGH,
+          },
+        });
+        
+        console.log('Notification displayed with ID:', notificationId);
+      } catch (error) {
+        console.error('Error displaying notification:', error);
+      }
     });
-
-    // 3️⃣ Background / quit notifications
-    messaging().setBackgroundMessageHandler(async remoteMessage => {
-      handleNotification(remoteMessage, 'background');
-    });
-
-    return () => {
-      unsubscribeOnMessage();
-    };
+    
+    return unsubscribe;
   }, []);
 
   return (
