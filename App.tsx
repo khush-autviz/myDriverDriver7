@@ -108,34 +108,125 @@ export default function App() {
   }, []);
 
   // Handle foreground messages
-  useEffect(() => {
-    const unsubscribe = messaging().onMessage(async remoteMessage => {
-      console.log('Foreground message:', remoteMessage);
+  // useEffect(() => {
+  //   console.log('useEffect');
+  //   const unsubscribe = messaging().onMessage(async remoteMessage => {
+  //     console.log('Foreground message:', remoteMessage);
 
-      // Request permissions if needed
-      await notifee.requestPermission();
+  //     console.log('Notification type:', remoteMessage.data?.type);
 
-      // Create a channel (Android)
-      const channelId = await notifee.createChannel({
-        id: 'default',
-        name: 'Default Channel',
-        importance: AndroidImportance.HIGH,
-      });
+  //     // Request permissions if needed
+  //     await notifee.requestPermission({
+  //       sound: true,
+  //       badge: true,
+  //       alert: true,
+  //     });
 
-      // Display a notification
-      await notifee.displayNotification({
-        title: remoteMessage.notification?.title,
-        body: remoteMessage.notification?.body,
-        android: {
-          channelId,
-          pressAction: {
-            id: 'default',
-          },
-        },
-      });
+  //     await notifee.deleteChannel('default');
+
+  //     // Create a channel (Android)
+  //     const channelId = await notifee.createChannel({
+  //       id: 'default',
+  //       name: 'Default Channel',
+  //       importance: AndroidImportance.HIGH,
+  //       vibration: true,
+  //       sound: 'mytone',
+  //     });
+
+  //     // Display a notification
+  //     await notifee.displayNotification({
+  //       title: remoteMessage.notification?.title,
+  //       body: remoteMessage.notification?.body,
+  //       ios: {
+  //         sound: 'mytone',
+  //       },
+  //       android: {
+  //         channelId,
+  //         pressAction: {
+  //           id: 'default',
+  //         },
+  //         sound: 'mytone',
+  //       },
+  //     });
+  //   });
+
+  //   return unsubscribe;
+  // }, []);
+
+  // Cache created channels
+  const channels: Record<string, string> = {};
+
+  // Get or create channel per notification type
+  const getChannelId = async (notifType: string) => {
+    if (channels[notifType]) return channels[notifType];
+
+    const channel = await notifee.createChannel({
+      id: notifType === 'ride_requested' ? 'ride_channel' : 'default_channel',
+      name: notifType === 'ride_requested' ? 'Ride Requests' : 'Default Channel',
+      importance: AndroidImportance.HIGH,
+      vibration: true,
+      vibrationPattern:
+        notifType === 'ride_requested'
+          ? [0, 500, 200, 500] // custom vibration pattern
+          : [0, 300, 200, 300],
+      sound: notifType === 'ride_requested' ? 'mytone' : 'default', // sound files in res/raw
     });
 
-    return unsubscribe;
+    channels[notifType] = channel;
+    return channel;
+  };
+
+  // Handle notifications
+  const handleNotification = async (
+    remoteMessage: any,
+    state: 'foreground' | 'background'
+  ) => {
+    console.log(`Notification received in ${state} state:`, remoteMessage);
+
+    const notifType = remoteMessage.data?.type || 'default';
+    console.log('Notification type:', notifType);
+
+    const channelId = await getChannelId(notifType);
+
+    await notifee.displayNotification({
+      title: remoteMessage.notification?.title || remoteMessage.data?.title,
+      body: remoteMessage.notification?.body || remoteMessage.data?.body,
+      ios: {
+        sound: notifType === 'ride_requested' ? 'mytone' : 'default',
+      },
+      android: {
+        channelId,
+        pressAction: { id: 'default' },
+        sound: notifType === 'ride_requested' ? 'mytone' : 'default',
+      },
+    });
+  };
+
+  useEffect(() => {
+    // 1️⃣ Request permissions
+    const requestPermission = async () => {
+      const settings = await notifee.requestPermission({
+        sound: true,
+        badge: true,
+        alert: true,
+      });
+      console.log('Notification permission settings:', settings);
+    };
+    requestPermission();
+
+    // 2️⃣ Foreground notifications
+    const unsubscribeOnMessage = messaging().onMessage(async remoteMessage => {
+      handleNotification(remoteMessage, 'foreground');
+    });
+
+    // 3️⃣ Background / quit notifications
+    messaging().setBackgroundMessageHandler(async remoteMessage => {
+      handleNotification(remoteMessage, 'background');
+    });
+
+    return () => {
+      unsubscribeOnMessage();
+    };
   }, []);
 
   return (
