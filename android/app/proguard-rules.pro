@@ -8,3 +8,13 @@
 #   http://developer.android.com/guide/developing/tools/proguard.html
 
 # Add any project specific keep options here:
+
+# Keep raw resources (sound files)
+-keep class **.R$raw { *; }
+
+# Keep all resources to prevent sound files from being stripped in release
+-keeppackagenames **.R
+-keep class **.R
+-keep class **.R$* {
+    <fields>;
+}
