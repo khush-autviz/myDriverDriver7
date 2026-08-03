@@ -269,8 +269,8 @@ export default function FellowDrivers() {
         const asset = result.assets[0];
         
         if (asset.uri) {
-          // Smaller size limit for better performance (BIGGEST IMPACT)
-          const maxSizeInBytes = 20 * 1024; // 120KB instead of 1MB (85% reduction)
+          // Size limit (5MB)
+          const maxSizeInBytes = 5 * 1024 * 1024; // 5MB limit
           
           console.log(`Selected ${type} URI: ${asset.uri}`);
           
