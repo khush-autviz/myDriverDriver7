@@ -12,8 +12,8 @@
 		761780ED2CA45674006654EE /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 761780EC2CA45674006654EE /* AppDelegate.swift */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
 		8B7936EC8532A337039357E0 /* libPods-myDriverDriver7.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B5DD8BCE85AE492AF43F540 /* libPods-myDriverDriver7.a */; };
+		CB72FDCA3020A9BE0090544F /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = CB72FDC93020A9BE0090544F /* GoogleService-Info.plist */; };
 		CBA68BC92EB8F035004CCE8E /* tone.caf in Resources */ = {isa = PBXBuildFile; fileRef = CBA68BC82EB8F035004CCE8E /* tone.caf */; };
-		CBBDE2A92E952D1A00270BD3 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = CBBDE2A82E952D1A00270BD3 /* GoogleService-Info.plist */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -26,9 +26,9 @@
 		3B5DD8BCE85AE492AF43F540 /* libPods-myDriverDriver7.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-myDriverDriver7.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		761780EC2CA45674006654EE /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = myDriverDriver7/AppDelegate.swift; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = myDriverDriver7/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		CB72FDC93020A9BE0090544F /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		CBA68BC82EB8F035004CCE8E /* tone.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = tone.caf; sourceTree = "<group>"; };
 		CBBADFCD2E953C50002878C5 /* myDriverDriver7.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = myDriverDriver7.entitlements; path = myDriverDriver7/myDriverDriver7.entitlements; sourceTree = "<group>"; };
-		CBBDE2A82E952D1A00270BD3 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "../../google json/GoogleService-Info.plist"; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
@@ -76,8 +76,8 @@
 		83CBB9F61A601CBA00E9B192 = {
 			isa = PBXGroup;
 			children = (
+				CB72FDC93020A9BE0090544F /* GoogleService-Info.plist */,
 				CBA68BC82EB8F035004CCE8E /* tone.caf */,
-				CBBDE2A82E952D1A00270BD3 /* GoogleService-Info.plist */,
 				13B07FAE1A68108700A75B9A /* myDriverDriver7 */,
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
 				83CBBA001A601CBA00E9B192 /* Products */,
@@ -168,8 +168,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */,
-				CBBDE2A92E952D1A00270BD3 /* GoogleService-Info.plist in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
+				CB72FDCA3020A9BE0090544F /* GoogleService-Info.plist in Resources */,
 				CBA68BC92EB8F035004CCE8E /* tone.caf in Resources */,
 				2A660A8211034F680D646891 /* PrivacyInfo.xcprivacy in Resources */,
 			);
@@ -294,7 +294,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = myDriverDriver7/myDriverDriver7.entitlements;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_TEAM = JG94W75979;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = myDriverDriver7/Info.plist;
@@ -303,7 +303,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.4;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -324,7 +324,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = myDriverDriver7/myDriverDriver7.entitlements;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_TEAM = JG94W75979;
 				INFOPLIST_FILE = myDriverDriver7/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
@@ -332,7 +332,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.4;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
