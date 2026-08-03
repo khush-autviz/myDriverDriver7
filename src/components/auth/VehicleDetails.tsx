@@ -293,8 +293,8 @@ const requestStoragePermission = async () => {
         const asset = result.assets[0];
         
         if (asset.uri) {
-          // 3. Smaller size limit (BIGGEST IMPACT)
-          const maxSizeInBytes = 50 * 1024; // 200KB instead of 1MB
+          // 3. Size limit (5MB)
+          const maxSizeInBytes = 5 * 1024 * 1024; // 5MB limit
           
           let fileSizeInBytes = asset.fileSize || 0;
           

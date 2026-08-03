@@ -109,8 +109,8 @@ export default function VehicleDocuments() {
         const asset = result.assets[0];
         
         if (asset.uri) {
-          // Smaller size limit for better performance (BIGGEST IMPACT)
-          const maxSizeInBytes = 50 * 1024; // 200KB instead of 1MB (80% reduction)
+          // Size limit (5MB)
+          const maxSizeInBytes = 5 * 1024 * 1024; // 5MB limit
           const documentName = getDocumentName(type);
           
           console.log(`Selected ${documentName} URI: ${asset.uri}`);
