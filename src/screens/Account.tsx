@@ -5,8 +5,9 @@ import { Black, DarkGray, Gold, Gray, LightGold, White } from '../constants/Colo
 import Ionicons from 'react-native-vector-icons/Ionicons'
 import { useAuthStore } from '../store/authStore'
 import { useNavigation } from '@react-navigation/native'
-import { driverWalletBalance } from '../constants/Api'
+import { driverWalletBalance, deleteFcmToken } from '../constants/Api'
 import { useQuery } from '@tanstack/react-query'
+import messaging from '@react-native-firebase/messaging'
 
 export default function Account() {
   const USER = useAuthStore(state => state.user)
@@ -29,7 +30,16 @@ export default function Account() {
 
   const walletBalance = walletData?.data?.balance || 0
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      const token = await messaging().getToken();
+      if (token) {
+        await deleteFcmToken(token);
+      }
+    } catch (error) {
+      console.error('Error deleting FCM token:', error);
+    }
+
     // navigation.navigate('Signin')
     navigation.reset({
       index: 0,
