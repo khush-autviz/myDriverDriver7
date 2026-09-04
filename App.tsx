@@ -140,7 +140,7 @@ export default function App() {
         title: remoteMessage.notification?.title,
         body: remoteMessage.notification?.body,
         ios: {
-          sound: 'mytone',
+          sound: 'tone.caf',
         },
         android: {
           channelId: 'mytone',
