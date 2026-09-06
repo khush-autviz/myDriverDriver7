@@ -127,23 +127,24 @@ export default function App() {
       // await notifee.deleteChannel('default');
 
       // Create single channel (Android)
-      await notifee.createChannel({
-        id: 'mytone',
-        name: 'My Tone Channel',
+      const channelId = await notifee.createChannel({
+        id: 'mytone_v2',
+        name: 'My Tone Channel V2',
         importance: AndroidImportance.HIGH,
         vibration: true,
         sound: 'mytone',
       });
+      console.log('🔊 [Notifee Foreground] Channel created/verified:', channelId);
 
       // Display a notification
       await notifee.displayNotification({
-        title: remoteMessage.notification?.title,
-        body: remoteMessage.notification?.body,
+        title: remoteMessage.notification?.title || remoteMessage.data?.title || 'Notification',
+        body: remoteMessage.notification?.body || remoteMessage.data?.body || '',
         ios: {
           sound: 'tone.caf',
         },
         android: {
-          channelId: 'mytone',
+          channelId: 'mytone_v2',
           pressAction: {
             id: 'default',
           },

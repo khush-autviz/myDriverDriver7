@@ -38,8 +38,8 @@ class MainActivity : ReactActivity() {
   private fun createNotificationChannel() {
     // Notification channels are required for Android 8.0 (API level 26) and above
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-      val channelId = "mytone"
-      val channelName = "My Tone Channel"
+      val channelId = "mytone_v2"
+      val channelName = "My Tone Channel V2"
       val importance = NotificationManager.IMPORTANCE_HIGH
 
       val channel = NotificationChannel(channelId, channelName, importance).apply {
@@ -55,12 +55,10 @@ class MainActivity : ReactActivity() {
         setSound(soundUri, audioAttributes)
       }
 
-      // Get notification manager and delete old channel (to force update)
       val notificationManager = getSystemService(NotificationManager::class.java)
-      notificationManager?.deleteNotificationChannel(channelId) // Force refresh
       notificationManager?.createNotificationChannel(channel)
       
-      android.util.Log.d("MainActivity", "✅ Notification channel created with custom sound")
+      android.util.Log.d("MainActivity", "✅ [NotificationChannel] Channel '$channelId' created with custom sound")
     }
   }
 }
