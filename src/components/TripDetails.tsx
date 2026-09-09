@@ -41,7 +41,7 @@ export default function TripDetails() {
         'Customer not responding',
         'Vehicle issue or breakdown',
         'Personal emergency',
-        'Unsafe or blocked pickup location',    
+        'Unsafe or blocked pickup location',
     ];
 
     const handleSheetChanges = useCallback((index: number) => {
@@ -76,12 +76,53 @@ export default function TripDetails() {
     // COMMENTED: Problematic continuous logging
     // console.log(rideInfo, 'ride info');
 
+    // Fallback region for MapView so map always renders even if location is delayed on app reopen
+    const initialMapRegion = useMemo(() => {
+        const pickupLng = rideInfo?.data?.ride?.pickupLocation?.coordinates?.[0];
+        const pickupLat = rideInfo?.data?.ride?.pickupLocation?.coordinates?.[1];
+
+        return {
+            latitude: location?.latitude || pickupLat || -26.2041,
+            longitude: location?.longitude || pickupLng || 28.0473,
+            latitudeDelta: 0.02,
+            longitudeDelta: 0.02,
+        };
+    }, [location?.latitude, location?.longitude, rideInfo]);
+
     // NEW: Only log when screen is focused
     useEffect(() => {
         if (isScreenFocused && rideInfo) {
             console.log(rideInfo, 'ride info');
         }
     }, [rideInfo, isScreenFocused]);
+
+    // Auto-fit map markers whenever location or ride details update
+    useEffect(() => {
+        if (mapRef.current && isScreenFocused) {
+            const coordsToFit: Array<{ latitude: number; longitude: number }> = [];
+            if (location?.latitude && location?.longitude) {
+                coordsToFit.push({ latitude: location.latitude, longitude: location.longitude });
+            }
+            if (rideInfo?.data?.ride?.pickupLocation?.coordinates) {
+                coordsToFit.push({
+                    latitude: rideInfo.data.ride.pickupLocation.coordinates[1],
+                    longitude: rideInfo.data.ride.pickupLocation.coordinates[0],
+                });
+            }
+            if (rideInfo?.data?.ride?.destination?.coordinates) {
+                coordsToFit.push({
+                    latitude: rideInfo.data.ride.destination.coordinates[1],
+                    longitude: rideInfo.data.ride.destination.coordinates[0],
+                });
+            }
+            if (coordsToFit.length > 0) {
+                mapRef.current.fitToCoordinates(coordsToFit, {
+                    edgePadding: { top: 70, right: 70, bottom: 220, left: 70 },
+                    animated: true,
+                });
+            }
+        }
+    }, [location, rideInfo, isScreenFocused]);
 
     // driver arrived mutation
     const driverArrivedMutation = useMutation({
@@ -133,10 +174,17 @@ export default function TripDetails() {
         mutationFn: ({ id, payload }: { id: any, payload: any }) => cancelRide(id, payload),
         onSuccess: (response) => {
             console.log('cancel ride success', response);
-            navigation.navigate('Main')
+            setmodalVisible(false);
+            bottomSheetRef.current?.close();
+            setRideId(null);
+            navigation.reset({
+                index: 0,
+                routes: [{ name: 'Main' }],
+            });
         },
         onError: (error: any) => {
             console.log('cancel ride error', error);
+            setmodalVisible(false);
             ShowToast(error?.response?.data?.message, { type: 'error' })
         }
     })
@@ -163,11 +211,13 @@ export default function TripDetails() {
         // FIXED: Only handle if screen is focused
         if (isScreenFocused) {
             console.log('ride cancel socket', data);
-            setRideId(null)
+            setmodalVisible(false);
+            bottomSheetRef.current?.close();
+            setRideId(null);
             navigation.reset({
                 index: 0,
                 routes: [{ name: 'Main' }],
-            })
+            });
             ShowToast('Ride cancelled by user', { type: 'error' })
         }
     }, [isScreenFocused, navigation, setRideId]) // FIXED: Added proper dependencies
@@ -210,22 +260,22 @@ export default function TripDetails() {
     const openDirections = (type: 'pickup' | 'destination') => {
         let destination = '';
         let destinationName = '';
-        
+
         if (type === 'pickup') {
             // Navigate to pickup location
-            destination = `${rideInfo?.data?.ride?.pickupLocation?.coordinates[0]},${rideInfo?.data?.ride?.pickupLocation?.coordinates[1]}`;
+            destination = `${rideInfo?.data?.ride?.pickupLocation?.coordinates[1]},${rideInfo?.data?.ride?.pickupLocation?.coordinates[0]}`;
             destinationName = rideInfo?.data?.ride?.pickupLocation?.address || 'Pickup Location';
         } else if (type === 'destination') {
             // Navigate to destination
-            destination = `${rideInfo?.data?.ride?.destination?.coordinates[0]},${rideInfo?.data?.ride?.destination?.coordinates[1]}`;
+            destination = `${rideInfo?.data?.ride?.destination?.coordinates[1]},${rideInfo?.data?.ride?.destination?.coordinates[0]}`;
             destinationName = rideInfo?.data?.ride?.destination?.address || 'Destination';
         }
 
         if (destination) {
-            const url = Platform.OS === 'ios' 
+            const url = Platform.OS === 'ios'
                 ? `http://maps.apple.com/?daddr=${destination}&dirflg=d`
                 : `https://www.google.com/maps/dir/?api=1&destination=${destination}&travelmode=driving`;
-            
+
             Linking.canOpenURL(url).then(supported => {
                 if (supported) {
                     Linking.openURL(url);
@@ -281,6 +331,8 @@ export default function TripDetails() {
                                     style={styles.reasonButton}
                                     activeOpacity={0.7}
                                     onPress={() => {
+                                        setmodalVisible(false);
+                                        bottomSheetRef.current?.close();
                                         cancelRideMutation.mutate({
                                             id: rideId,
                                             payload: { reason: item }
@@ -310,56 +362,43 @@ export default function TripDetails() {
             </Modal>
 
 
-            {location?.latitude && location?.longitude && (
-                <View style={styles.mapContainer}>
-                    <MapView
-                        style={styles.map}
-                        provider='google'
-                        showsCompass={false}
-                        initialRegion={{
-                            latitude: location?.latitude,
-                            longitude: location?.longitude,
-                            latitudeDelta: 0.01,
-                            longitudeDelta: 0.01,
-                        }}
-                        ref={mapRef}
-                    >
-                        {rideInfo?.data?.ride?.pickupLocation?.coordinates && location?.latitude && location?.longitude && mode === 'accepted' && (
-                            <>
-                                <Marker coordinate={{ latitude: location?.latitude, longitude: location?.longitude }} >
-                                      
-                                </Marker>
-                                <Marker coordinate={{ latitude: rideInfo?.data?.ride?.pickupLocation?.coordinates[0], longitude: rideInfo?.data?.ride?.pickupLocation?.coordinates[1] }} >
-                                    {/* <Image source={require('../assets/logo/push-pin.png')} style={{ width: 40, height: 40 }} /> */}
-                                </Marker>
-
-                                {/* <MapViewDirections
-                                    origin={{ latitude: location?.latitude, longitude: location?.longitude }}
-                                    destination={{ latitude: rideInfo?.data?.ride?.pickupLocation?.coordinates[0], longitude: rideInfo?.data?.ride?.pickupLocation?.coordinates[1] }}
-                                    apikey='AIzaSyCD1L-TRXFfxXI0H8TSakx84C_x7NIIrJ4'
-                                    strokeColor={Gold}
-                                    strokeWidth={4}
-                                /> */}
-                            </>
+            <View style={styles.mapContainer}>
+                <MapView
+                    style={styles.map}
+                    provider='google'
+                    showsCompass={false}
+                    initialRegion={initialMapRegion}
+                    ref={mapRef}
+                >
+                        {/* Driver Marker */}
+                        {location?.latitude && location?.longitude && (
+                            <Marker coordinate={{ latitude: location.latitude, longitude: location.longitude }}>
+                                <Image source={require('../assets/logo/car.png')} style={{ width: 40, height: 40 }} />
+                            </Marker>
                         )}
-                        {rideInfo?.data?.ride?.pickupLocation?.coordinates && location?.latitude && location?.longitude && mode !== 'accepted' && (
-                            <>
-                                <Marker coordinate={{ latitude: rideInfo?.data?.ride?.pickupLocation?.coordinates[0], longitude: rideInfo?.data?.ride?.pickupLocation?.coordinates[1] }} />
-                                <Marker coordinate={{ latitude: rideInfo?.data?.ride?.destination?.coordinates[0], longitude: rideInfo?.data?.ride?.destination?.coordinates[1] }} >
-                                    <Image source={require('../assets/logo/push-pin.png')} style={{ width: 40, height: 40 }} />
-                                </Marker>
-                                {/* <MapViewDirections
-                                    origin={{ latitude: rideInfo?.data?.ride?.pickupLocation?.coordinates[0], longitude: rideInfo?.data?.ride?.pickupLocation?.coordinates[1] }}
-                                    destination={{ latitude: rideInfo?.data?.ride?.destination?.coordinates[0], longitude: rideInfo?.data?.ride?.destination?.coordinates[1] }}
-                                    apikey='AIzaSyCD1L-TRXFfxXI0H8TSakx84C_x7NIIrJ4'
-                                    strokeColor={Gold}
-                                    strokeWidth={4}
-                                /> */}
-                            </>
+
+                        {/* Pickup Marker */}
+                        {rideInfo?.data?.ride?.pickupLocation?.coordinates && (
+                            <Marker coordinate={{
+                                latitude: rideInfo.data.ride.pickupLocation.coordinates[1],
+                                longitude: rideInfo.data.ride.pickupLocation.coordinates[0]
+                            }}>
+                                <Image source={require('../assets/logo/pickup.png')} style={{ width: 40, height: 40 }} />
+                            </Marker>
+                        )}
+
+                        {/* Destination Marker */}
+                        {rideInfo?.data?.ride?.destination?.coordinates && (
+                            <Marker coordinate={{
+                                latitude: rideInfo.data.ride.destination.coordinates[1],
+                                longitude: rideInfo.data.ride.destination.coordinates[0]
+                            }}>
+                                <Image source={require('../assets/logo/destination.png')} style={{ width: 35, height: 35 }} />
+                            </Marker>
                         )}
 
                     </MapView>
-                    
+
                     {/* Directions Buttons - Top Right */}
                     {(mode === 'accepted' || mode === 'arrived' || mode === 'otp_verified') && (
                         <>
@@ -374,7 +413,7 @@ export default function TripDetails() {
                                     <Text style={styles.directionsButtonText}>To Pickup</Text>
                                 </View>
                             </TouchableOpacity>
-                            
+
                             {/* To Destination Button - Show for all modes */}
                             <TouchableOpacity
                                 style={[styles.directionsButton, styles.destinationButton]}
@@ -384,12 +423,12 @@ export default function TripDetails() {
                                 <View style={styles.directionsButtonContent}>
                                     <Ionicons name="flag" size={20} color={Gold} />
                                     <Text style={styles.directionsButtonText}>To Destination</Text>
-                                    
+
                                 </View>
                             </TouchableOpacity>
                         </>
                     )}
-                    
+
                     {/* Recenter Button - Bottom Right */}
                     <TouchableOpacity
                         style={styles.recenterButton}
@@ -398,7 +437,6 @@ export default function TripDetails() {
                         <Ionicons name="locate" size={24} color={Gold} />
                     </TouchableOpacity>
                 </View>
-            )}
 
 
             <BottomSheet
@@ -474,28 +512,28 @@ export default function TripDetails() {
                                             </View>
                                         </View>
                                     </View>
-                                    </ScrollView>
+                                </ScrollView>
 
-                                    {/* Action Buttons */}
-                                    <View style={styles.actionButtonsContainer}>
-                                        <TouchableOpacity
-                                            style={styles.arrivedButton}
-                                            activeOpacity={0.8}
-                                            onPress={() => driverArrivedMutation.mutateAsync(rideId)}
-                                        >
-                                            {/* <Ionicons name="location" size={20} color={Black} style={styles.buttonIcon} /> */}
-                                            <Text style={styles.arrivedButtonText}>Arrived</Text>
-                                        </TouchableOpacity>
+                                {/* Action Buttons */}
+                                <View style={styles.actionButtonsContainer}>
+                                    <TouchableOpacity
+                                        style={styles.arrivedButton}
+                                        activeOpacity={0.8}
+                                        onPress={() => driverArrivedMutation.mutateAsync(rideId)}
+                                    >
+                                        {/* <Ionicons name="location" size={20} color={Black} style={styles.buttonIcon} /> */}
+                                        <Text style={styles.arrivedButtonText}>Arrived</Text>
+                                    </TouchableOpacity>
 
-                                        <TouchableOpacity
-                                            style={styles.cancelRideButton}
-                                            activeOpacity={0.8}
-                                            onPress={() => setmodalVisible(!modalVisible)}
-                                        >
-                                            {/* <Ionicons name="close-circle" size={20} color={White} style={styles.buttonIcon} /> */}
-                                            <Text style={styles.cancelRideButtonText}>Cancel</Text>
-                                        </TouchableOpacity>
-                                    </View>
+                                    <TouchableOpacity
+                                        style={styles.cancelRideButton}
+                                        activeOpacity={0.8}
+                                        onPress={() => setmodalVisible(!modalVisible)}
+                                    >
+                                        {/* <Ionicons name="close-circle" size={20} color={White} style={styles.buttonIcon} /> */}
+                                        <Text style={styles.cancelRideButtonText}>Cancel</Text>
+                                    </TouchableOpacity>
+                                </View>
                                 {/* </ScrollView> */}
                             </View>
                         </>
@@ -541,7 +579,7 @@ export default function TripDetails() {
                                             disabled={otp.length !== 4 || !customerVehiclePlateNumber.trim()}
                                             onPress={() => verifyRideOtpMutation.mutateAsync({
                                                 id: rideId,
-                                                payload: { 
+                                                payload: {
                                                     otp,
                                                     customerVehiclePlateNumber: customerVehiclePlateNumber.trim()
                                                 }
@@ -553,7 +591,7 @@ export default function TripDetails() {
                                             </Text>
                                         </TouchableOpacity>
                                     </View>
-                                    
+
                                     <View style={styles.plateNumberContainer}>
                                         <View style={styles.plateNumberHeader}>
                                             <Ionicons name="car" size={18} color={Gold} />
@@ -566,7 +604,7 @@ export default function TripDetails() {
                                             value={customerVehiclePlateNumber}
                                             onChangeText={text => setCustomerVehiclePlateNumber(text.toUpperCase())}
                                             autoCapitalize="characters"
-                                            // maxLength={10}
+                                        // maxLength={10}
                                         />
                                     </View>
                                 </View>
@@ -678,23 +716,23 @@ export default function TripDetails() {
                                             <Text style={styles.destinationFare}>Total Fare: R{rideInfo?.data?.ride?.fare.toFixed(2)}</Text>
                                         </View>
                                     </View>
-                                    </ScrollView>
+                                </ScrollView>
 
-                                    {/* Complete Trip Button */}
-                                    <TouchableOpacity
-                                        style={styles.completeButton}
-                                        activeOpacity={0.8}
-                                        onPress={() => completeRideMutation.mutateAsync(rideId)}
-                                    >
-                                        {/* <View style={styles.completeButtonContent}> */}
-                                        {/* <Ionicons name="checkmark-circle" size={24} color={Black} /> */}
-                                        {/* <View> */}
-                                        <Text style={styles.completeButtonText}>Complete Trip</Text>
-                                        {/* <Text style={styles.completeButtonSubtext}>Mark as arrived at destination</Text> */}
-                                        {/* </View> */}
-                                        {/* </View> */}
-                                        {/* <Ionicons name="chevron-forward" size={20} color={Black} /> */}
-                                    </TouchableOpacity>
+                                {/* Complete Trip Button */}
+                                <TouchableOpacity
+                                    style={styles.completeButton}
+                                    activeOpacity={0.8}
+                                    onPress={() => completeRideMutation.mutateAsync(rideId)}
+                                >
+                                    {/* <View style={styles.completeButtonContent}> */}
+                                    {/* <Ionicons name="checkmark-circle" size={24} color={Black} /> */}
+                                    {/* <View> */}
+                                    <Text style={styles.completeButtonText}>Complete Trip</Text>
+                                    {/* <Text style={styles.completeButtonSubtext}>Mark as arrived at destination</Text> */}
+                                    {/* </View> */}
+                                    {/* </View> */}
+                                    {/* <Ionicons name="chevron-forward" size={20} color={Black} /> */}
+                                </TouchableOpacity>
                                 {/* </ScrollView> */}
                             </View>
                         </>

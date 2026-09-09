@@ -11,6 +11,7 @@ import {
   TouchableOpacity,
   Image,
   PermissionsAndroid,
+  ActivityIndicator,
 } from 'react-native';
 import {
   Black,
@@ -44,6 +45,8 @@ export default function Home() {
   const [rideDetails, setrideDetails] = useState<any>()
   const [fellowDriverModalVisible, setFellowDriverModalVisible] = useState(false)
   const [fellowDrivers, setFellowDrivers] = useState<any[]>([])
+  const [isFetchingFellowDrivers, setIsFetchingFellowDrivers] = useState(false)
+  const [selectingDriverId, setSelectingDriverId] = useState<string | null>(null)
   const [selectedFellowDriver, setSelectedFellowDriver] = useState<any>(null)
   const socket = useSocket();
   const { location, startTracking, stopTracking, startBackgroundTracking, stopBackgroundTracking, isBackgroundTracking } = useLocation()
@@ -115,28 +118,25 @@ export default function Home() {
       }
 
       socket?.emit('goOnDuty', {
-          // latitude: location?.latitude || 0,
-          // longitude: location?.longitude || 0,
-          latitude: location?.longitude || 0,
-          longitude: location?.latitude || 0,
+        latitude: location?.latitude || 0,
+        longitude: location?.longitude || 0,
       })
+
       socket?.emit('updateLocation', {
-        // latitude: location?.latitude || 0,
-        // longitude: location?.longitude || 0,
-        latitude: location?.longitude || 0,
-        longitude: location?.latitude || 0,
+        latitude: location?.latitude || 0,
+        longitude: location?.longitude || 0,
       })
-      SETUSER({...USER, isAvailable: true})
+
+      SETUSER({ ...USER, isAvailable: true });
       ShowToast('Successfully went online with fellow driver', { type: 'success' });
-      // socket?.on('rideRequest', (data) => {
-      //   setrideDetails(data)
-      //   setmodalVisible(true)
-      // })
+      setSelectingDriverId(null);
+      setFellowDriverModalVisible(false);
     },
     onError: (error: any) => {
       console.log('❌ Driver online error', error);
-      ShowToast(error?.response?.data?.message, {type: 'error'})
+      ShowToast(error?.response?.data?.message, { type: 'error' });
       setSelectedFellowDriver(null);
+      setSelectingDriverId(null);
     }
   })
 
@@ -149,7 +149,7 @@ export default function Home() {
     },
     onError: (error: any) => {
       console.log('extra driver online error', error);
-      ShowToast(error?.response?.data?.message, {type: 'error'})
+      ShowToast(error?.response?.data?.message, { type: 'error' })
       setSelectedFellowDriver(null);
     }
   })
@@ -172,7 +172,7 @@ export default function Home() {
     },
     onError: (error: any) => {
       console.log('❌ Driver offline error', error);
-      ShowToast(error?.response?.data?.message, {type: 'error'})
+      ShowToast(error?.response?.data?.message, { type: 'error' })
     }
   })
 
@@ -180,8 +180,8 @@ export default function Home() {
   // Function to handle normal mode toggle
   const toggleNormalMode = () => {
     if (!isNormalMode) {
-      if(!location?.latitude || !location?.longitude) {
-        ShowToast('Please enable location services to go online', {type: 'error'})
+      if (!location?.latitude || !location?.longitude) {
+        ShowToast('Please enable location services to go online', { type: 'error' })
         return
       }
       // Show modal to select fellow driver
@@ -208,13 +208,14 @@ export default function Home() {
     },
     onError: (error: any) => {
       console.log('ride accept error', error);
-      ShowToast(error?.response?.data?.message, {type: 'error'})
+      ShowToast(error?.response?.data?.message, { type: 'error' })
     }
   })
 
   // Function to fetch fellow drivers
   const fetchFellowDrivers = async () => {
     try {
+      setIsFetchingFellowDrivers(true);
       const response = await getFellowDrivers();
       console.log('response fellow drivers', response);
       const approvedDrivers = response.data.fellowDrivers.filter((driver: any) => driver.approvalStatus === 'approved');
@@ -222,6 +223,8 @@ export default function Home() {
     } catch (error) {
       console.log('Error fetching fellow drivers:', error);
       ShowToast('Failed to fetch fellow drivers', { type: 'error' });
+    } finally {
+      setIsFetchingFellowDrivers(false);
     }
   };
 
@@ -245,14 +248,15 @@ export default function Home() {
   // Function to select fellow driver and go online
   const selectFellowDriverAndGoOnline = (fellowDriver: any) => {
     setSelectedFellowDriver(fellowDriver);
-    setFellowDriverModalVisible(false);
-    
+    const driverId = fellowDriver.id || fellowDriver._id;
+    setSelectingDriverId(driverId);
+
     DriverOnlineMutation.mutateAsync({
       driverId: USER?.id ?? USER?._id,
-      fellowDriverId: fellowDriver.id,
+      fellowDriverId: driverId,
       location: {
-        latitude: location?.longitude || 0,
-        longitude: location?.latitude || 0,
+        latitude: location?.latitude || 0,
+        longitude: location?.longitude || 0,
       }
     });
   };
@@ -264,7 +268,7 @@ export default function Home() {
 
   socket?.on('forceOffline', (data) => {
     console.log('force offline', data);
-    SETUSER({...USER, isAvailable: false})
+    SETUSER({ ...USER, isAvailable: false })
     toggleNormalMode()
   })
 
@@ -277,7 +281,7 @@ export default function Home() {
 
   useEffect(() => {
     startTracking()
-    
+
     // Get FCM token and send to backend when Home component mounts
     getFcmTokenAndSendToBackend()
 
@@ -369,14 +373,14 @@ export default function Home() {
                 console.log('🗺️ Map is ready');
               }}
             >
-              <Marker 
-                coordinate={{ 
-                  latitude: location.latitude, 
-                  longitude: location.longitude 
+              <Marker
+                coordinate={{
+                  latitude: location.latitude,
+                  longitude: location.longitude
                 }}
                 tracksViewChanges={false}
               >
-                {/* <Image source={require('../assets/logo/push-pin.png')} style={{ width: 40, height: 40 }} /> */}
+                <Image source={require('../assets/logo/car.png')} style={{ width: 40, height: 40 }} />
               </Marker>
             </MapView>
           )}
@@ -649,7 +653,19 @@ export default function Home() {
             padding: 20,
             maxHeight: 400,
           }} showsVerticalScrollIndicator={false}>
-            {fellowDrivers.length === 0 ? (
+            {isFetchingFellowDrivers ? (
+              <View style={{
+                alignItems: 'center',
+                paddingVertical: 40,
+              }}>
+                <ActivityIndicator size="large" color={Gold} />
+                <Text style={{
+                  color: Gray,
+                  fontSize: 14,
+                  marginTop: 12,
+                }}>Loading fellow drivers...</Text>
+              </View>
+            ) : fellowDrivers.length === 0 ? (
               <View style={{
                 alignItems: 'center',
                 paddingVertical: 40,
@@ -669,77 +685,86 @@ export default function Home() {
                 }}>Add and get approval for fellow drivers first</Text>
               </View>
             ) : (
-              fellowDrivers.map((driver) => (
-                <TouchableOpacity
-                  key={driver.id}
-                  style={{
-                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                    borderRadius: 12,
-                    padding: 16,
-                    marginBottom: 12,
-                    borderWidth: 1,
-                    borderColor: 'rgba(255, 255, 255, 0.1)',
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                  }}
-                  onPress={() => selectFellowDriverAndGoOnline(driver)}
-                  activeOpacity={0.7}
-                >
-                  <View style={{
-                    width: 50,
-                    height: 50,
-                    borderRadius: 25,
-                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    marginRight: 12,
-                    overflow: 'hidden',
-                  }}>
-                    {driver.profilePhoto ? (
-                      <Image 
-                        source={{ uri: `https://api.mydriversa.co.za/${driver.profilePhoto}` }} 
-                        style={{
-                          width: 50,
-                          height: 50,
-                          borderRadius: 25,
-                        }}
-                        resizeMode="cover"
-                      />
-                    ) : (
-                      <Ionicons name="person" size={24} color={Gold} />
-                    )}
-                  </View>
-                  
-                  <View style={{
-                    flex: 1,
-                  }}>
-                    <Text style={{
-                      color: White,
-                      fontSize: 16,
-                      fontWeight: '600',
-                      marginBottom: 4,
-                    }}>{driver.name}</Text>
-                    <Text style={{
-                      color: Gray,
-                      fontSize: 14,
-                      marginBottom: 2,
-                    }}>{driver.mobileNumber}</Text>
-                    <View style={{
+              fellowDrivers.map((driver) => {
+                const isSelected = selectingDriverId === (driver.id || driver._id);
+                return (
+                  <TouchableOpacity
+                    key={driver.id || driver._id}
+                    style={{
+                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                      borderRadius: 12,
+                      padding: 16,
+                      marginBottom: 12,
+                      borderWidth: 1,
+                      borderColor: 'rgba(255, 255, 255, 0.1)',
                       flexDirection: 'row',
                       alignItems: 'center',
+                      opacity: (selectingDriverId && !isSelected) ? 0.5 : 1,
+                    }}
+                    disabled={!!selectingDriverId}
+                    onPress={() => selectFellowDriverAndGoOnline(driver)}
+                    activeOpacity={0.7}
+                  >
+                    <View style={{
+                      width: 50,
+                      height: 50,
+                      borderRadius: 25,
+                      backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      marginRight: 12,
+                      overflow: 'hidden',
                     }}>
-                      <Ionicons name="card" size={14} color={Gray} />
+                      {driver.profilePhoto ? (
+                        <Image
+                          source={{ uri: `https://api.mydriversa.co.za/${driver.profilePhoto}` }}
+                          style={{
+                            width: 50,
+                            height: 50,
+                            borderRadius: 25,
+                          }}
+                          resizeMode="cover"
+                        />
+                      ) : (
+                        <Ionicons name="person" size={24} color={Gold} />
+                      )}
+                    </View>
+
+                    <View style={{
+                      flex: 1,
+                    }}>
+                      <Text style={{
+                        color: White,
+                        fontSize: 16,
+                        fontWeight: '600',
+                        marginBottom: 4,
+                      }}>{driver.name}</Text>
                       <Text style={{
                         color: Gray,
-                        fontSize: 12,
-                        marginLeft: 4,
-                      }}>{driver.licenseNumber}</Text>
+                        fontSize: 14,
+                        marginBottom: 2,
+                      }}>{driver.mobileNumber}</Text>
+                      <View style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                      }}>
+                        <Ionicons name="card" size={14} color={Gray} />
+                        <Text style={{
+                          color: Gray,
+                          fontSize: 12,
+                          marginLeft: 4,
+                        }}>{driver.licenseNumber}</Text>
+                      </View>
                     </View>
-                  </View>
-                  
-                  <Ionicons name="chevron-forward" size={20} color={Gray} />
-                </TouchableOpacity>
-              ))
+
+                    {isSelected ? (
+                      <ActivityIndicator size="small" color={Gold} />
+                    ) : (
+                      <Ionicons name="chevron-forward" size={20} color={Gray} />
+                    )}
+                  </TouchableOpacity>
+                );
+              })
             )}
           </ScrollView>
 
